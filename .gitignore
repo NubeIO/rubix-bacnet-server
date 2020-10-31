@@ -1,0 +1,16 @@
+.idea/
+.vscode/
+
+.DS_Store
+
+# Environments
+.env
+.venv
+env/
+venv
+env.bak/
+venv.bak/
+data.db
+log_bac0_app.log
+__pycache__/
+*.pyc
