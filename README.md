@@ -27,6 +27,6 @@ HTTP POST:
     "device_id": "192.168.0.202",
     "object_id": "1",
     "object_type": "analogOutput",
-    "value": 22
+    "value": 22.2
 }
 ```
