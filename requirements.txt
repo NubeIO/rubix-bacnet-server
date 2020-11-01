@@ -1,3 +1,5 @@
 Flask
 BAC0
 pandas
+bacpypes
+tinydb

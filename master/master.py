@@ -5,7 +5,7 @@ import logging
 import sys
 import netifaces as ni
 
-logging.basicConfig(filename='log_bac0_app.log', level=logging.WARNING)
+logging.basicConfig(filename='../log_bac0_app.log', level=logging.WARNING)
 
 STATIC_BACNET_IP = '192.168.0.101/24'
 STATIC_BACNET_PORT = "47808"

@@ -8,10 +8,8 @@ from bacpypes.local.object import (
 from bacpypes.object import AnalogInputObject, register_object_type
 from bacpypes.basetypes import EngineeringUnits
 from bacpypes.primitivedata import CharacterString
-import time
-from tinydb import TinyDB, Query
 
-db = TinyDB('points.json')
+import time
 
 
 def device(ip, device_id):
@@ -58,24 +56,10 @@ def device(ip, device_id):
         description=CharacterString("Reading of humidity sensor"),
     )
 
-    Points = Query()
-    insert_if_none = db.search(Points.name.exists())
-    present_value = None
-    if not insert_if_none:
-        db.insert({'name': 'ao_1', 'present_value': 0})
-    else:
-        val = db.search(Points.type == 'ao_1')
-        for val in db:
-            present_value = val['present_value']
-
-
-    print(22222)
-    print(present_value)
-    print(22222)
     ao_1 = AnalogOutputCmdObject(
         objectIdentifier=("analogOutput", 1),
         objectName="ao_1",
-        presentValue=present_value,
+        presentValue=0,
         description=CharacterString("Sets speed of heat exchanger"),
     )
 
