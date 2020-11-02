@@ -1,13 +1,16 @@
 import os
 import time
 import BAC0
-from bacpypes.basetypes import PriorityArray, StatusFlags, PriorityValue
-from bacpypes.constructeddata import ArrayOf
+from bacpypes.basetypes import PriorityArray, StatusFlags, PriorityValue, DateTime
+from bacpypes.constructeddata import ArrayOf, Element, Choice, Any
 from bacpypes.errors import ExecutionError
 from bacpypes.local.object import AnalogValueCmdObject, BinaryOutputCmdObject
 from bacpypes.object import Property, ReadableProperty
 from bacpypes.object import register_object_type
-from bacpypes.primitivedata import Real, Null
+from bacpypes.primitivedata import Atomic, BitString, Boolean, CharacterString, Date, Double, \
+    Enumerated, Integer, Null, ObjectIdentifier, OctetString, Real, Time, \
+    Unsigned, Unsigned16, Tag
+
 from tinydb import TinyDB, Query
 
 global bacnet
@@ -133,21 +136,44 @@ class BAC0_Converter:
         )
 
 
-class PriorityArrayTEST(ArrayOf(
+class __PriorityArray(ArrayOf(
     PriorityValue, fixed_length=16, prototype=PriorityValue(null=()),
 )):
     pass
+
+
+class __PriorityValue(Choice):
+    choiceElements = \
+        [Element('null', Null)
+            , Element('real', Real)
+            , Element('enumerated', Enumerated)
+            , Element('unsigned', Unsigned)
+            , Element('boolean', Boolean)
+            , Element('integer', Integer)
+            , Element('double', Double)
+            , Element('time', Time)
+            , Element('characterString', CharacterString)
+            , Element('octetString', OctetString)
+            , Element('bitString', BitString)
+            , Element('date', Date)
+            , Element('objectidentifier', ObjectIdentifier)
+            , Element('constructedValue', Any, 0)
+            , Element('datetime', DateTime, 1)
+         ]
 
 
 def start():
     global bacnet
     bacnet = BAC0_Converter('192.168.0.101/24', 123, 'Pi')
     bacnet.start_device(47808)
+
     what_db_will_return = [{'null': ()}, {'null': ()}, {'null': ()}, {'null': ()}, {'null': ()}, {'null': ()},
                            {'null': ()},
                            {'null': ()}, {'null': ()}, {'null': ()}, {'null': ()}, {'null': ()}, {'null': ()},
                            {'null': ()},
                            {'null': ()}, {'enumerated': 1}]
+
+
     # call DB and build new array with existing results
     priority_array = PriorityArray()
     for i in range(16):
