@@ -1,10 +1,10 @@
 import time
-import BAC0
 from bacpypes.basetypes import EngineeringUnits
 from bacpypes.local.object import AnalogOutputCmdObject, BinaryOutputCmdObject
 from bacpypes.primitivedata import CharacterString
 from tinydb import TinyDB, Query
 
+from server_v2.bac_class import BAC0_Device
 from server_v2.breakdowns.helper_point_array import default_values
 from server_v2.breakdowns.point_save_on_change import point_save
 from tests.test_working import create_object_identifier
@@ -12,6 +12,7 @@ from tests.test_working import create_object_identifier
 global bacnet
 db = TinyDB('points.json')
 Points = Query()
+RANDOM_OBJECT_COUNT = 1
 
 
 # @register_object_type(vendor_id=999)
@@ -47,27 +48,9 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
                    present_value, _type, old_value, new_value, db, Points)
 
 
-class BAC0_Converter:
-    def __init__(self, ip, instance_number, obj_name):
-        self.ip = ip
-        self.instance_number = instance_number
-        self.obj_name = obj_name
-
-    def start_device(self, init_port):
-        self.device = BAC0.lite(
-            ip=self.ip,
-            deviceId=self.instance_number,
-            localObjName=self.obj_name,
-            port=init_port
-        )
-
-
-RANDOM_OBJECT_COUNT = 1
-
-
 def start():
     global bacnet
-    bacnet = BAC0_Converter('192.168.0.101/24', 123, 'Pi')
+    bacnet = BAC0_Device('192.168.0.101/24', 123, 'Pi')
     bacnet.start_device(47808)
     for i in range(1, RANDOM_OBJECT_COUNT + 1):
         default_pv = 'inactive'
