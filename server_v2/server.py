@@ -166,7 +166,7 @@ class BAC0_Converter:
 
 def start():
     global bacnet
-    bacnet = BAC0_Converter('192.168.0.101/24', 123, 'Pi')
+    bacnet = BAC0_Converter('192.168.15.13/24', 123, 'Pi')
     bacnet.start_device(47808)
     for i in range(1, RANDOM_OBJECT_COUNT + 1):
         [priority_array, present_value] = get_priority_array_and_present_value('binaryOutput', i)
@@ -190,7 +190,7 @@ def start():
             presentValue=11,
             # eventState="normal",
             statusFlags=[0, 0, 0, 0],
-            relinquishDefault=22.2,
+            relinquishDefault=22.2  ,
             priorityArray=priority_array,
             # units=EngineeringUnits("milliseconds"),
             # description=CharacterString("Sets fade time between led colors (0-32767)"),
