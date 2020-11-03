@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask
 from bacpypes.primitivedata import Real
 
-from server.bacnet_device import device
+from server_old.bacnet_device import device
 
 executor = ThreadPoolExecutor(2)
 

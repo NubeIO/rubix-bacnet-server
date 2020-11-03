@@ -2,15 +2,16 @@ import time
 from bacpypes.basetypes import EngineeringUnits
 from bacpypes.local.object import AnalogOutputCmdObject, BinaryOutputCmdObject
 from bacpypes.primitivedata import CharacterString
+
+
+from server.bac_class import BAC0_Device
+from server.breakdowns.helper_point_array import default_values, create_object_identifier
+from server.breakdowns.point_save_on_change import point_save
+
 from tinydb import TinyDB, Query
 
-from server_v2.bac_class import BAC0_Device
-from server_v2.breakdowns.helper_point_array import default_values
-from server_v2.breakdowns.point_save_on_change import point_save
-from tests.test_working import create_object_identifier
-
 global bacnet
-db = TinyDB('points.json')
+db = TinyDB('db/points.json')
 Points = Query()
 RANDOM_OBJECT_COUNT = 1
 
