@@ -10,6 +10,8 @@ from server.breakdowns.point_save_on_change import point_save
 
 from tinydb import TinyDB, Query
 
+from server.config import PointConfig, NetworkConfig
+
 global bacnet
 db = TinyDB('db/points.json')
 Points = Query()
@@ -51,9 +53,17 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
 
 def start():
     global bacnet
-    bacnet = BAC0_Device('192.168.0.101/24', 123, 'Pi')
-    bacnet.start_device(47808)
-    for i in range(1, RANDOM_OBJECT_COUNT + 1):
+    ao_count = PointConfig.ao_count
+    bo_count = PointConfig.bo_count
+
+    ip = NetworkConfig.ip
+    port = NetworkConfig.port
+    device_id = NetworkConfig.deviceId
+    local_obj_name = NetworkConfig.localObjName
+
+    bacnet = BAC0_Device(ip, device_id, local_obj_name)
+    bacnet.start_device(port)
+    for i in range(1, int(bo_count) + 1):
         default_pv = 'inactive'
         object_type = 'binaryOutput'
         [priority_array, present_value] = default_values(object_type, i, default_pv, db, Points)
@@ -69,7 +79,7 @@ def start():
             description=CharacterString("Sets fade time between led colors (0-32767)"),
         )
         bacnet.device.this_application.add_object(bo)
-    for i in range(1, RANDOM_OBJECT_COUNT + 1):
+    for i in range(1, int(ao_count) + 1):
         default_pv = 0.0
         object_type = 'analogOutput'
         [priority_array, present_value] = default_values(object_type, i, default_pv, db, Points)
