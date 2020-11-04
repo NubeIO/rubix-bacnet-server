@@ -29,6 +29,15 @@ class PointConfig:
         self.bo_count = bo_count
 
 
+class DbConfig:
+    location = None
+    name = None
+
+    def __init__(self, location, name):
+        self.location = location
+        self.name = name
+
+
 try:
     f = open(file, 'r')
     config.read_file(f)
@@ -40,6 +49,10 @@ try:
     # get point config
     PointConfig.ao_count = config.get("points", "ao_count")
     PointConfig.bo_count = config.get("points", "bo_count")
+    # json db location
+    DbConfig.location = config.get("db", "location")
+    DbConfig.name = config.get("db", "name")
+
 
 except OSError as e:
     print('File cannot be opened: ', e)

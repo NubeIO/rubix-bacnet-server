@@ -10,12 +10,14 @@ from server.breakdowns.point_save_on_change import point_save
 
 from tinydb import TinyDB, Query
 
-from server.config import PointConfig, NetworkConfig
+from server.config import PointConfig, NetworkConfig, DbConfig
 
 global bacnet
-db = TinyDB('db/points.json')
+db_location = DbConfig.location
+db_name = DbConfig.name
+db_file = f"{db_location}/{db_name}.json"
+db = TinyDB(db_file)
 Points = Query()
-RANDOM_OBJECT_COUNT = 1
 
 
 # @register_object_type(vendor_id=999)
@@ -89,7 +91,7 @@ def start():
             presentValue=present_value,
             eventState="normal",
             statusFlags=[0, 0, 0, 0],
-            relinquishDefault=22.2,
+            relinquishDefault=0.0,
             priorityArray=priority_array,
             units=EngineeringUnits("milliseconds"),
             description=CharacterString("Sets fade time between led colors (0-32767)"),
