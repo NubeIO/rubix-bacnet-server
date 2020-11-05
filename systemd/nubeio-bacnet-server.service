@@ -1,0 +1,18 @@
+
+[Unit]
+Description=Flask Application for Nube Rest API
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/bac-rest
+ExecStart=/home/pi/bac-rest/venv/bin/gunicorn -b 0.0.0.0:1515 --log-level=DEBUG -w 1 run:app
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bac-rest
+
+[Install]
+WantedBy=multi-user.target

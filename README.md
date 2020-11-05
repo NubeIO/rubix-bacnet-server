@@ -1,5 +1,12 @@
 # bacnet-flask
 
+
+## to run a file that imports other classes
+```
+PYTHONPATH=. python server/bac_server.py
+
+```
+
 ```
 cd bacnet-flask/
 python3 -m venv venv
