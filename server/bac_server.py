@@ -1,14 +1,16 @@
 import BAC0
 from bacpypes.basetypes import EngineeringUnits
 from bacpypes.local.object import AnalogOutputCmdObject, BinaryOutputCmdObject
-from bacpypes.primitivedata import CharacterString, Real
+from bacpypes.primitivedata import CharacterString, Real, Enumerated
 from flask_restful import reqparse
+
 from server.breakdowns.helper_point_array import default_values, create_object_identifier
 from server.breakdowns.point_save_on_change import point_save
 from tinydb import TinyDB, Query
 from server.config import PointConfig, NetworkConfig, DbConfig
 from concurrent.futures import ThreadPoolExecutor
-from flask import Flask
+from flask import Flask, jsonify
+import paho.mqtt.client as mqtt
 
 executor = ThreadPoolExecutor(2)
 app = Flask(__name__)
@@ -19,6 +21,9 @@ db_name = DbConfig.name
 db_file = f"{db_location}/{db_name}.json"
 db = TinyDB(db_file)
 Points = Query()
+
+client = mqtt.Client()
+client.connect("0.0.0.0", 1883, 60)
 
 
 class BinaryOutputFeedbackObject(BinaryOutputCmdObject):
@@ -48,11 +53,18 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
         object_name = self.objectName
         object_type = self.objectType
         present_value = self.presentValue
+
         if isinstance(present_value, Real):
             present_value = present_value.value
         elif type(present_value) is float:
             present_value = present_value
         _type = "real"
+        topic = f"bacnet/server/points/ao/{object_identifier}"
+        payload = str(present_value)
+        print(topic, payload)
+        # client.publish("bacnet/analogOutput-1", "123343.0")
+        print(2222222222222222222)
+        client.publish(topic, payload, qos=1, retain=True)
         point_save(pnt_dict, object_identifier, object_name, object_type,
                    present_value, _type, old_value, new_value, db, Points)
 
@@ -116,7 +128,7 @@ def process_write(bac, point, val):
 def process_read(bac, point):
     obj = bac.this_application.get_object_name(point)
     value = obj.ReadProperty('presentValue')
-    res = str(value)
+    res = value
     return res
 
 
@@ -132,19 +144,66 @@ def change_value_real(bac, point, value):
     obj.presentValue = Real(value)
 
 
-@app.route('/write/ao/<point>/<value>', methods=['GET'])
-def write(point=None, value=None):
+def change_value_bool(bac, point, value):
+    obj = bac.this_application.get_object_name(point)
+    value = int(value)
+    obj.presentValue = Enumerated(value)
+
+
+def change_point_name(bac, point, value):
+    obj = bac.this_application.get_object_name(point)
+    value = int(value)
+    obj.presentValue = Enumerated(value)
+
+
+@app.route('/points/write/ao', methods=['POST'])
+def write():
     global bacnet
+    parser = reqparse.RequestParser()
+    parser.add_argument('point', type=str, help='bacnet point object id`', required=True)
+    parser.add_argument('value', type=float, help='value must be a float', required=True)
+    parser.add_argument('priority', type=int, help='priority must be a number', required=False)
+    args = parser.parse_args()
+    point = args['point']
+    value = args['value']
+    priority = args['priority']
     res = executor.submit(process_write, bacnet, point, float(value))
-    return res.result()
+    res = res.result()
+    res = vars(res).get('value')
+    return jsonify(res)
 
 
-@app.route('/read/<point>', methods=['GET'])
+@app.route('/points/read/<point>', methods=['GET'])
 def read(point=None):
     global bacnet
     value = executor.submit(process_read, bacnet, point)
     res = value.result(2)
     return res
+
+
+@app.route('/points/all/ao', methods=['GET'])
+def read_all():
+    get = db.search(Points.object_type == 'analogOutput')
+    all_ids = []
+    for dct in get:
+        all_ids.append({'name': f'{dct["object_name"]} -> {dct["object_name"]}', 'object_identifier':
+            dct["object_identifier"], 'object_name': dct["object_name"], 'object_type': dct["object_type"],
+                        'highest_priority_array': dct["highest_priority_array"]})
+    return jsonify(all_ids)
+
+
+@app.route('/points/read/<point>/<value>', methods=['GET'])
+def name(point=None, value=None):
+    global bacnet
+    print(111, point, value)
+    obj = bacnet.this_application.get_object_name(point)
+    print(222, obj)
+    print(3333, obj.units)
+    obj.units = 'degreesCelsius'
+    print(4444, obj.units)
+    # value = executor.submit(process_read, bacnet, point)
+    # res = value.result(2)
+    return 'res'
 
 
 if __name__ == '__main__':

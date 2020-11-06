@@ -2,7 +2,6 @@ import getpass
 import configparser
 
 user = getpass.getuser()
-print(user)
 file = f"/home/{user}/bacnet_server.ini"
 config = configparser.ConfigParser()
 
