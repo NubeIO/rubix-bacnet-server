@@ -53,7 +53,6 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
         object_name = self.objectName
         object_type = self.objectType
         present_value = self.presentValue
-
         if isinstance(present_value, Real):
             present_value = present_value.value
         elif type(present_value) is float:
@@ -61,9 +60,6 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
         _type = "real"
         topic = f"bacnet/server/points/ao/{object_identifier}"
         payload = str(present_value)
-        print(topic, payload)
-        # client.publish("bacnet/analogOutput-1", "123343.0")
-        print(2222222222222222222)
         client.publish(topic, payload, qos=1, retain=True)
         point_save(pnt_dict, object_identifier, object_name, object_type,
                    present_value, _type, old_value, new_value, db, Points)
