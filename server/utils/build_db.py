@@ -19,6 +19,7 @@ for i in range(1, int(bo_count) + 1):
     print(vars(priority_array))
     point_obj = {
         'object_identifier': f'{object_type} {i}',
+        'object_name': f'{object_type} {i}',
         'object_type': f'{object_type}',
         'present_value': _present_value,
         'event_state': 'normal',
@@ -39,6 +40,7 @@ for i in range(1, int(ao_count) + 1):
     print(vars(priority_array))
     point_obj = {
         'object_identifier': f'{object_type} {i}',
+        'object_name': f'{object_type} {i}',
         'object_type': f'{object_type}',
         'present_value': _present_value,
         'event_state': 'normal',

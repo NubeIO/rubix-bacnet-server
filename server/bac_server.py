@@ -116,12 +116,13 @@ def start():
 
 def process_write(bac, point, val):
     change_value_real(bac, point, val)
-    db.update({'presentValue': val}, Points.object_identifier == point)
+    db.update({'presentValue': val}, Points.object_identifier == point)  # update DB
     res = process_read(bac, point)
     return res
 
 
 def process_read(bac, point):
+    """this will read the BACnet AO value"""
     obj = bac.this_application.get_object_name(point)
     value = obj.ReadProperty('presentValue')
     res = value
@@ -135,6 +136,7 @@ def process_read_db(point):
 
 
 def change_value_real(bac, point, value):
+    """this will write the BACnet for an AO value"""
     obj = bac.this_application.get_object_name(point)
     value = float(value)
     obj.presentValue = Real(value)
@@ -177,9 +179,10 @@ def read(point=None):
     return res
 
 
-@app.route('/points/all/ao', methods=['GET'])
+@app.route('/points/ao', methods=['GET'])
 def read_all():
     get = db.search(Points.object_type == 'analogOutput')
+    print(get)
     all_ids = []
     for dct in get:
         all_ids.append({'name': f'{dct["object_name"]} -> {dct["object_name"]}', 'object_identifier':
