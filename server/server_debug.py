@@ -1,1 +1,1 @@
-_debug_points = False
+_debug_points = True

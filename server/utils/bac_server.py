@@ -1,30 +1,37 @@
+from threading import Thread
+
 import BAC0
-from bacpypes.basetypes import EngineeringUnits
+import paho.mqtt.client as mqtt
+from bacpypes.basetypes import EngineeringUnits, PriorityArray
 from bacpypes.local.object import AnalogOutputCmdObject, BinaryOutputCmdObject
 from bacpypes.primitivedata import CharacterString, Real, Enumerated
+from flask import Flask, jsonify
 from flask_restful import reqparse
+from tinydb import TinyDB, Query
+
 from server.breakdowns.helper_point_array import default_values, create_object_identifier
 from server.breakdowns.point_save_on_change import point_save
-from tinydb import TinyDB, Query
 from server.config import PointConfig, NetworkConfig, DbConfig
-from flask import Flask, jsonify
-import paho.mqtt.client as mqtt
 
 app = Flask(__name__)
 
-global bacnet
-db_location = DbConfig.location
-db_name = DbConfig.name
-db_file = f"{db_location}/{db_name}.json"
-db = TinyDB(db_file)
-Points = Query()
+# db_location = DbConfig.location
+# db_name = DbConfig.name
+# db_file = f"{db_location}/{db_name}.json"
+# db = TinyDB(db_file)
+# Points = Query()
 
-client = mqtt.Client()
-client.connect("0.0.0.0", 1883, 60)
+
+def mqtt_start():
+    global client
+    client = mqtt.Client()
+    client.loop_start()
+    client.connect("0.0.0.0", 1883, 60)
+    client.loop_forever()
 
 
 class BinaryOutputFeedbackObject(BinaryOutputCmdObject):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._property_monitors["presentValue"].append(self.check_feedback)
 
@@ -35,12 +42,12 @@ class BinaryOutputFeedbackObject(BinaryOutputCmdObject):
         object_type = self.objectType
         present_value = self.presentValue
         _type = "enumerated"
-        point_save(pnt_dict, object_identifier, object_name, object_type,
-                   present_value, _type, old_value, new_value, db, Points)
+        # point_save(pnt_dict, object_identifier, object_name, object_type,
+        #            present_value, _type, old_value, new_value, db, Points)
 
 
 class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._property_monitors["presentValue"].append(self.check_feedback)
 
@@ -51,16 +58,16 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
         object_type = self.objectType
         present_value = self.presentValue
         if isinstance(present_value, Real):
-            present_value = present_value.value
+            present_value = float(present_value.value)
         elif type(present_value) is float:
-            present_value = present_value
+            present_value = float(present_value)
         _type = "real"
         topic = f"bacnet/server/points/ao/{object_identifier}"
+
         payload = str(present_value)
         print({'MQTT_PUBLISH': "MQTT_PUBLISH", 'topic': topic, 'payload': payload})
+        # client.publish(topic, payload, qos=1, retain=True)
         client.publish(topic, payload, qos=1, retain=True)
-        point_save(pnt_dict, object_identifier, object_name, object_type,
-                   present_value, _type, old_value, new_value, db, Points)
 
 
 def start():
@@ -77,44 +84,40 @@ def start():
     for i in range(1, int(bo_count) + 1):
         default_pv = 'inactive'
         object_type = 'binaryOutput'
-        [priority_array, present_value] = default_values(object_type, i, default_pv, db, Points)
+        # [priority_array, present_value] = default_values(object_type, i, default_pv, db, Points)
         bo = BinaryOutputFeedbackObject(
             objectIdentifier=(object_type, i),
             objectName='binaryOutput-%d' % (i,),
-            presentValue=present_value,
+            presentValue=default_pv,
             eventState="normal",
             statusFlags=[0, 0, 0, 0],
             feedbackValue="inactive",
             relinquishDefault="inactive",
-            priorityArray=priority_array,
+            priorityArray=PriorityArray(),
             description=CharacterString("Sets fade time between led colors (0-32767)"),
         )
         bacnet.this_application.add_object(bo)
     for i in range(1, int(ao_count) + 1):
         default_pv = 0.0
         object_type = 'analogOutput'
-        [priority_array, present_value] = default_values(object_type, i, default_pv, db, Points)
+        # [priority_array, present_value] = default_values(object_type, i, default_pv)
         ao = AnalogOutputFeedbackObject(
             objectIdentifier=(object_type, i),
             objectName='analogOutput-%d' % (i,),
-            presentValue=present_value,
+            presentValue=default_pv,
             eventState="normal",
             statusFlags=[0, 0, 0, 0],
             relinquishDefault=0.0,
-            priorityArray=priority_array,
+            priorityArray=PriorityArray(),
             units=EngineeringUnits("milliseconds"),
             description=CharacterString("Sets fade time between led colors (0-32767)"),
         )
         bacnet.this_application.add_object(ao)
 
-    app.run(host='0.0.0.0', port=5001, threaded=True)
-    while True:
-        pass
-
 
 def process_write(bac, point, val):
     change_value_real(bac, point, val)
-    db.update({'presentValue': val}, Points.object_identifier == point)  # update DB
+    # db.update({'presentValue': val}, Points.object_identifier == point)  # update DB
     res = process_read(bac, point)
     return res
 
@@ -135,8 +138,11 @@ def process_read_db(point):
 
 def change_value_real(bac, point, value):
     """this will write the BACnet for an AO value"""
+    print({'BACNET_UPDATE_REAL_VAL_START': "change_value_real", 'bac':bac, 'point':point, 'value':value})
     obj = bac.this_application.get_object_name(point)
+    print({'BACNET_UPDATE_REAL_VAL_STEP_2': "get bacnet object by name", 'obj': obj})
     value = float(value)
+    print({'BACNET_UPDATE_REAL_VAL_STEP_3': "val", 'value': value})
     obj.presentValue = Real(value)
 
 
@@ -154,7 +160,6 @@ def change_point_name(bac, point, value):
 
 @app.route('/points/write/ao', methods=['POST'])
 def write():
-    global bacnet
     parser = reqparse.RequestParser()
     parser.add_argument('point', type=str, help='bacnet point object id`', required=True)
     parser.add_argument('value', type=float, help='value must be a float', required=True)
@@ -162,7 +167,7 @@ def write():
     args = parser.parse_args()
     point = args['point']
     value = args['value']
-    priority = args['priority']
+    # priority = args['priority']
     print({'HTTP': "HTTP_POST_FROM_WIRES", 'point': point, 'value': value})
     res = process_write(bacnet, point, float(value))
     res = vars(res).get('value')
@@ -172,7 +177,6 @@ def write():
 
 @app.route('/points/read/<point>', methods=['GET'])
 def read(point=None):
-    global bacnet
     value = process_read(bacnet, point)
     return value
 
@@ -192,7 +196,6 @@ def read_all():
 
 @app.route('/points/read/<point>/<value>', methods=['GET'])
 def name(point=None, value=None):
-    global bacnet
     print(111, point, value)
     obj = bacnet.this_application.get_object_name(point)
     print(222, obj)
@@ -203,4 +206,7 @@ def name(point=None, value=None):
 
 
 if __name__ == '__main__':
+    mqtt_thread = Thread(target=mqtt_start, daemon=True)
+    mqtt_thread.start()
     start()
+    app.run(host='0.0.0.0', port=5001, threaded=True)

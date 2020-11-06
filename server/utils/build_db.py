@@ -17,8 +17,8 @@ for i in range(1, int(bo_count) + 1):
     [priority_array, _present_value] = default_values(object_type, i, default_pv, db, Points)
     print(vars(priority_array))
     point_obj = {
-        'object_identifier': f'{object_type} {i}',
-        'object_name': f'{object_type} {i}',
+        'object_identifier': f'{object_type}-{i}',
+        'object_name': f'{object_type}-{i}',
         'object_type': f'{object_type}',
         'present_value': _present_value,
         'event_state': 'normal',
@@ -36,10 +36,10 @@ default_pv = 0.0
 object_type = 'analogOutput'
 for i in range(1, int(ao_count) + 1):
     [priority_array, _present_value] = default_values(object_type, i, default_pv, db, Points)
-    print(vars(priority_array))
+
     point_obj = {
-        'object_identifier': f'{object_type} {i}',
-        'object_name': f'{object_type} {i}',
+        'object_identifier': f'{object_type}-{i}',
+        'object_name': f'{object_type}-{i}',
         'object_type': f'{object_type}',
         'present_value': _present_value,
         'event_state': 'normal',
@@ -51,4 +51,5 @@ for i in range(1, int(ao_count) + 1):
         'units': 'milliseconds',
         'description': f'{object_type} {i}',
     }
+    print(point_obj)
     db.insert(point_obj)
