@@ -5,7 +5,6 @@ from server.config import DbConfig, PointConfig
 
 db_location = DbConfig.location
 db_name = DbConfig.name
-# db_file = 'test_db.json'
 db_file = f'{db_location}/{db_name}.json'
 db = TinyDB(db_file)
 Points = Query()

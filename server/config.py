@@ -1,8 +1,10 @@
-import getpass
 import configparser
+import os
+import pwd
 
-user = getpass.getuser()
-file = f"/home/{user}/bacnet_server.ini"
+user = pwd.getpwuid(os.getuid()).pw_dir
+
+file = f"{user}/bacnet_server.ini"
 config = configparser.ConfigParser()
 
 

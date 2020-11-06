@@ -179,7 +179,7 @@ def read(point=None):
     return res
 
 
-@app.route('/points/ao', methods=['GET'])
+@app.route('/points/all/ao', methods=['GET'])
 def read_all():
     get = db.search(Points.object_type == 'analogOutput')
     print(get)
