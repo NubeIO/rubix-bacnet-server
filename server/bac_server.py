@@ -3,16 +3,13 @@ from bacpypes.basetypes import EngineeringUnits
 from bacpypes.local.object import AnalogOutputCmdObject, BinaryOutputCmdObject
 from bacpypes.primitivedata import CharacterString, Real, Enumerated
 from flask_restful import reqparse
-
 from server.breakdowns.helper_point_array import default_values, create_object_identifier
 from server.breakdowns.point_save_on_change import point_save
 from tinydb import TinyDB, Query
 from server.config import PointConfig, NetworkConfig, DbConfig
-from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, jsonify
 import paho.mqtt.client as mqtt
 
-executor = ThreadPoolExecutor(2)
 app = Flask(__name__)
 
 global bacnet
@@ -60,6 +57,7 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
         _type = "real"
         topic = f"bacnet/server/points/ao/{object_identifier}"
         payload = str(present_value)
+        print({'MQTT_PUBLISH': "MQTT_PUBLISH", 'topic': topic, 'payload': payload})
         client.publish(topic, payload, qos=1, retain=True)
         point_save(pnt_dict, object_identifier, object_name, object_type,
                    present_value, _type, old_value, new_value, db, Points)
@@ -142,10 +140,10 @@ def change_value_real(bac, point, value):
     obj.presentValue = Real(value)
 
 
-def change_value_bool(bac, point, value):
-    obj = bac.this_application.get_object_name(point)
-    value = int(value)
-    obj.presentValue = Enumerated(value)
+# def change_value_bool(bac, point, value):
+#     obj = bac.this_application.get_object_name(point)
+#     value = int(value)
+#     obj.presentValue = Enumerated(value)
 
 
 def change_point_name(bac, point, value):
@@ -165,29 +163,30 @@ def write():
     point = args['point']
     value = args['value']
     priority = args['priority']
-    res = executor.submit(process_write, bacnet, point, float(value))
-    res = res.result()
+    print({'HTTP': "HTTP_POST_FROM_WIRES", 'point': point, 'value': value})
+    res = process_write(bacnet, point, float(value))
     res = vars(res).get('value')
+    print({'HTTP': "HTTP_POST_SEND_BACK_TO_WIRES", 'point': point, 'res': res})
     return jsonify(res)
 
 
 @app.route('/points/read/<point>', methods=['GET'])
 def read(point=None):
     global bacnet
-    value = executor.submit(process_read, bacnet, point)
-    res = value.result(2)
-    return res
+    value = process_read(bacnet, point)
+    return value
 
 
 @app.route('/points/all/ao', methods=['GET'])
 def read_all():
     get = db.search(Points.object_type == 'analogOutput')
-    print(get)
     all_ids = []
+    print({'HTTP': "HTTP_GET_FROM_WIRES", 'msg': 'READ ALL POINTS'})
     for dct in get:
         all_ids.append({'name': f'{dct["object_name"]} -> {dct["object_name"]}', 'object_identifier':
             dct["object_identifier"], 'object_name': dct["object_name"], 'object_type': dct["object_type"],
                         'highest_priority_array': dct["highest_priority_array"]})
+    print({'HTTP': "HTTP_GET_SEND_BACK_TO_WIRES", 'msg': 'READ ALL POINTS BACK'})
     return jsonify(all_ids)
 
 
@@ -199,10 +198,8 @@ def name(point=None, value=None):
     print(222, obj)
     print(3333, obj.units)
     obj.units = 'degreesCelsius'
-    print(4444, obj.units)
-    # value = executor.submit(process_read, bacnet, point)
-    # res = value.result(2)
-    return 'res'
+    # value = process_read(bacnet, point)
+    return 'value'
 
 
 if __name__ == '__main__':
