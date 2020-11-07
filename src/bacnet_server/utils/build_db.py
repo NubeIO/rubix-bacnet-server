@@ -1,7 +1,7 @@
 from tinydb import TinyDB, Query
 
-from server.breakdowns.helper_point_array import default_values
-from server.config import DbConfig, PointConfig
+from src.bacnet_server.breakdowns.helper_point_array import default_values
+from src.bacnet_server.config import DbConfig, PointConfig
 
 db_location = DbConfig.location
 db_name = DbConfig.name
