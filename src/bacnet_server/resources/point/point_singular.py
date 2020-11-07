@@ -38,10 +38,6 @@ class BACnetPointSingular(BACnetPointBase):
         try:
             if data.type:
                 data.type = BACnetPointType.__members__.get(data.type)
-            # if data.data_type:
-            #     data.data_type = ModbusDataType.__members__.get(data.data_type)
-            # if data.data_endian:
-            #     data.data_endian = ModbusDataEndian.__members__.get(data.data_endian)
             BACnetPointModel.filter_by_uuid(uuid).update(data)
             BACnetPointModel.commit()
             return BACnetPointModel.find_by_uuid(uuid)

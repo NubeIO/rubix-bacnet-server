@@ -1,7 +1,4 @@
 from flask_restful import Resource, reqparse, abort
-
-# from src.modbus.models.device import ModbusDeviceModel
-# from src.modbus.models.point import ModbusPointModel
 from src.bacnet_server.models.point import BACnetPointModel
 
 
