@@ -1,11 +1,6 @@
 import uuid
 from flask_restful import marshal_with
 from sqlalchemy import func
-
-# from src.modbus.models.point import ModbusPointModel
-# from src.modbus.resources.mod_fields import point_fields
-# from src.modbus.resources.point.point_base import ModbusPointBase
-# from src.utils.model_utils import ModelUtils
 from src.bacnet_server.models.point import BACnetPointModel
 from src.bacnet_server.models.point_store import BACnetPointStoreModel
 from src.bacnet_server.resources.mod_fields import point_fields

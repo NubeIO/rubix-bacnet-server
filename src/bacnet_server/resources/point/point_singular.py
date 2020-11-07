@@ -1,12 +1,7 @@
 from flask_restful import abort, marshal_with
 
 from src import db
-# from src.modbus.interfaces.point.points import ModbusDataType, ModbusPointType, ModbusDataEndian
-# from src.modbus.models.point import ModbusPointModel
-# from src.modbus.models.point_store import ModbusPointStoreModel
-# from src.modbus.resources.mod_fields import point_fields
-# from src.modbus.resources.point.point_base import ModbusPointBase
-from src.bacnet_server.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
+from src.bacnet_server.interfaces.point.points import BACnetPointType
 from src.bacnet_server.models.point import BACnetPointModel
 from src.bacnet_server.models.point_store import BACnetPointStoreModel
 from src.bacnet_server.resources.mod_fields import point_fields
@@ -42,11 +37,7 @@ class BACnetPointSingular(BACnetPointBase):
             return self.add_point(data, uuid)
         try:
             if data.type:
-                data.type = ModbusPointType.__members__.get(data.type)
-            if data.data_type:
-                data.data_type = ModbusDataType.__members__.get(data.data_type)
-            if data.data_endian:
-                data.data_endian = ModbusDataEndian.__members__.get(data.data_endian)
+                data.type = BACnetPointType.__members__.get(data.type)
             BACnetPointModel.filter_by_uuid(uuid).update(data)
             BACnetPointModel.commit()
             return BACnetPointModel.find_by_uuid(uuid)

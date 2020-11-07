@@ -40,68 +40,68 @@ from src import routes
 db.create_all()
 #
 #
-# def mqtt_start():
-#     global client
-#     client = mqtt.Client()
-#     client.loop_start()
-#     client.connect("0.0.0.0", 1883, 60)
-#     client.loop_forever()
-#
-#
-# class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         self._property_monitors["presentValue"].append(self.check_feedback)
-#
-#     def check_feedback(self, old_value, new_value):
-#         pnt_dict = self._dict_contents()
-#         object_identifier = create_object_identifier(self.objectIdentifier)
-#         object_name = self.objectName
-#         object_type = self.objectType
-#         present_value = self.presentValue
-#         if isinstance(present_value, Real):
-#             present_value = float(present_value.value)
-#         elif type(present_value) is float:
-#             present_value = float(present_value)
-#         _type = "real"
-#         topic = f"bacnet/server/points/ao/{object_identifier}"
-#
-#         payload = str(present_value)
-#         print({'MQTT_PUBLISH': "MQTT_PUBLISH", 'topic': topic, 'payload': payload})
-#         # client.publish(topic, payload, qos=1, retain=True)
-#         client.publish(topic, payload, qos=1, retain=True)
-#
-#
-# def start_bac():
-#     global bacnet
-#     bacnet = None
-#     ao_count = PointConfig.ao_count
-#     print(99999999999)
-#     ip = NetworkConfig.ip
-#     port = NetworkConfig.port
-#     device_id = NetworkConfig.deviceId
-#     local_obj_name = NetworkConfig.localObjName
-#
-#     bacnet = BAC0.lite(ip=ip, port=port, deviceId=device_id, localObjName=local_obj_name)
-#     for i in range(1, int(ao_count) + 1):
-#         default_pv = 0.0
-#         object_type = 'analogOutput'
-#         # [priority_array, present_value] = default_values(object_type, i, default_pv)
-#         ao = AnalogOutputFeedbackObject(
-#             objectIdentifier=(object_type, i),
-#             objectName='analogOutput-%d' % (i,),
-#             presentValue=default_pv,
-#             eventState="normal",
-#             statusFlags=[0, 0, 0, 0],
-#             relinquishDefault=0.0,
-#             priorityArray=PriorityArray(),
-#             units=EngineeringUnits("milliseconds"),
-#             description=CharacterString("Sets fade time between led colors (0-32767)"),
-#         )
-#         bacnet.this_application.add_object(ao)
-#
-#
-# mqtt_thread = Thread(target=mqtt_start, daemon=True)
-# mqtt_thread.start()
-# bacnet_thread = Thread(target=start_bac, daemon=True)
-# bacnet_thread.start()
+def mqtt_start():
+    global client
+    client = mqtt.Client()
+    client.loop_start()
+    client.connect("0.0.0.0", 1883, 60)
+    client.loop_forever()
+
+
+class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._property_monitors["presentValue"].append(self.check_feedback)
+
+    def check_feedback(self, old_value, new_value):
+        pnt_dict = self._dict_contents()
+        object_identifier = create_object_identifier(self.objectIdentifier)
+        object_name = self.objectName
+        object_type = self.objectType
+        present_value = self.presentValue
+        if isinstance(present_value, Real):
+            present_value = float(present_value.value)
+        elif type(present_value) is float:
+            present_value = float(present_value)
+        _type = "real"
+        topic = f"bacnet/server/points/ao/{object_identifier}"
+
+        payload = str(present_value)
+        print({'MQTT_PUBLISH': "MQTT_PUBLISH", 'topic': topic, 'payload': payload})
+        # client.publish(topic, payload, qos=1, retain=True)
+        client.publish(topic, payload, qos=1, retain=True)
+
+
+def start_bac():
+    global bacnet
+    bacnet = None
+    ao_count = PointConfig.ao_count
+    print(99999999999)
+    ip = NetworkConfig.ip
+    port = NetworkConfig.port
+    device_id = NetworkConfig.deviceId
+    local_obj_name = NetworkConfig.localObjName
+
+    bacnet = BAC0.lite(ip=ip, port=port, deviceId=device_id, localObjName=local_obj_name)
+    for i in range(1, int(ao_count) + 1):
+        default_pv = 0.0
+        object_type = 'analogOutput'
+        # [priority_array, present_value] = default_values(object_type, i, default_pv)
+        ao = AnalogOutputFeedbackObject(
+            objectIdentifier=(object_type, i),
+            objectName='analogOutput-%d' % (i,),
+            presentValue=default_pv,
+            eventState="normal",
+            statusFlags=[0, 0, 0, 0],
+            relinquishDefault=0.0,
+            priorityArray=PriorityArray(),
+            units=EngineeringUnits("milliseconds"),
+            description=CharacterString("Sets fade time between led colors (0-32767)"),
+        )
+        bacnet.this_application.add_object(ao)
+
+
+mqtt_thread = Thread(target=mqtt_start, daemon=True)
+mqtt_thread.start()
+bacnet_thread = Thread(target=start_bac, daemon=True)
+bacnet_thread.start()
