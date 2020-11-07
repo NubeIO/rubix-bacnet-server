@@ -1,5 +1,5 @@
-from server.breakdowns.helper_point_array import highest_priority
-from server.server_debug import _debug_points
+from src.bacnet_server.breakdowns.helper_point_array import highest_priority
+from src.bacnet_server.server_debug import _debug_points
 
 
 def point_save(pnt_dict, object_identifier, object_name, object_type,
