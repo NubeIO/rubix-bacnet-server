@@ -13,8 +13,6 @@ class BACnetPointBase(Resource):
     parser.add_argument('type', type=str, required=True)
     parser.add_argument('enable', type=bool, required=True)
     parser.add_argument('write_value', type=float, required=True)
-    parser.add_argument('data_type', type=str, required=True)
-    parser.add_argument('data_endian', type=str, required=True)
     parser.add_argument('data_round', type=int, required=True)
     parser.add_argument('data_offset', type=str, required=True)
     parser.add_argument('timeout', type=int, required=True)

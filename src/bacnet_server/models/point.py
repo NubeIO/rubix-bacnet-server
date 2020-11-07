@@ -1,6 +1,6 @@
 from src import db
 # from src.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
-from src.bacnet_server.interfaces.point.points import ModbusPointType, ModbusDataEndian, ModbusDataType
+from src.bacnet_server.interfaces.point.points import BACnetPointType
 
 
 class BACnetPointModel(db.Model):
@@ -9,11 +9,9 @@ class BACnetPointModel(db.Model):
     name = db.Column(db.String(80), nullable=False)
     reg = db.Column(db.Integer(), nullable=False)
     reg_length = db.Column(db.Integer(), nullable=False)
-    type = db.Column(db.Enum(ModbusPointType), nullable=False)
+    type = db.Column(db.Enum(BACnetPointType), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
     write_value = db.Column(db.Float(), nullable=False)
-    data_type = db.Column(db.Enum(ModbusDataType), nullable=False)
-    data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False)
     data_round = db.Column(db.Integer(), nullable=False)
     data_offset = db.Column(db.String(80), nullable=False)
     timeout = db.Column(db.Integer(), nullable=False)
