@@ -1,18 +1,18 @@
 from src import db
 
 
-class ModbusPointStoreModel(db.Model):
-    __tablename__ = 'mod_points_store'
+class BACnetPointStoreModel(db.Model):
+    __tablename__ = 'bac_points_store'
     id = db.Column(db.Integer(), primary_key=True, nullable=False, autoincrement=True)
     value = db.Column(db.Float(), nullable=False)
     value_array = db.Column(db.String())
     fault = db.Column(db.Boolean(), default=False, nullable=False)
     fault_message = db.Column(db.String())
     ts = db.Column(db.DateTime, server_default=db.func.now())
-    point_uuid = db.Column(db.String, db.ForeignKey('mod_points.uuid'), nullable=False)
+    point_uuid = db.Column(db.String, db.ForeignKey('bac_points.uuid'), nullable=False)
 
     def __repr__(self):
-        return f"ModbusPointStore({self.id})"
+        return f"BACnetPointStore({self.id})"
 
     @classmethod
     def find_last_valid_row(cls, point_uuid):
