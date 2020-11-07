@@ -3,8 +3,8 @@ from src import db
 from src.bacnet_server.interfaces.point.points import ModbusPointType, ModbusDataEndian, ModbusDataType
 
 
-class ModbusPointModel(db.Model):
-    __tablename__ = 'mod_points'
+class BACnetPointModel(db.Model):
+    __tablename__ = 'bac_points'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     reg = db.Column(db.Integer(), nullable=False)
@@ -25,7 +25,7 @@ class ModbusPointModel(db.Model):
 
 
     def __repr__(self):
-        return f"ModbusPointModel({self.uuid})"
+        return f"BACnetPointModel({self.uuid})"
 
     @classmethod
     def find_by_uuid(cls, uuid):

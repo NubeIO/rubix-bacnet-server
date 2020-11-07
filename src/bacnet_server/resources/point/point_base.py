@@ -2,10 +2,10 @@ from flask_restful import Resource, reqparse, abort
 
 # from src.modbus.models.device import ModbusDeviceModel
 # from src.modbus.models.point import ModbusPointModel
-from src.bacnet_server.models.point import ModbusPointModel
+from src.bacnet_server.models.point import BACnetPointModel
 
 
-class ModbusPointBase(Resource):
+class BACnetPointBase(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('name', type=str, required=True)
     parser.add_argument('reg', type=int, required=True)
@@ -25,12 +25,12 @@ class ModbusPointBase(Resource):
 
     @staticmethod
     def create_point_model_obj(uuid, data):
-        return ModbusPointModel(uuid=uuid, **data)
+        return BACnetPointModel(uuid=uuid, **data)
 
     def add_point(self, data, uuid):
         # self.abort_if_device_does_not_exist(data.device_uuid)
         try:
-            point = ModbusPointBase.create_point_model_obj(uuid, data)
+            point = BACnetPointBase.create_point_model_obj(uuid, data)
             point.save_to_db()
             return point
         except Exception as e:
