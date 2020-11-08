@@ -1,23 +1,45 @@
 from src import db
 # from src.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
-from src.bacnet_server.interfaces.point.points import PointType
+from src.bacnet_server.interfaces.point.points import PointType, PriorityNumber, Units
+
+
+pointAO = {
+    'object_identifier': 'object_identifier',  # str, unique, feedback from bacpypes
+    'object_type': 'object_type',  # enum BACnetPointType,
+    'object_name': 'object_name',  # str, unique
+    'address': 'address',  # str, unique
+    'present_value': 'present_value',  # feedback from bacpypes
+    'relinquish_default': 'relinquish_default',  # float CRUD from rest
+    'priority_array': 'priority_array',  # feedback from bacpypes
+    'priority_value': 'priority_value',  # float CRUD from rest
+    'priority_num': 'priority_num',  # enum, CRUD from rest
+    'units': 'units',  # enum, CRUD from rest
+    'description': 'description',  # CRUD from rest
+    'enable': 'enable',  # CRUD from rest
+    'fault': 'fault',  # CRUD from rest
+    'data_round': 'data_round',  # CRUD from rest
+    'data_offset': 'data_offset',  # CRUD from rest
+}
 
 
 class BACnetPointModel(db.Model):
     __tablename__ = 'bac_points'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
-    name = db.Column(db.String(80), nullable=False)
-    reg = db.Column(db.Integer(), nullable=False)
-    reg_length = db.Column(db.Integer(), nullable=False)
-    type = db.Column(db.Enum(PointType), nullable=False)
+    object_identifier = db.Column(db.String(80), nullable=False)
+    object_type = db.Column(db.Enum(PointType), nullable=False)
+    object_name = db.Column(db.String(80), nullable=False)
+    address = db.Column(db.Integer(), nullable=False, unique=True)
+    present_value = db.Column(db.Float(), nullable=False)
+    relinquish_default = db.Column(db.Float(), nullable=False)
+    priority_array = db.Column(db.String(), nullable=False)
+    priority_value = db.Column(db.Float(), nullable=False)
+    priority_num = db.Column(db.Enum(PriorityNumber), nullable=False)
+    units = db.Column(db.Enum(Units), nullable=False)
+    description = db.Column(db.String(120), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
-    write_value = db.Column(db.Float(), nullable=False)
+    fault = db.Column(db.Boolean(), nullable=False)
     data_round = db.Column(db.Integer(), nullable=False)
-    data_offset = db.Column(db.String(80), nullable=False)
-    timeout = db.Column(db.Integer(), nullable=False)
-    timeout_global = db.Column(db.Boolean(), nullable=False)
-    prevent_duplicates = db.Column(db.Boolean(), nullable=False)
-    prevent_duplicates_global = db.Column(db.Boolean(), nullable=False)
+    data_offset = db.Column(db.Float(), nullable=False)
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 

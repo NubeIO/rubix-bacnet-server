@@ -36,8 +36,8 @@ class BACnetPointSingular(BACnetPointBase):
         if point is None:
             return self.add_point(data, uuid)
         try:
-            if data.type:
-                data.type = PointType.__members__.get(data.type)
+            if data.object_type:
+                data.object_type = PointType.__members__.get(data.object_type)
             BACnetPointModel.filter_by_uuid(uuid).update(data)
             BACnetPointModel.commit()
             return BACnetPointModel.find_by_uuid(uuid)
