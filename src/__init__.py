@@ -101,7 +101,7 @@ def start_bac():
         bacnet.this_application.add_object(ao)
 
 
-mqtt_thread = Thread(target=mqtt_start, daemon=True)
-mqtt_thread.start()
-bacnet_thread = Thread(target=start_bac, daemon=True)
-bacnet_thread.start()
+# mqtt_thread = Thread(target=mqtt_start, daemon=True)
+# mqtt_thread.start()
+# bacnet_thread = Thread(target=start_bac, daemon=True)
+# bacnet_thread.start()

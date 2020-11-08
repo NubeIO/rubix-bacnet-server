@@ -1,7 +1,7 @@
 from flask_restful import abort, marshal_with
 
 from src import db
-from src.bacnet_server.interfaces.point.points import BACnetPointType
+from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.point import BACnetPointModel
 from src.bacnet_server.models.point_store import BACnetPointStoreModel
 from src.bacnet_server.resources.mod_fields import point_fields
@@ -37,7 +37,7 @@ class BACnetPointSingular(BACnetPointBase):
             return self.add_point(data, uuid)
         try:
             if data.type:
-                data.type = BACnetPointType.__members__.get(data.type)
+                data.type = PointType.__members__.get(data.type)
             BACnetPointModel.filter_by_uuid(uuid).update(data)
             BACnetPointModel.commit()
             return BACnetPointModel.find_by_uuid(uuid)
