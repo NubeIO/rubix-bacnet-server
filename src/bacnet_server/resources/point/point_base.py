@@ -9,7 +9,7 @@ class BACnetPointBase(Resource):
     parser.add_argument('object_name', type=str, required=False)
     parser.add_argument('address', type=int, required=False)
     parser.add_argument('present_value', type=float, required=False)
-    parser.add_argument("priority_array", type=str, required=False)
+    parser.add_argument("priority_array_write", type=str, required=False)
     parser.add_argument('relinquish_default', type=float, required=False)
     parser.add_argument('units', type=str, required=False)
     parser.add_argument('description', type=str, required=False)
@@ -37,8 +37,8 @@ class BACnetPointBase(Resource):
     def create_point_store(self, row):
         if row:
             return {
-                'present_value': row.value,
-                'priority_array': row.value_array,
+                'present_value': row.present_value,
+                'priority_array': row.priority_array,
                 'ts': str(row.ts) if row.ts else None,
             }
         else:

@@ -1,35 +1,17 @@
 from src import db
-# from src.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
-from src.bacnet_server.interfaces.point.points import PointType, PriorityNumber, Units, priority_array
+from src.bacnet_server.interfaces.point.points import PointType, Units
 
 
-pointAO = {
-    'object_identifier': 'object_identifier',  # str, unique, feedback from bacpypes
-    'object_type': 'object_type',  # enum BACnetPointType,
-    'object_name': 'object_name',  # str, unique
-    'address': 'address',  # str, unique
-    'present_value': 'present_value',  # feedback from bacpypes
-    'relinquish_default': 'relinquish_default',  # float CRUD from rest
-    'priority_array': 'priority_array',  # feedback from bacpypes
-    'units': 'units',  # enum, CRUD from rest
-    'description': 'description',  # CRUD from rest
-    'enable': 'enable',  # CRUD from rest
-    'fault': 'fault',  # CRUD from rest
-    'data_round': 'data_round',  # CRUD from rest
-    'data_offset': 'data_offset',  # CRUD from rest
-}
 
 
 class BACnetPointModel(db.Model):
     __tablename__ = 'bac_points'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
-    object_identifier = db.Column(db.String(80), nullable=False)
     object_type = db.Column(db.Enum(PointType), nullable=False)
     object_name = db.Column(db.String(80), nullable=False)
     address = db.Column(db.Integer(), nullable=False, unique=True)
-    present_value = db.Column(db.Float(), nullable=False)
     relinquish_default = db.Column(db.Float(), nullable=False)
-    priority_array = db.Column(db.String(300), nullable=False)
+    priority_array_write = db.Column(db.String(300), nullable=False)
     units = db.Column(db.Enum(Units), nullable=False)
     description = db.Column(db.String(120), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
