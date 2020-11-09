@@ -21,17 +21,6 @@ priority_array = {
     '_16': None,
 }
 
-pointAO = {
-    'object_identifier': 'object_identifier',  # int, unique
-    'object_type': 'object_type',  # enum BACnetPointType,
-    'object_name': 'object_name',  # str, unique
-    'present_value': 'present_value',  # feedback from bacpypes
-    'relinquish_default': 'relinquish_default',  # float CRUD from rest
-    'priority_array': "priority_array",  # feedback from bacpypes
-    'units': 'units',  # enum, CRUD from rest
-    'description': 'description',  # CRUD from rest
-}
-
 
 class PriorityNumber(enum.Enum):
     _1 = 1
@@ -114,5 +103,3 @@ class Units(enum.Enum):
 
 
 Units = Units.return_units_enum()
-
-print(Units.__dict__)
