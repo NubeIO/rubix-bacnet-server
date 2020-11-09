@@ -2,15 +2,32 @@ import enum
 
 from bacpypes.basetypes import EngineeringUnits
 
+priority_array = {
+    '_1': None,
+    '_2': None,
+    '_3': None,
+    '_4': None,
+    '_5': None,
+    '_6': None,
+    '_7': None,
+    '_8': None,
+    '_9': None,
+    '_10': None,
+    '_11': None,
+    '_12': None,
+    '_13': None,
+    '_14': None,
+    '_15': None,
+    '_16': None,
+}
+
 pointAO = {
     'object_identifier': 'object_identifier',  # int, unique
     'object_type': 'object_type',  # enum BACnetPointType,
     'object_name': 'object_name',  # str, unique
     'present_value': 'present_value',  # feedback from bacpypes
     'relinquish_default': 'relinquish_default',  # float CRUD from rest
-    'priority_array': 'priority_array',  # feedback from bacpypes
-    'priority_value': 'priority_value',  # float CRUD from rest
-    'priority_num': 'priority_num',  # enum, CRUD from rest
+    'priority_array': "priority_array",  # feedback from bacpypes
     'units': 'units',  # enum, CRUD from rest
     'description': 'description',  # CRUD from rest
 }
@@ -97,3 +114,5 @@ class Units(enum.Enum):
 
 
 Units = Units.return_units_enum()
+
+print(Units.__dict__)

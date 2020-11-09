@@ -1,6 +1,6 @@
 from src import db
 # from src.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
-from src.bacnet_server.interfaces.point.points import PointType, PriorityNumber, Units
+from src.bacnet_server.interfaces.point.points import PointType, PriorityNumber, Units, priority_array
 
 
 pointAO = {
@@ -11,8 +11,6 @@ pointAO = {
     'present_value': 'present_value',  # feedback from bacpypes
     'relinquish_default': 'relinquish_default',  # float CRUD from rest
     'priority_array': 'priority_array',  # feedback from bacpypes
-    'priority_value': 'priority_value',  # float CRUD from rest
-    'priority_num': 'priority_num',  # enum, CRUD from rest
     'units': 'units',  # enum, CRUD from rest
     'description': 'description',  # CRUD from rest
     'enable': 'enable',  # CRUD from rest
@@ -31,9 +29,7 @@ class BACnetPointModel(db.Model):
     address = db.Column(db.Integer(), nullable=False, unique=True)
     present_value = db.Column(db.Float(), nullable=False)
     relinquish_default = db.Column(db.Float(), nullable=False)
-    priority_array = db.Column(db.String(), nullable=False)
-    priority_value = db.Column(db.Float(), nullable=False)
-    priority_num = db.Column(db.Enum(PriorityNumber), nullable=False)
+    priority_array = db.Column(db.String(300), nullable=False)
     units = db.Column(db.Enum(Units), nullable=False)
     description = db.Column(db.String(120), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
