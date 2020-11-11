@@ -25,6 +25,7 @@ def default_values(priority_array, default_pv):
             write = {'null': ()}
         else:
             present_value = value
+            # TODO: Switch cases for different type of points
             write = {'real': value}
         priority_array_return.__setitem__(i, PriorityValue(**write))
     return [priority_array_return, present_value]

@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse, abort
 
+from src import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
 
 
@@ -40,6 +41,7 @@ class BACnetPointBase(Resource):
             priority_array_write = data.pop('priority_array_write')
             point = BACnetPointModel(uuid=uuid, **data)
             point.save_to_db(priority_array_write)
+            BACServer.get_instance().add_point(point)
             return point
         except Exception as e:
             abort(500, message=str(e))
