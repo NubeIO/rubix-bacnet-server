@@ -1,18 +1,12 @@
 import os
 from threading import Thread
 
-import BAC0
-import paho.mqtt.client as mqtt
-from bacpypes.basetypes import EngineeringUnits
-from bacpypes.local.object import AnalogOutputCmdObject
-from bacpypes.primitivedata import CharacterString, Real
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-from src.bacnet_server.breakdowns.helper_point_array import create_object_identifier, default_values
-from src.bacnet_server.config import NetworkConfig, PointConfig
-from src.bacnet_server.interfaces.point.points import PointType
+from src.bacnet_server.bac_server import BACServer
+from src.bacnet_server.mqtt_connection import MqttConnection
 
 app = Flask(__name__)
 CORS(app)
@@ -36,64 +30,7 @@ from src import routes
 db.create_all()
 
 
-def mqtt_start():
-    global client
-    client = mqtt.Client()
-    client.loop_start()
-    try:
-        client.connect("0.0.0.0", 1883, 60)
-        client.loop_forever()
-    except Exception as e:
-        print(f"Error {e}")
-
-
-class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._property_monitors["presentValue"].append(self.check_feedback)
-
-    def check_feedback(self, old_value, new_value):
-        object_identifier = create_object_identifier(self.objectIdentifier[0], self.objectIdentifier[1])
-        present_value = self.presentValue
-        if isinstance(present_value, Real):
-            present_value = float(present_value.value)
-        elif type(present_value) is float:
-            present_value = float(present_value)
-        topic = f"bacnet/server/points/ao/{object_identifier}"
-
-        payload = str(present_value)
-        print({'MQTT_PUBLISH': "MQTT_PUBLISH", 'topic': topic, 'payload': payload})
-        client.publish(topic, payload, qos=1, retain=True)
-
-
-def start_bac():
-    from src.bacnet_server.models.model_point import BACnetPointModel
-
-    global bacnet
-    bacnet = None
-    ip = NetworkConfig.ip
-    port = NetworkConfig.port
-    device_id = NetworkConfig.deviceId
-    local_obj_name = NetworkConfig.localObjName
-
-    bacnet = BAC0.lite(ip=ip, port=port, deviceId=device_id, localObjName=local_obj_name)
-    for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
-        [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
-        ao = AnalogOutputFeedbackObject(
-            objectIdentifier=(point.object_type.name, point.address),
-            objectName=create_object_identifier(point.object_type.name, point.address),
-            presentValue=present_value,
-            priorityArray=priority_array,
-            eventState="normal",
-            statusFlags=[0, 0, 0, 0],
-            relinquishDefault=0.0,
-            units=EngineeringUnits("milliseconds"),
-            description=CharacterString("Sets fade time between led colors (0-32767)"),
-        )
-        bacnet.this_application.add_object(ao)
-
-
 if not os.environ.get("WERKZEUG_RUN_MAIN"):
-    mqtt_thread = Thread(target=mqtt_start, daemon=True)
+    mqtt_thread = Thread(target=MqttConnection.get_instance().start, daemon=True)
     mqtt_thread.start()
-    start_bac()
+    BACServer.get_instance().start_bac()
