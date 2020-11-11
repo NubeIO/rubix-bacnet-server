@@ -1,7 +1,6 @@
 from src import db
 from src.bacnet_server.interfaces.point.points import PointType, Units
-
-
+from src.bacnet_server.models.point_store import BACnetPointStoreModel
 
 
 class BACnetPointModel(db.Model):
@@ -18,9 +17,10 @@ class BACnetPointModel(db.Model):
     fault = db.Column(db.Boolean(), nullable=False)
     data_round = db.Column(db.Integer(), nullable=False)
     data_offset = db.Column(db.Float(), nullable=False)
+    point_store = db.relationship('BACnetPointStoreModel', backref='point', lazy=False, uselist=False,
+                                  cascade="all,delete")
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
-
 
     def __repr__(self):
         return f"BACnetPointModel({self.uuid})"
@@ -34,6 +34,7 @@ class BACnetPointModel(db.Model):
         return cls.query.filter_by(uuid=uuid)
 
     def save_to_db(self):
+        self.point_store = BACnetPointStoreModel.create_new_point_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
 

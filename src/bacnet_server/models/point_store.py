@@ -1,26 +1,33 @@
+from sqlalchemy import and_, or_
+
 from src import db
 
 
 class BACnetPointStoreModel(db.Model):
     __tablename__ = 'bac_points_store'
-    id = db.Column(db.Integer(), primary_key=True, nullable=False, autoincrement=True)
-    object_identifier = db.Column(db.String(80), nullable=False)
+    point_uuid = db.Column(db.String, db.ForeignKey('bac_points.uuid'), primary_key=True, nullable=False)
     present_value = db.Column(db.Float(), nullable=False)
     priority_array = db.Column(db.String())
     ts = db.Column(db.DateTime, server_default=db.func.now())
-    point_uuid = db.Column(db.String, db.ForeignKey('bac_points.uuid'), nullable=False)
 
     def __repr__(self):
-        return f"BACnetPointStore({self.id})"
+        return f"PointStore(point_uuid = {self.point_uuid})"
 
     @classmethod
-    def find_last_valid_row(cls, point_uuid):
-        return cls.query.filter_by(point_uuid=point_uuid, fault=False).order_by(cls.ts.desc()).first()
+    def find_by_point_uuid(cls, point_uuid):
+        return cls.query.filter_by(point_uuid=point_uuid).first()
 
-    def save_to_db(self):
-        db.session.add(self)
-        db.session.commit()
+    @classmethod
+    def create_new_point_store_model(cls, point_uuid):
+        return BACnetPointStoreModel(point_uuid=point_uuid, present_value=0)
 
-    def delete_from_db(self):
-        db.session.delete(self)
-        db.session.commit()
+    def update(self) -> bool:
+        res = db.session.execute(self.__table__
+                                 .update()
+                                 .values(present_value=self.present_value, priority_array=self.priority_array)
+                                 .where(and_(self.__table__.c.point_uuid == self.point_uuid,
+                                             or_(self.__table__.c.present_value != self.present_value,
+                                                 self.__table__.c.priority_array != self.priority_array,
+                                                 self.__table__.c.fault != self.fault))))
+
+        return bool(res.rowcount)

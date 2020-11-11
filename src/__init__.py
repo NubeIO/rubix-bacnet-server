@@ -1,22 +1,19 @@
 import os
 from threading import Thread
-from flask import Flask
-from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-# from src.modbus.services.point_store_cleaner import PointStoreCleaner
 
-
-from threading import Thread
 import BAC0
 import paho.mqtt.client as mqtt
 from bacpypes.basetypes import EngineeringUnits, PriorityArray
 from bacpypes.local.object import AnalogOutputCmdObject
-from bacpypes.primitivedata import CharacterString, Real, Enumerated
-from flask import Flask, jsonify
-from flask_restful import reqparse
+from bacpypes.primitivedata import CharacterString, Real
+from flask import Flask
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 
-from src.bacnet_server.breakdowns.helper_point_array import create_object_identifier
+from src.bacnet_server.breakdowns.helper_point_array import create_object_identifier, default_values
 from src.bacnet_server.config import NetworkConfig, PointConfig
+
+# from src.modbus.services.point_store_cleaner import PointStoreCleaner
 
 app = Flask(__name__)
 CORS(app)
@@ -38,14 +35,17 @@ db = SQLAlchemy(app)
 from src import routes
 
 db.create_all()
-#
-#
+
+
 def mqtt_start():
     global client
     client = mqtt.Client()
     client.loop_start()
-    client.connect("0.0.0.0", 1883, 60)
-    client.loop_forever()
+    try:
+        client.connect("0.0.0.0", 1883, 60)
+        client.loop_forever()
+    except Exception as e:
+        print(f"Error {e}")
 
 
 class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
@@ -75,13 +75,12 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
 def start_bac():
     global bacnet
     bacnet = None
-    ao_count = PointConfig.ao_count
-    print(99999999999)
     ip = NetworkConfig.ip
     port = NetworkConfig.port
     device_id = NetworkConfig.deviceId
     local_obj_name = NetworkConfig.localObjName
 
+    ao_count = PointConfig.ao_count
     bacnet = BAC0.lite(ip=ip, port=port, deviceId=device_id, localObjName=local_obj_name)
     for i in range(1, int(ao_count) + 1):
         default_pv = 0.0
@@ -101,8 +100,7 @@ def start_bac():
         bacnet.this_application.add_object(ao)
 
 
-# if not os.environ.get("WERKZEUG_RUN_MAIN"):
-    # print("Here")
-    # mqtt_thread = Thread(target=mqtt_start, daemon=True)
-    # mqtt_thread.start()
-    # start_bac()
+if not os.environ.get("WERKZEUG_RUN_MAIN"):
+    mqtt_thread = Thread(target=mqtt_start, daemon=True)
+    mqtt_thread.start()
+    start_bac()
