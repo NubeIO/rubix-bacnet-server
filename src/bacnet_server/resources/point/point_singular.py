@@ -1,7 +1,7 @@
 from flask_restful import abort, marshal_with
 
-from src.bacnet_server.interfaces.point.points import PointType
-from src.bacnet_server.models.point import BACnetPointModel
+from src.bacnet_server.models.model_point import BACnetPointModel
+from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 from src.bacnet_server.resources.mod_fields import point_fields
 from src.bacnet_server.resources.point.point_base import BACnetPointBase
 
@@ -26,9 +26,9 @@ class BACnetPointSingular(BACnetPointBase):
         if point is None:
             return self.add_point(data, uuid)
         try:
-            if data.object_type:
-                data.object_type = PointType.__members__.get(data.object_type)
+            priority_array_write = data.pop('priority_array_write')
             BACnetPointModel.filter_by_uuid(uuid).update(data)
+            PriorityArrayModel.filter_by_point_uuid(uuid).update(priority_array_write)
             BACnetPointModel.commit()
             return BACnetPointModel.find_by_uuid(uuid)
         except Exception as e:
