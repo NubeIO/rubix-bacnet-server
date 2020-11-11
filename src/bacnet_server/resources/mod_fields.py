@@ -1,14 +1,15 @@
+from collections import OrderedDict
+
 from flask_restful import fields
 
 point_store_fields = {
-    'point_uuid': fields.String,
     'object_identifier': fields.Float,
     'present_value': fields.String,
     'priority_array': fields.Boolean,
     'ts': fields.String
 }
 
-priority_array_write_fields = {
+priority_array_write_fields = OrderedDict({
     '_1': fields.Float,
     '_2': fields.Float,
     '_3': fields.Float,
@@ -25,7 +26,7 @@ priority_array_write_fields = {
     '_14': fields.Float,
     '_15': fields.Float,
     '_16': fields.Float,
-}
+})
 
 point_fields = {
     'uuid': fields.String,
