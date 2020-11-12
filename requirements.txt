@@ -3,3 +3,6 @@ BAC0
 pandas
 bacpypes
 paho-mqtt
+flask-cors
+Flask-RESTful
+Flask-SQLAlchemy
