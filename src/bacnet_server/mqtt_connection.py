@@ -30,6 +30,7 @@ class MqttConnection:
         MqttConnection.__client = mqtt.Client()
         MqttConnection.__client.loop_start()
         try:
+            # TODO add mqtt data to the ini file
             MqttConnection.__client.connect("0.0.0.0", 1883, 60)
             MqttConnection.__client.loop_forever()
         except Exception as e:
