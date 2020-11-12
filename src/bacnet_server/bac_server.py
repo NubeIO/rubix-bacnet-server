@@ -5,6 +5,7 @@ from bacpypes.primitivedata import CharacterString
 from src.bacnet_server.config import NetworkConfig
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
+from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
 
 
@@ -41,7 +42,7 @@ class BACServer:
         object_identifier = create_object_identifier(point.object_type.name, point.address)
         ao = AnalogOutputFeedbackObject(
             objectIdentifier=(point.object_type.name, point.address),
-            objectName=object_identifier,
+            objectName=point.uuid,
             presentValue=present_value,
             priorityArray=priority_array,
             eventState="normal",
@@ -50,6 +51,7 @@ class BACServer:
             units=EngineeringUnits("milliseconds"),
             description=CharacterString("Sets fade time between led colors (0-32767)"),
         )
+        update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
         self.__bacnet.this_application.add_object(ao)
 

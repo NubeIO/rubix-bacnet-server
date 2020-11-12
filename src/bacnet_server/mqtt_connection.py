@@ -19,15 +19,18 @@ class MqttConnection:
 
     @staticmethod
     def get_mqtt_client():
-        if not MqttConnection.__instance:
-            MqttConnection.__instance = MqttConnection()
+        if MqttConnection.__instance is None:
+            MqttConnection()
         return MqttConnection.__client
 
-    def start(self):
-        self.__client = mqtt.Client()
-        self.__client.loop_start()
+    @staticmethod
+    def start():
+        if MqttConnection.__instance is None:
+            MqttConnection()
+        MqttConnection.__client = mqtt.Client()
+        MqttConnection.__client.loop_start()
         try:
-            self.__client.connect("0.0.0.0", 1883, 60)
-            self.__client.loop_forever()
+            MqttConnection.__client.connect("0.0.0.0", 1883, 60)
+            MqttConnection.__client.loop_forever()
         except Exception as e:
             print(f"Error {e}")

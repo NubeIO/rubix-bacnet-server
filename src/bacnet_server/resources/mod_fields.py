@@ -3,9 +3,7 @@ from collections import OrderedDict
 from flask_restful import fields
 
 point_store_fields = {
-    'object_identifier': fields.Float,
     'present_value': fields.String,
-    'priority_array': fields.Boolean,
     'ts': fields.String
 }
 

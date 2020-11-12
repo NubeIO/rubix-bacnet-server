@@ -29,8 +29,7 @@ from src import routes
 
 db.create_all()
 
-
 if not os.environ.get("WERKZEUG_RUN_MAIN"):
-    mqtt_thread = Thread(target=MqttConnection.get_instance().start, daemon=True)
+    mqtt_thread = Thread(target=MqttConnection.start, daemon=True)
     mqtt_thread.start()
     BACServer.get_instance().start_bac()

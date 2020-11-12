@@ -7,7 +7,6 @@ class BACnetPointStoreModel(db.Model):
     __tablename__ = 'bac_points_store'
     point_uuid = db.Column(db.String, db.ForeignKey('bac_points.uuid'), primary_key=True, nullable=False)
     present_value = db.Column(db.Float(), nullable=False)
-    priority_array = db.Column(db.String())
     ts = db.Column(db.DateTime, server_default=db.func.now())
 
     def __repr__(self):
@@ -24,10 +23,8 @@ class BACnetPointStoreModel(db.Model):
     def update(self) -> bool:
         res = db.session.execute(self.__table__
                                  .update()
-                                 .values(present_value=self.present_value, priority_array=self.priority_array)
+                                 .values(present_value=self.present_value)
                                  .where(and_(self.__table__.c.point_uuid == self.point_uuid,
-                                             or_(self.__table__.c.present_value != self.present_value,
-                                                 self.__table__.c.priority_array != self.priority_array,
-                                                 self.__table__.c.fault != self.fault))))
-
+                                             or_(self.__table__.c.present_value != self.present_value))))
+        db.session.commit()
         return bool(res.rowcount)
