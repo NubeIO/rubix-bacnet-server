@@ -54,6 +54,7 @@ class BACServer:
         update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
         self.__bacnet.this_application.add_object(ao)
+        return [object_identifier, present_value]
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)

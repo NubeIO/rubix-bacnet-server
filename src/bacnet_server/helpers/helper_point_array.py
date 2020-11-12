@@ -2,7 +2,7 @@ from bacpypes.basetypes import PriorityArray, PriorityValue
 
 
 def create_object_identifier(object_type, address):
-    return f'{object_type} - {address}'
+    return f'{object_type}-{address}'
 
 
 def serialize_priority_array(priority_array):

@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, abort
 
-from src import BACServer
+from src.bacnet_server.bac_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
 
 
