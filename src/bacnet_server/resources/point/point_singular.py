@@ -2,7 +2,8 @@ import copy
 
 from flask_restful import abort, marshal_with
 
-from src import BACServer
+from src.bacnet_server.bac_server import BACServer
+from src.bacnet_server.helpers.helper_mqtt import publish_mqtt_value
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 from src.bacnet_server.resources.mod_fields import point_fields
@@ -35,7 +36,8 @@ class BACnetPointSingular(BACnetPointBase):
             BACnetPointModel.commit()
             BACServer.get_instance().remove_point(point)
             point_return = BACnetPointModel.find_by_uuid(uuid)
-            BACServer.get_instance().add_point(point_return)
+            [object_identifier, present_value] = BACServer.get_instance().add_point(point_return)
+            publish_mqtt_value(object_identifier, present_value)
             return point_return
         except Exception as e:
             abort(500, message=str(e))

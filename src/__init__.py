@@ -5,9 +5,6 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-from src.bacnet_server.bac_server import BACServer
-from src.bacnet_server.mqtt_connection import MqttConnection
-
 app = Flask(__name__)
 CORS(app)
 
@@ -30,6 +27,9 @@ from src import routes
 db.create_all()
 
 if not os.environ.get("WERKZEUG_RUN_MAIN"):
+    from src.bacnet_server.mqtt_connection import MqttConnection
+    from src.bacnet_server.bac_server import BACServer
+
     mqtt_thread = Thread(target=MqttConnection.start, daemon=True)
     mqtt_thread.start()
     BACServer.get_instance().start_bac()

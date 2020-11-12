@@ -1,6 +1,5 @@
 import BAC0
 from bacpypes.basetypes import EngineeringUnits
-from bacpypes.primitivedata import CharacterString
 
 from src.bacnet_server.config import NetworkConfig
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
@@ -41,19 +40,21 @@ class BACServer:
         # TODO: Switch cases for different type of points
         object_identifier = create_object_identifier(point.object_type.name, point.address)
         ao = AnalogOutputFeedbackObject(
+            profileName=point.uuid,
             objectIdentifier=(point.object_type.name, point.address),
-            objectName=point.uuid,
+            objectName=point.object_name,
+            relinquishDefault=point.relinquish_default,
             presentValue=present_value,
             priorityArray=priority_array,
             eventState="normal",
             statusFlags=[0, 0, 0, 0],
-            relinquishDefault=0.0,
-            units=EngineeringUnits("milliseconds"),
-            description=CharacterString("Sets fade time between led colors (0-32767)"),
+            units=EngineeringUnits(point.units.name),
+            description=point.description,
         )
         update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
         self.__bacnet.this_application.add_object(ao)
+        return [object_identifier, present_value]
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
