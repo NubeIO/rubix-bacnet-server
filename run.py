@@ -3,7 +3,7 @@ from src import app
 
 ip = '0.0.0.0'
 port = 1515
-debug = True
+debug = False
 
 
 if __name__ == '__main__':

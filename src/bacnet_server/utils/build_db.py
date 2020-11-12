@@ -1,7 +1,7 @@
 from tinydb import TinyDB, Query
 
-from src.bacnet_server.breakdowns.helper_point_array import default_values
 from src.bacnet_server.config import DbConfig, PointConfig
+from src.bacnet_server.helpers.helper_point_array import create_object_identifier
 
 db_location = DbConfig.location
 db_name = DbConfig.name
@@ -14,13 +14,10 @@ bo_count = PointConfig.bo_count
 default_pv = 'inactive'
 object_type = 'binaryOutput'
 for i in range(1, int(bo_count) + 1):
-    [priority_array, _present_value] = default_values(object_type, i, default_pv, db, Points)
-    print(vars(priority_array))
     point_obj = {
-        'object_identifier': f'{object_type}-{i}',
-        'object_name': f'{object_type}-{i}',
-        'object_type': f'{object_type}',
-        'present_value': _present_value,
+        'object_identifier': create_object_identifier(object_type, i),
+        'object_name': create_object_identifier(object_type, i),
+        'present_value': default_pv,
         'event_state': 'normal',
         'status_flags': [0, 0, 0, 0],
         'feedback_value': 'inactive',
@@ -35,13 +32,10 @@ for i in range(1, int(bo_count) + 1):
 default_pv = 0.0
 object_type = 'analogOutput'
 for i in range(1, int(ao_count) + 1):
-    [priority_array, _present_value] = default_values(object_type, i, default_pv, db, Points)
-
     point_obj = {
-        'object_identifier': f'{object_type}-{i}',
-        'object_name': f'{object_type}-{i}',
-        'object_type': f'{object_type}',
-        'present_value': _present_value,
+        'object_identifier': create_object_identifier(object_type, i),
+        'object_name': create_object_identifier(object_type, i),
+        'present_value': default_pv,
         'event_state': 'normal',
         'status_flags': [0, 0, 0, 0],
         'relinquish_default': default_pv,

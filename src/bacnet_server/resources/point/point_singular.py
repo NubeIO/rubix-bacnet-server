@@ -1,12 +1,10 @@
 from flask_restful import abort, marshal_with
 
-from src import db
-from src.bacnet_server.interfaces.point.points import PointType
-from src.bacnet_server.models.point import BACnetPointModel
-from src.bacnet_server.models.point_store import BACnetPointStoreModel
+from src import BACServer
+from src.bacnet_server.models.model_point import BACnetPointModel
+from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 from src.bacnet_server.resources.mod_fields import point_fields
 from src.bacnet_server.resources.point.point_base import BACnetPointBase
-from src.bacnet_server.utils.model_utils import ModelUtils
 
 
 class BACnetPointSingular(BACnetPointBase):
@@ -15,19 +13,12 @@ class BACnetPointSingular(BACnetPointBase):
     point with last not null value and value_array
     """
 
+    @marshal_with(point_fields)
     def get(self, uuid):
-        point = db.session \
-            .query(BACnetPointModel, BACnetPointStoreModel) \
-            .select_from(BACnetPointModel) \
-            .filter_by(uuid=uuid) \
-            .join(BACnetPointStoreModel, isouter=True) \
-            .order_by(BACnetPointStoreModel.id.desc()) \
-            .first()
-        db.session.commit()
+        point = BACnetPointModel.find_by_uuid(uuid)
         if not point:
-            abort(404, message=f'BACnet Point not found')
-
-        return {**ModelUtils.row2dict(point[0]), "point_store": self.create_point_store(point[1])}, 200
+            abort(404, message='BACnet Point is not found')
+        return point
 
     @marshal_with(point_fields)
     def put(self, uuid):
@@ -36,16 +27,20 @@ class BACnetPointSingular(BACnetPointBase):
         if point is None:
             return self.add_point(data, uuid)
         try:
-            if data.object_type:
-                data.object_type = PointType.__members__.get(data.object_type)
+            priority_array_write = data.pop('priority_array_write')
             BACnetPointModel.filter_by_uuid(uuid).update(data)
+            PriorityArrayModel.filter_by_point_uuid(uuid).update(priority_array_write)
             BACnetPointModel.commit()
-            return BACnetPointModel.find_by_uuid(uuid)
+            BACServer.get_instance().remove_point(point)
+            point_return = BACnetPointModel.find_by_uuid(uuid)
+            BACServer.get_instance().add_point(point_return)
+            return point_return
         except Exception as e:
             abort(500, message=str(e))
 
     def delete(self, uuid):
         point = BACnetPointModel.find_by_uuid(uuid)
         if point:
+            BACServer.get_instance().remove_point(point)
             point.delete_from_db()
         return '', 204
