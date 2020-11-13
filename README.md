@@ -146,3 +146,32 @@ Write a value to @16 of 1
 Write a value to @16 of null
 ./bacwp 123 1 1 85 16 -1 0 0
 ```
+
+
+### using bacstack to read device/point info
+
+point info
+```
+pointName
+./bacrp 123 1 1 77
+pointDisc
+./bacrp 123 1 1 28
+pointUnits
+./bacrp 123 1 1 117
+pointEventState
+./bacrp 123 1 1 36
+```
+
+device info, if the deviceId is 123
+```
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 77
+"nube-io"
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 75
+(device, 123)
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 112
+operational-read-only
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 121
+"NUBE-IO-IO vendor_name"
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 120
+1173
+```
