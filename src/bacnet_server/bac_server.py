@@ -3,6 +3,7 @@ from bacpypes.basetypes import EngineeringUnits
 
 from src.bacnet_server.config import NetworkConfig
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
+from src.bacnet_server.helpers.helper_mqtt import publish_mqtt_value
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
@@ -66,7 +67,7 @@ class BACServer:
         self.__bacnet.this_application.add_object(ao)
         update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
-        return [object_identifier, present_value]
+        publish_mqtt_value(object_identifier, present_value)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
