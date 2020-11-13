@@ -6,3 +6,4 @@ paho-mqtt
 flask-cors
 Flask-RESTful
 Flask-SQLAlchemy
+netifaces
