@@ -75,7 +75,7 @@ body:
 
 
 
-## HTTP PUT:
+## HTTP PATCH:
 Update an existing point
 ```
 /api/bacnet/points/<uuid>
@@ -88,24 +88,6 @@ body:
   "object_name": "object_name",
   "address": 1,
   "relinquish_default": 1,
-  "priority_array_write": {
-    "_1": null,
-    "_2": null,
-    "_3": null,
-    "_4": null,
-    "_5": null,
-    "_6": null,
-    "_7": null,
-    "_8": 99.9,
-    "_9": 892.02,
-    "_10": null,
-    "_11": null,
-    "_12": null,
-    "_13": null,
-    "_14": null,
-    "_15": null,
-    "_16": 16.9089
-  },
   "units": "volts",
   "description": "description",
   "enable": true,
