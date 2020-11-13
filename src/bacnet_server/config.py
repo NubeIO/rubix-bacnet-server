@@ -21,6 +21,7 @@ class NetworkConfig:
         self.port = port
 
 
+# TODO remove
 class PointConfig:
     bo_count = None
     ao_count = None
@@ -50,9 +51,9 @@ try:
     # get point config
     PointConfig.ao_count = config.get("points", "ao_count")
     PointConfig.bo_count = config.get("points", "bo_count")
-    # json db location
-    DbConfig.location = config.get("db", "location")
-    DbConfig.name = config.get("db", "name")
+    # json db location OLD #TODO remove
+    # DbConfig.location = config.get("db", "location")
+    # DbConfig.name = config.get("db", "name")
 
 
 except OSError as e:
