@@ -1,12 +1,12 @@
 import BAC0
 from bacpypes.basetypes import EngineeringUnits
 
-from src.bacnet_server.config import NetworkConfig
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
 from src.bacnet_server.helpers.helper_mqtt import publish_mqtt_value
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
+from src.ini_config import config
 
 
 class BACServer:
@@ -16,23 +16,20 @@ class BACServer:
         if BACServer.__instance:
             raise Exception("BACServer class is a singleton class!")
         else:
-            ip = NetworkConfig.ip
-            port = NetworkConfig.port
-            device_id = NetworkConfig.deviceId
-            local_obj_name = NetworkConfig.localObjName
-            model_name = "rubix-bac-stack-RC4"
-            vendor_id = 1173
-            vendor_name = "Nube iO Operations Pty Ltd"
-            description = "NUBE-IO BACnet Server"
+            ip = config.get('device', 'ip')
+            port = config.get('device', 'port')
+            device_id = config.get('device', 'device_id')
+            local_obj_name = config.get('device', 'local_obj_name')
+            model_name = config.get('device', 'model_name')
+            vendor_id = config.get('device', 'vendor_id')
+            vendor_name = config.get('device', 'vendor_name')
             self.__bacnet = BAC0.lite(ip=ip,
                                       port=port,
                                       deviceId=device_id,
                                       localObjName=local_obj_name,
                                       modelName=model_name,
                                       vendorId=vendor_id,
-                                      vendorName=vendor_name,
-                                      # description=description
-                                      )
+                                      vendorName=vendor_name)
             self.__registry = {}
             BACServer.__instance = self
 
