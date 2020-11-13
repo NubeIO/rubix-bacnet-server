@@ -33,7 +33,6 @@ class BACnetPointSingular(BACnetPointBase):
             priority_array_write = data.pop('priority_array_write')
             BACnetPointModel.filter_by_uuid(uuid).update(data)
             PriorityArrayModel.filter_by_point_uuid(uuid).update(priority_array_write)
-            BACnetPointModel.commit()
             BACServer.get_instance().remove_point(point)
             point_return = BACnetPointModel.find_by_uuid(uuid)
             [object_identifier, present_value] = BACServer.get_instance().add_point(point_return)

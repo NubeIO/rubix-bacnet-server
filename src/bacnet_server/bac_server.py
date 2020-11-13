@@ -7,6 +7,7 @@ from src.bacnet_server.helpers.helper_point_array import default_values, create_
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
 
+
 class BACServer:
     __instance = None
 
@@ -22,7 +23,15 @@ class BACServer:
             vendor_id = 1173
             vendor_name = "Nube iO Operations Pty Ltd"
             description = "NUBE-IO BACnet Server"
-            self.__bacnet = BAC0.lite(ip=ip, port=port, deviceId=device_id, localObjName=local_obj_name, modelName=model_name, vendorId=vendor_id, vendorName=vendor_name, description=description)
+            self.__bacnet = BAC0.lite(ip=ip,
+                                      port=port,
+                                      deviceId=device_id,
+                                      localObjName=local_obj_name,
+                                      modelName=model_name,
+                                      vendorId=vendor_id,
+                                      vendorName=vendor_name,
+                                      # description=description
+                                      )
             self.__registry = {}
             BACServer.__instance = self
 
@@ -54,11 +63,12 @@ class BACServer:
             units=EngineeringUnits(point.units.name),
             description=point.description,
         )
+        self.__bacnet.this_application.add_object(ao)
         update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
-        self.__bacnet.this_application.add_object(ao)
         return [object_identifier, present_value]
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
         self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
+        del self.__registry[object_identifier]

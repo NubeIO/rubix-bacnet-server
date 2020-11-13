@@ -26,5 +26,4 @@ class BACnetPointStoreModel(db.Model):
                                  .values(present_value=self.present_value)
                                  .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                              or_(self.__table__.c.present_value != self.present_value))))
-        db.session.commit()
         return bool(res.rowcount)
