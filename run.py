@@ -2,7 +2,7 @@ from src import app
 
 
 ip = '0.0.0.0'
-port = 1515
+port = 1717
 debug = False
 
 

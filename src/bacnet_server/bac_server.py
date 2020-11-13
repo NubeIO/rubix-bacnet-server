@@ -7,7 +7,6 @@ from src.bacnet_server.helpers.helper_point_array import default_values, create_
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
 
-
 class BACServer:
     __instance = None
 
@@ -19,7 +18,11 @@ class BACServer:
             port = NetworkConfig.port
             device_id = NetworkConfig.deviceId
             local_obj_name = NetworkConfig.localObjName
-            self.__bacnet = BAC0.lite(ip=ip, port=port, deviceId=device_id, localObjName=local_obj_name)
+            model_name = "rubix-bac-stack-RC4"
+            vendor_id = 1173
+            vendor_name = "Nube iO Operations Pty Ltd"
+            description = "NUBE-IO BACnet Server"
+            self.__bacnet = BAC0.lite(ip=ip, port=port, deviceId=device_id, localObjName=local_obj_name, modelName=model_name, vendorId=vendor_id, vendorName=vendor_name, description=description)
             self.__registry = {}
             BACServer.__instance = self
 
