@@ -8,7 +8,7 @@ class BACnetPointModel(db.Model):
     __tablename__ = 'bac_points'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     object_type = db.Column(db.Enum(PointType), nullable=False)
-    object_name = db.Column(db.String(80), nullable=False)
+    object_name = db.Column(db.String(80), nullable=False, unique=True)
     address = db.Column(db.Integer(), nullable=False, unique=True)
     relinquish_default = db.Column(db.Float(), nullable=False)
     priority_array_write = db.relationship('PriorityArrayModel',
@@ -46,10 +46,6 @@ class BACnetPointModel(db.Model):
         self.priority_array_write = PriorityArrayModel(point_uuid=self.uuid, **priority_array_write)
         self.point_store = BACnetPointStoreModel.create_new_point_store_model(self.uuid)
         db.session.add(self)
-        db.session.commit()
-
-    @classmethod
-    def commit(cls):
         db.session.commit()
 
     def delete_from_db(self):
