@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqtt
 
+from src.ini_config import config
+
 
 class MqttConnection:
     __instance = None
@@ -30,8 +32,9 @@ class MqttConnection:
         MqttConnection.__client = mqtt.Client()
         MqttConnection.__client.loop_start()
         try:
-            # TODO add mqtt data to the ini file
-            MqttConnection.__client.connect("0.0.0.0", 1883, 60)
+            host = config.get('mqtt', 'host')
+            port = int(config.get('mqtt', 'port'))
+            MqttConnection.__client.connect(host, port, 60)
             MqttConnection.__client.loop_forever()
         except Exception as e:
             print(f"Error {e}")

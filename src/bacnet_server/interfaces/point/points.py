@@ -2,46 +2,6 @@ import enum
 
 from bacpypes.basetypes import EngineeringUnits
 
-priority_array = {
-    '_1': None,
-    '_2': None,
-    '_3': None,
-    '_4': None,
-    '_5': None,
-    '_6': None,
-    '_7': None,
-    '_8': None,
-    '_9': None,
-    '_10': None,
-    '_11': None,
-    '_12': None,
-    '_13': None,
-    '_14': None,
-    '_15': None,
-    '_16': None,
-}
-
-
-class PriorityNumber(enum.Enum):
-    _1 = 1
-    _2 = 2
-    _3 = 3
-    _4 = 4
-    _5 = 5
-    _6 = 6
-    _7 = 7
-    _8 = 8
-    _9 = 9
-    _10 = 10
-    _11 = 11
-    _12 = 12
-    _13 = 13
-    _14 = 14
-    _15 = 15
-    _16 = 16
-    NULL = 17
-
-
 PriorityOperationEmergencyBool = ('Emergency On', 'Emergency Off', 'Auto')
 
 PriorityOperationManualBool = ('Manual On', 'Manual Off', 'Auto')
@@ -81,6 +41,15 @@ class PointType(enum.Enum):
     # binaryInput= 3
     binaryOutput = 2
     # binaryValue= 5
+
+
+class BACnetEventState(enum.Enum):
+    normal = 0,
+    fault = 1,
+    offnormal = 2,
+    highLimit = 3,
+    lowLimit = 4,
+    lifeSafetyAlarm = 5
 
 
 class Units(enum.Enum):

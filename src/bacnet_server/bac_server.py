@@ -1,12 +1,16 @@
+import copy
+import time
+
 import BAC0
 from bacpypes.basetypes import EngineeringUnits
 
-from src.bacnet_server.config import NetworkConfig
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
 from src.bacnet_server.helpers.helper_mqtt import publish_mqtt_value
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
+from src.bacnet_server.models.model_point import BACnetPointModel
+from src.bacnet_server.models.model_server import BACnetServerModel
 
 
 class BACServer:
@@ -16,23 +20,7 @@ class BACServer:
         if BACServer.__instance:
             raise Exception("BACServer class is a singleton class!")
         else:
-            ip = NetworkConfig.ip
-            port = NetworkConfig.port
-            device_id = NetworkConfig.deviceId
-            local_obj_name = NetworkConfig.localObjName
-            model_name = "rubix-bac-stack-RC4"
-            vendor_id = 1173
-            vendor_name = "Nube iO Operations Pty Ltd"
-            description = "NUBE-IO BACnet Server"
-            self.__bacnet = BAC0.lite(ip=ip,
-                                      port=port,
-                                      deviceId=device_id,
-                                      localObjName=local_obj_name,
-                                      modelName=model_name,
-                                      vendorId=vendor_id,
-                                      vendorName=vendor_name,
-                                      # description=description
-                                      )
+            self.__bacnet = None
             self.__registry = {}
             BACServer.__instance = self
 
@@ -42,11 +30,54 @@ class BACServer:
             BACServer()
         return BACServer.__instance
 
-    def start_bac(self):
-        from src.bacnet_server.models.model_point import BACnetPointModel
+    def is_running(self):
+        return self.__bacnet is not None
 
+    def start_bac(self):
+        bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist()
+        self.connect(bacnet_server)
+        self.sync_stack()
+
+    def restart_bac(self, old_bacnet_server, new_bacnet_server, restart_on_failure=True):
+        """
+        It tries to establish connection with new configuration,
+        If it fails it will re-establish connection with old one,
+        Even this re-establishment with old one got error, we send an error message
+        """
+
+        if self.__bacnet:
+            self.__bacnet.disconnect()  # on macOS it's not working
+            time.sleep(1)  # as per their testing we need to sleep to make sure all sockets got closed
+        self.__reset_variable()
+        try:
+            self.connect(new_bacnet_server)
+            self.sync_stack()
+        except Exception as e:
+            print(f'Error: {str(e)}')
+            if restart_on_failure:
+                try:
+                    BACServer.get_instance().restart_bac(old_bacnet_server, old_bacnet_server, False)
+                except Exception as err:
+                    print(f'Error on re-starting: {str(err)}')
+                    raise Exception(f'Current configuration and even on revert server starting is got exception')
+            raise e
+
+    def sync_stack(self):
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
             self.add_point(point)
+
+    def connect(self, bacnet_server):
+        self.__bacnet = BAC0.lite(ip=bacnet_server.ip,
+                                  port=bacnet_server.port,
+                                  deviceId=bacnet_server.device_id,
+                                  localObjName=bacnet_server.local_obj_name,
+                                  modelName=bacnet_server.model_name,
+                                  vendorId=bacnet_server.vendor_id,
+                                  vendorName=bacnet_server.vendor_name)
+
+    def __reset_variable(self):
+        self.__bacnet = None
+        self.__registry = {}
 
     def add_point(self, point):
         [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
@@ -59,7 +90,7 @@ class BACServer:
             relinquishDefault=point.relinquish_default,
             presentValue=present_value,
             priorityArray=priority_array,
-            eventState="normal",
+            eventState=point.event_state.name,
             statusFlags=[0, 0, 0, 0],
             units=EngineeringUnits(point.units.name),
             description=point.description,
@@ -73,3 +104,9 @@ class BACServer:
         object_identifier = create_object_identifier(point.object_type.name, point.address)
         self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
         del self.__registry[object_identifier]
+
+    def remove_all_points(self):
+        object_identifiers = copy.deepcopy(list(self.__registry.keys()))
+        for object_identifier in object_identifiers:
+            self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
+            del self.__registry[object_identifier]

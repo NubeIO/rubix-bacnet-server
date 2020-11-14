@@ -33,6 +33,7 @@ point_fields = {
     'address': fields.Integer,
     'relinquish_default': fields.Float,
     'priority_array_write': fields.Nested(priority_array_write_fields),
+    'event_state': fields.String,
     'units': fields.String,
     'description': fields.String,
     'enable': fields.Boolean,
@@ -42,4 +43,14 @@ point_fields = {
     'created_on': fields.String,
     'updated_on': fields.String,
     'point_store': fields.Nested(point_store_fields)
+}
+
+server_field = {
+    'ip': fields.String,
+    'port': fields.Integer,
+    'device_id': fields.String,
+    'local_obj_name': fields.String,
+    'model_name': fields.String,
+    'vendor_id': fields.String,
+    'vendor_name': fields.String,
 }
