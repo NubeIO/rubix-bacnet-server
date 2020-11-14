@@ -6,7 +6,8 @@ from src.bacnet_server.helpers.helper_mqtt import publish_mqtt_value
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
-from src.ini_config import config
+from src.bacnet_server.models.model_point import BACnetPointModel
+from src.bacnet_server.models.model_server import BACnetServerModel
 
 
 class BACServer:
@@ -16,20 +17,7 @@ class BACServer:
         if BACServer.__instance:
             raise Exception("BACServer class is a singleton class!")
         else:
-            ip = config.get('device', 'ip')
-            port = config.get('device', 'port')
-            device_id = config.get('device', 'device_id')
-            local_obj_name = config.get('device', 'local_obj_name')
-            model_name = config.get('device', 'model_name')
-            vendor_id = config.get('device', 'vendor_id')
-            vendor_name = config.get('device', 'vendor_name')
-            self.__bacnet = BAC0.lite(ip=ip,
-                                      port=port,
-                                      deviceId=device_id,
-                                      localObjName=local_obj_name,
-                                      modelName=model_name,
-                                      vendorId=vendor_id,
-                                      vendorName=vendor_name)
+            self.__bacnet = None
             self.__registry = {}
             BACServer.__instance = self
 
@@ -40,10 +28,19 @@ class BACServer:
         return BACServer.__instance
 
     def start_bac(self):
-        from src.bacnet_server.models.model_point import BACnetPointModel
-
+        self.connect()
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
             self.add_point(point)
+
+    def connect(self):
+        bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist()
+        self.__bacnet = BAC0.lite(ip=bacnet_server.ip,
+                                  port=bacnet_server.port,
+                                  deviceId=bacnet_server.device_id,
+                                  localObjName=bacnet_server.local_obj_name,
+                                  modelName=bacnet_server.model_name,
+                                  vendorId=bacnet_server.vendor_id,
+                                  vendorName=bacnet_server.vendor_name)
 
     def add_point(self, point):
         [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
