@@ -1,3 +1,4 @@
+import copy
 import time
 
 import BAC0
@@ -103,3 +104,9 @@ class BACServer:
         object_identifier = create_object_identifier(point.object_type.name, point.address)
         self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
         del self.__registry[object_identifier]
+
+    def remove_all_points(self):
+        object_identifiers = copy.deepcopy(list(self.__registry.keys()))
+        for object_identifier in object_identifiers:
+            self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
+            del self.__registry[object_identifier]

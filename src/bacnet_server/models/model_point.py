@@ -42,6 +42,11 @@ class BACnetPointModel(db.Model):
     def filter_by_uuid(cls, uuid):
         return cls.query.filter_by(uuid=uuid)
 
+    @classmethod
+    def delete_all_from_db(cls):
+        cls.query.delete()
+        db.session.commit()
+
     def save_to_db(self, priority_array_write):
         self.priority_array_write = PriorityArrayModel(point_uuid=self.uuid, **priority_array_write)
         self.point_store = BACnetPointStoreModel.create_new_point_store_model(self.uuid)
