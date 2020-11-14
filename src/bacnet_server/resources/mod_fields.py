@@ -33,6 +33,7 @@ point_fields = {
     'address': fields.Integer,
     'relinquish_default': fields.Float,
     'priority_array_write': fields.Nested(priority_array_write_fields),
+    'event_state': fields.String,
     'units': fields.String,
     'description': fields.String,
     'enable': fields.Boolean,

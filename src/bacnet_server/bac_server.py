@@ -89,7 +89,7 @@ class BACServer:
             relinquishDefault=point.relinquish_default,
             presentValue=present_value,
             priorityArray=priority_array,
-            eventState="normal",
+            eventState=point.event_state.name,
             statusFlags=[0, 0, 0, 0],
             units=EngineeringUnits(point.units.name),
             description=point.description,

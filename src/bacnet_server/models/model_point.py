@@ -1,5 +1,5 @@
 from src import db
-from src.bacnet_server.interfaces.point.points import PointType, Units
+from src.bacnet_server.interfaces.point.points import PointType, Units, BACnetEventState
 from src.bacnet_server.models.model_point_store import BACnetPointStoreModel
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 
@@ -16,7 +16,7 @@ class BACnetPointModel(db.Model):
                                            lazy=False,
                                            uselist=False,
                                            cascade="all,delete")
-    db.Column(db.String(300), nullable=False)
+    event_state = db.Column(db.Enum(BACnetEventState), nullable=False)
     units = db.Column(db.Enum(Units), nullable=False)
     description = db.Column(db.String(120), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
