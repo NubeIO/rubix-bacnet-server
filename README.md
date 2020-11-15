@@ -8,12 +8,15 @@ PYTHONPATH=. python server/bac_server.py
 ```
 
 ```
+git clone --depth 1 https://github.com/NubeDev/bacnet-flask
 cd bacnet-flask/
+# if required install python3-venv
+sudo apt-get install python3-venv -y
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
-python app.py
+python run.py
 ```
 
 
