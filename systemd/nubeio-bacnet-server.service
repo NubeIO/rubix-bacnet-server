@@ -1,13 +1,12 @@
-
 [Unit]
-Description=Flask Application for Nube Rest API
+Description=Flask Application for Nube BACNET SERVER
 After=network.target
 
 [Service]
 Type=simple
 User=pi
 WorkingDirectory=/home/pi/bac-rest
-ExecStart=/home/pi/bac-rest/venv/bin/gunicorn -b 0.0.0.0:1515 --log-level=DEBUG -w 1 run:app
+ExecStart=/home/pi/bacnet-flask/venv/bin/gunicorn -b 0.0.0.0:1717 --log-level=DEBUG -w 1 run:app
 Restart=always
 RestartSec=10
 StandardOutput=syslog
