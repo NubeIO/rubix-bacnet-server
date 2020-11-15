@@ -7,3 +7,4 @@ flask-cors
 Flask-RESTful
 Flask-SQLAlchemy
 netifaces
+gunicorn
