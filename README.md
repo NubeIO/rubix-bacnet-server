@@ -116,6 +116,48 @@ body:
 
 
 
+## Edit the Server Settings
+
+
+### HTTP GET
+
+/api/bacnet/server
+```
+{
+    "ip": "192.168.0.101",
+    "port": 47808,
+    "device_id": "123",
+    "local_obj_name": "Nube-IO",
+    "model_name": "rubix-bac-stack-RC4",
+    "vendor_id": "1173",
+    "vendor_name": "Nube iO Operations Pty Ltd"
+}
+```
+
+
+/api/bacnet/server/status
+```
+{
+    "running": true
+}
+
+```
+
+### HTTP PATCH
+
+/api/bacnet/server
+Any feild can be uppdated aswell
+ip, port, device_id, local_obj_name, model_name, vendor_id, vendor_name
+
+```
+{
+       "device_id": "123"
+}
+```
+
+
+
+
 
 ## Using a bacnet master to test
 
