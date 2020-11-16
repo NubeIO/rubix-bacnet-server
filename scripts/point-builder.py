@@ -1,7 +1,7 @@
 import json
 import requests
 
-ip = "192.168.0.100"
+ip = "0.0.0.0"
 port = 1717
 
 url = f'http://{ip}:{port}/api'
