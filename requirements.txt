@@ -1,5 +1,5 @@
 Flask
-BAC0
+BAC0==19.9.9
 pandas
 bacpypes
 paho-mqtt
