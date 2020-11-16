@@ -19,6 +19,19 @@ pip install -r requirements.txt
 python run.py
 ```
 
+## setup systemd
+
+```
+sudo cp systemd/nubeio-bacnet-server.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl disable nubeio-bacnet-server.service
+sudo systemctl enable nubeio-bacnet-server.service
+sudo journalctl -f -u nubeio-bacnet-server.service
+sudo systemctl status nubeio-bacnet-server.service
+sudo systemctl start nubeio-bacnet-server.service
+sudo systemctl stop nubeio-bacnet-server.service
+sudo systemctl restart nubeio-bacnet-server.service
+```
 
 
 ## HTTP GET:
