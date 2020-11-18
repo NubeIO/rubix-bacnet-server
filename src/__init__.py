@@ -1,5 +1,4 @@
 import os
-from threading import Thread
 
 from flask import Flask
 from flask_cors import CORS
@@ -31,6 +30,5 @@ if not os.environ.get("WERKZEUG_RUN_MAIN"):
     from src.bacnet_server.mqtt_connection import MqttConnection
     from src.bacnet_server.bac_server import BACServer
 
-    mqtt_thread = Thread(target=MqttConnection.start, daemon=True)
-    mqtt_thread.start()
+    MqttConnection.start()
     BACServer.get_instance().start_bac()
