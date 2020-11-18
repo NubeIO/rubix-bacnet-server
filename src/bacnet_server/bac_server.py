@@ -34,9 +34,12 @@ class BACServer:
         return self.__bacnet is not None
 
     def start_bac(self):
-        bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist()
-        self.connect(bacnet_server)
-        self.sync_stack()
+        try:
+            bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist()
+            self.connect(bacnet_server)
+            self.sync_stack()
+        except Exception as e:
+            print(f'Error: {str(e)}')
 
     def restart_bac(self, old_bacnet_server, new_bacnet_server, restart_on_failure=True):
         """
