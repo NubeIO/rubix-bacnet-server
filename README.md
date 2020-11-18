@@ -1,10 +1,9 @@
 # bacnet-flask
 
 
-## to run a file that imports other classes
+## To run a file that imports other classes
 ```
 PYTHONPATH=. python server/bac_server.py
-
 ```
 
 ```
@@ -16,10 +15,12 @@ python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+# copy <project_dir>/settings/config.example.ini to <project_dir>/settings/config.ini; for local run
+# copy <project_dir>/settings/config.example.ini to /data/bacnet-flask/config.ini; for systemd/guicorn run
 python run.py
 ```
 
-## setup systemd
+## Setup systemd
 
 ```
 sudo cp systemd/nubeio-bacnet-server.service /etc/systemd/system/
@@ -44,9 +45,6 @@ Will return all the a point when the UUID is passed in
 ```
 /api/bacnet/points/<uuid>
 ```
-
-
-
 
 
 ## HTTP POST:
@@ -86,7 +84,6 @@ body:
   "data_round": 2,
   "data_offset": 16
 }
-
 ```
 
 
@@ -111,7 +108,6 @@ body:
   "data_round": 2,
   "data_offset": 16
 }
-
 ```
 
 
@@ -140,7 +136,6 @@ body:
 {
     "running": true
 }
-
 ```
 
 ### HTTP PATCH
@@ -156,12 +151,9 @@ ip, port, device_id, local_obj_name, model_name, vendor_id, vendor_name
 ```
 
 
-
-
-
 ## Using a bacnet master to test
 
-### using bacstack to test for a BO
+### Using bacstack to test for a BO
 ```
 read presentValue
 ./bacrp 123 4 1 85
@@ -174,8 +166,7 @@ Write a value to @16 of null
 ```
 
 
-
-### using bacstack to test for a AO
+### Using bacstack to test for a AO
 ```
 read presentValue
 ./bacrp 123 1 1 85
@@ -188,7 +179,7 @@ Write a value to @16 of null
 ```
 
 
-### using bacstack to read device/point info
+### Using bacstack to read device/point info
 
 point info
 ```
