@@ -35,6 +35,6 @@ class MqttConnection:
             host = config.get('mqtt', 'host')
             port = int(config.get('mqtt', 'port'))
             MqttConnection.__client.connect(host, port, 60)
-            MqttConnection.__client.loop_forever()
+            MqttConnection.__client.loop_start()
         except Exception as e:
             print(f"Error {e}")
