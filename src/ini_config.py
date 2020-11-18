@@ -1,6 +1,12 @@
 """Load configuration from .ini file."""
 import configparser
 
-# Read local file `config.ini`.
+import os
+
 config = configparser.ConfigParser()
-config.read('settings/config.ini')
+if os.environ.get("data_dir") is None:
+    filename = '/settings/config.ini'
+else:
+    filename = f'{os.environ.get("data_dir")}/config.ini'
+
+config.read(filename)
