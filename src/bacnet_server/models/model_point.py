@@ -43,6 +43,11 @@ class BACnetPointModel(db.Model):
         return cls.query.filter_by(uuid=uuid)
 
     @classmethod
+    def find_by_object_id(cls, object_type, address):
+        return cls.query.filter(
+            (BACnetPointModel.object_type == object_type) & (BACnetPointModel.address == address)).first()
+
+    @classmethod
     def delete_all_from_db(cls):
         cls.query.delete()
         db.session.commit()
