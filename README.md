@@ -35,6 +35,31 @@ sudo systemctl restart nubeio-bacnet-server.service
 ```
 
 
+## CURL
+
+Get flask server details
+```
+curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/ping
+```
+
+Get bacnet server details
+```
+curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/server
+```
+Get bacnet server status
+```
+curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/server/status
+```
+
+Get bacnet server points
+```
+curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/points
+```
+
+
+
+
+
 ## HTTP GET:
 Will return all the points
 ```
