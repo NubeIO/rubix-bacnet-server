@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/bacnet-flask
-ExecStart=/home/pi/bacnet-flask/venv/bin/gunicorn -b 0.0.0.0:1717 -w 1 run:app
+User=<user>
+WorkingDirectory=<working_dir>
+ExecStart=<working_dir>/venv/bin/gunicorn -b 0.0.0.0:1717 -w 1 run:app
 Restart=always
 RestartSec=10
 StandardOutput=syslog
@@ -15,3 +15,5 @@ SyslogIdentifier=bacnet-flask
 
 [Install]
 WantedBy=multi-user.target
+
+
