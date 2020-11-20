@@ -1,6 +1,10 @@
+import logging
+
 import paho.mqtt.client as mqtt
 
 from src.ini_config import config
+
+logger = logging.getLogger(__name__)
 
 
 class MqttConnection:
@@ -27,6 +31,7 @@ class MqttConnection:
 
     @staticmethod
     def start():
+        logger.info('MQTT Connection start...')
         if MqttConnection.__instance is None:
             MqttConnection()
         MqttConnection.__client = mqtt.Client()
