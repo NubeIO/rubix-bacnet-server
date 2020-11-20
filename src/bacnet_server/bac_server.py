@@ -1,4 +1,5 @@
 import copy
+import logging
 import time
 
 import BAC0
@@ -11,6 +12,8 @@ from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_server import BACnetServerModel
+
+logger = logging.getLogger(__name__)
 
 
 class BACServer:
@@ -39,7 +42,7 @@ class BACServer:
             self.connect(bacnet_server)
             self.sync_stack()
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.error(f'Error: {str(e)}')
 
     def restart_bac(self, old_bacnet_server, new_bacnet_server, restart_on_failure=True):
         """
@@ -56,12 +59,12 @@ class BACServer:
             self.connect(new_bacnet_server)
             self.sync_stack()
         except Exception as e:
-            print(f'Error: {str(e)}')
+            logging.error(f'Error: {str(e)}')
             if restart_on_failure:
                 try:
                     BACServer.get_instance().restart_bac(old_bacnet_server, old_bacnet_server, False)
                 except Exception as err:
-                    print(f'Error on re-starting: {str(err)}')
+                    logging.error(f'Error on re-starting: {str(err)}')
                     raise Exception(f'Current configuration and even on revert server starting is got exception')
             raise e
 

@@ -42,4 +42,4 @@ class MqttConnection:
             MqttConnection.__client.connect(host, port, 60)
             MqttConnection.__client.loop_start()
         except Exception as e:
-            print(f"Error {e}")
+            logging.error(f"Error {e}")
