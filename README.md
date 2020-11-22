@@ -65,7 +65,7 @@ curl --data '{"device_id": "1233"}' -i -H "Accept: application/json" -H "Content
 HTTP PATCH new bacnet server `ip`
 ```
 curl --data '{"ip": "192.168.0.123"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
-``
+```
 
 
 
