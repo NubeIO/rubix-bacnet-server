@@ -56,7 +56,16 @@ Get bacnet server points
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/points
 ```
 
+### 
+HTTP PATCH new bacnet server `device_id`
+```
+curl --data '{"device_id": "1233"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
+```
 
+HTTP PATCH new bacnet server `ip`
+```
+curl --data '{"ip": "192.168.0.123"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
+``
 
 
 
