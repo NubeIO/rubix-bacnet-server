@@ -48,6 +48,10 @@ class BACnetPointModel(db.Model):
             (BACnetPointModel.object_type == object_type) & (BACnetPointModel.address == address)).first()
 
     @classmethod
+    def find_by_object_name(cls, object_name):
+        return cls.query.filter(BACnetPointModel.object_name == object_name).first()
+
+    @classmethod
     def delete_all_from_db(cls):
         cls.query.delete()
         db.session.commit()
