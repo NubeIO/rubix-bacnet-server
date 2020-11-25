@@ -34,7 +34,7 @@ class BACnetPointObject(BACnetPointBase):
         data = BACnetPointObject.parser_patch.parse_args()
         point = copy.deepcopy(BACnetPointModel.find_by_object_id(object_type, address))
         if point is None:
-            abort(404, message=f"Does not exist {object_type - address}")
+            abort(404, message=f"Does not exist {object_type}-{address}")
         try:
             priority_array_write = data.pop('priority_array_write')
             non_none_data = {}
