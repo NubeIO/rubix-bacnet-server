@@ -11,7 +11,8 @@ from src.bacnet_server.resources.point.point_base import BACnetPointBase
 
 class BACnetPointName(BACnetPointBase):
     parser_patch = reqparse.RequestParser()
-    parser_patch.add_argument('object_name', type=str, required=False)
+    parser_patch.add_argument('object_type', type=str, required=False)
+    parser_patch.add_argument('address', type=int, required=False)
     parser_patch.add_argument('relinquish_default', type=float, required=False)
     parser_patch.add_argument("priority_array_write", type=dict, required=False)
     parser_patch.add_argument('event_state', type=str, required=False)
@@ -50,5 +51,3 @@ class BACnetPointName(BACnetPointBase):
             return point_return
         except Exception as e:
             abort(500, message=str(e))
-
-
