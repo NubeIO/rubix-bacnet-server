@@ -8,9 +8,9 @@ url = f'http://{ip}:{port}/api'
 points_url = f'{url}/bacnet/points'
 
 device_count = 50
-device_start_address = 5
-reg_address = [7, 8, 9, 11, 40]
-point_names = ["Mode", "Fan_Status", "Setpoint", "Room_Temp", "Valve_position"]
+device_start_address = 1
+reg_address = [6, 7, 8, 10, 39]
+point_names = ['mode', 'fan_status', 'setpoint', 'temp', 'value_position']
 
 is_looping = True
 for i in range(device_count):
@@ -19,11 +19,13 @@ for i in range(device_count):
     for ii, r in enumerate(reg_address):
         addr = f'{i}{r}'
         addr = int(addr)
+        print({"addr": addr, "i": i, "ii": ii, "r": r})
+
         # print(f'{i}{r}')
         name = point_names[ii]
         point_obj = {
             "object_type": "analogOutput",
-            "object_name": f'dev_{i}_{name}',
+            "object_name": f'{name}_{i}_{r}',
             "address": addr,
             "relinquish_default": 1,
             "priority_array_write": {

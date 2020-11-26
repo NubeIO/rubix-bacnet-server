@@ -9,9 +9,10 @@ from src.bacnet_server.resources.mod_fields import point_fields
 from src.bacnet_server.resources.point.point_base import BACnetPointBase
 
 
-class BACnetPointObject(BACnetPointBase):
+class BACnetPointName(BACnetPointBase):
     parser_patch = reqparse.RequestParser()
-    parser_patch.add_argument('object_name', type=str, required=False)
+    parser_patch.add_argument('object_type', type=str, required=False)
+    parser_patch.add_argument('address', type=int, required=False)
     parser_patch.add_argument('relinquish_default', type=float, required=False)
     parser_patch.add_argument("priority_array_write", type=dict, required=False)
     parser_patch.add_argument('event_state', type=str, required=False)
@@ -23,18 +24,18 @@ class BACnetPointObject(BACnetPointBase):
     parser_patch.add_argument('data_offset', type=float, required=False)
 
     @marshal_with(point_fields)
-    def get(self, object_type, address):
-        point = BACnetPointModel.find_by_object_id(object_type, address)
+    def get(self, object_name):
+        point = BACnetPointModel.find_by_object_name(object_name)
         if not point:
             abort(404, message='BACnet Point is not found')
         return point
 
     @marshal_with(point_fields)
-    def patch(self, object_type, address):
-        data = BACnetPointObject.parser_patch.parse_args()
-        point = copy.deepcopy(BACnetPointModel.find_by_object_id(object_type, address))
+    def patch(self, object_name):
+        data = BACnetPointName.parser_patch.parse_args()
+        point = copy.deepcopy(BACnetPointModel.find_by_object_name(object_name))
         if point is None:
-            abort(404, message=f"Does not exist {object_type}-{address}")
+            abort(404, message=f"Does not exist {object_name}")
         try:
             priority_array_write = data.pop('priority_array_write')
             non_none_data = {}
