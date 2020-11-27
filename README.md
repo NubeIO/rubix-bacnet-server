@@ -1,6 +1,21 @@
 # bacnet-flask
 
 
+### Running on Production
+
+#### One time setup:
+- Clone [this](https://github.com/NubeIO/common-py-libs)
+- Create `venv` on inside that directory (follow instruction on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
+
+#### Commands:
+```bash
+sudo bash script.bash start -u=<pi|debian> -dir=<bacnet_flask_dir> -lib_dir=<common-py-libs-dir>
+sudo bash script.bash -h
+```
+
+##### Note: _change /data/bac-flask/config.ini  as you want and restart -- `sudo bash script.bash restart`_
+
+
 ## To run a file that imports other classes
 ```
 PYTHONPATH=. python server/bac_server.py
