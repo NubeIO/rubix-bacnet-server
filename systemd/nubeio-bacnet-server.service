@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=<user>
 WorkingDirectory=<working_dir>
-ExecStart=<working_dir>/venv/bin/gunicorn -b 0.0.0.0:1717 -w 1 run:app -e data_dir=/data/bacnet-flask
+ExecStart=<lib_dir>/venv/bin/gunicorn -b 0.0.0.0:1717 -w 1 run:app -e data_dir=/data/bacnet-flask
 Restart=always
 RestartSec=10
 StandardOutput=syslog
@@ -15,5 +15,3 @@ SyslogIdentifier=bacnet-flask
 
 [Install]
 WantedBy=multi-user.target
-
-
