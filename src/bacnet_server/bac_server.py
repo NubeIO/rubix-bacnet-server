@@ -34,7 +34,7 @@ class BACServer:
             BACServer()
         return BACServer.__instance
 
-    def is_running(self):
+    def status(self):
         return self.__bacnet is not None
 
     def start_bac(self):
