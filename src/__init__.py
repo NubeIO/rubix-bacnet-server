@@ -34,9 +34,7 @@ from src import routes
 
 db.create_all()
 
-if not os.environ.get("WERKZEUG_RUN_MAIN"):
-    from src.bacnet_server.mqtt_connection import MqttConnection
-    from src.bacnet_server.bac_server import BACServer
+with app.app_context():
+    from src.background import Background
 
-    MqttConnection.start()
-    BACServer.get_instance().start_bac()
+    Background.run()

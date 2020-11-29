@@ -6,12 +6,13 @@ import BAC0
 from bacpypes.basetypes import EngineeringUnits
 
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
-from src.bacnet_server.helpers.helper_mqtt import publish_mqtt_value
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_server import BACnetServerModel
+from src.bacnet_server.mqtt_client import MqttClient
+from src.ini_config import config, settings__enable_mqtt, mqtt__publish_value, mqtt__attempt_reconnect_secs
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,10 @@ class BACServer:
         try:
             bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist()
             self.connect(bacnet_server)
+            if settings__enable_mqtt and mqtt__publish_value:
+                while not MqttClient.get_instance().status():
+                    logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
+                    time.sleep(mqtt__attempt_reconnect_secs)
             self.sync_stack()
         except Exception as e:
             logging.error(f'Error: {str(e)}')
@@ -104,7 +109,8 @@ class BACServer:
         self.__bacnet.this_application.add_object(ao)
         update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
-        publish_mqtt_value(object_identifier, present_value)
+        if config.getboolean('mqtt', 'publish_value', fallback=False):
+            MqttClient.publish_mqtt_value(object_identifier, present_value)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
