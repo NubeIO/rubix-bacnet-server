@@ -1,7 +1,7 @@
 import uuid
 
 from src import db
-from src.ini_config import config
+from src.ini_config import *
 
 
 class BACnetServerModel(db.Model):
@@ -25,24 +25,16 @@ class BACnetServerModel(db.Model):
 
     @classmethod
     def create_default_server_if_does_not_exist(cls):
-        ip = config.get('device', 'ip')
-        port = config.get('device', 'port')
-        device_id = config.get('device', 'device_id')
-        local_obj_name = config.get('device', 'local_obj_name')
-        model_name = config.get('device', 'model_name')
-        vendor_id = config.get('device', 'vendor_id')
-        vendor_name = config.get('device', 'vendor_name')
-
         bacnet_server = BACnetServerModel.find_one()
         if not bacnet_server:
             uuid_ = str(uuid.uuid4())
             bacnet_server = BACnetServerModel(uuid=uuid_,
-                                              ip=ip,
-                                              port=port,
-                                              device_id=device_id,
-                                              local_obj_name=local_obj_name,
-                                              model_name=model_name,
-                                              vendor_id=vendor_id,
-                                              vendor_name=vendor_name)
+                                              ip=device__ip,
+                                              port=device__port,
+                                              device_id=device__device_id,
+                                              local_obj_name=device__local_obj_name,
+                                              model_name=device__model_name,
+                                              vendor_id=device__vendor_id,
+                                              vendor_name=device__vendor_name)
             bacnet_server.save_to_db()
         return bacnet_server

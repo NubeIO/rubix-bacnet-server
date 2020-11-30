@@ -1,10 +1,11 @@
 from bacpypes.local.object import AnalogOutputCmdObject
 from bacpypes.primitivedata import Real
 
-from src.bacnet_server.helpers.helper_mqtt import publish_mqtt_value
 from src.bacnet_server.helpers.helper_point_array import create_object_identifier, serialize_priority_array
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
+from src.bacnet_server.mqtt_client import MqttClient
+from src.ini_config import mqtt__publish_value
 
 
 class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
@@ -23,4 +24,5 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
             present_value = float(present_value.value)
         elif type(present_value) is float:
             present_value = float(present_value)
-        publish_mqtt_value(object_identifier, present_value)
+        if mqtt__publish_value:
+            MqttClient.publish_mqtt_value(object_identifier, present_value)

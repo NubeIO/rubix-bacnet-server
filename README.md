@@ -61,10 +61,6 @@ Get bacnet server details
 ```
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/server
 ```
-Get bacnet server status
-```
-curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/server/status
-```
 
 Get bacnet server points
 ```
@@ -176,14 +172,6 @@ body:
     "model_name": "rubix-bac-stack-RC4",
     "vendor_id": "1173",
     "vendor_name": "Nube iO Operations Pty Ltd"
-}
-```
-
-
-/api/bacnet/server/status
-```
-{
-    "running": true
 }
 ```
 
