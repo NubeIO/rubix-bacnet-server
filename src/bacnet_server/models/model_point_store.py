@@ -7,7 +7,7 @@ class BACnetPointStoreModel(db.Model):
     __tablename__ = 'bac_points_store'
     point_uuid = db.Column(db.String, db.ForeignKey('bac_points.uuid'), primary_key=True, nullable=False)
     present_value = db.Column(db.Float(), nullable=False)
-    ts = db.Column(db.DateTime, server_default=db.func.now())
+    ts = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
         return f"PointStore(point_uuid = {self.point_uuid})"

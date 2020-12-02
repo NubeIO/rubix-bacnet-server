@@ -28,13 +28,13 @@ priority_array_write_fields = OrderedDict({
 
 point_fields = {
     'uuid': fields.String,
-    'object_type': fields.String,
+    'object_type': fields.String(attribute="object_type.name"),
     'object_name': fields.String,
     'address': fields.Integer,
     'relinquish_default': fields.Float,
     'priority_array_write': fields.Nested(priority_array_write_fields),
-    'event_state': fields.String,
-    'units': fields.String,
+    'event_state': fields.String(attribute="event_state.name"),
+    'units': fields.String(attribute="units.name"),
     'description': fields.String,
     'enable': fields.Boolean,
     'fault': fields.Boolean,
