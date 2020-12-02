@@ -12,7 +12,7 @@ else:
 config.read(filename)
 
 settings__enable_mqtt = config.getboolean('settings', 'enable_mqtt', fallback=False)
-settings__enable_bacnet_server = config.getboolean('settings', 'enable_bacnet_server', fallback=False)
+settings__enable_bacnet_server = config.getboolean('settings', 'enable_bacnet_server', fallback=True)
 
 device__ip = config.get('device', 'ip', fallback='192.168.0.100')
 device__port = config.getint('device', 'port', fallback=47808)
