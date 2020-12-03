@@ -34,6 +34,7 @@ class BACnetPointName(BACnetPointBase):
     def patch(self, object_name):
         data = BACnetPointName.parser_patch.parse_args()
         point = copy.deepcopy(BACnetPointModel.find_by_object_name(object_name))
+        self.abort_if_bacnet_is_not_running()
         if point is None:
             abort(404, message=f"Does not exist {object_name}")
         try:

@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class BACServer:
     __instance = None
+    __sync_status = False
 
     def __init__(self):
         if BACServer.__instance:
@@ -35,7 +36,7 @@ class BACServer:
         return BACServer.__instance
 
     def status(self):
-        return self.__bacnet is not None
+        return self.__bacnet is not None and self.__sync_status
 
     def start_bac(self):
         try:
@@ -76,6 +77,7 @@ class BACServer:
     def sync_stack(self):
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
             self.add_point(point)
+        BACServer.__sync_status = True
 
     def connect(self, bacnet_server):
         self.__bacnet = BAC0.lite(ip=bacnet_server.ip,

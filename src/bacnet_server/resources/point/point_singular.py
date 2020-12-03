@@ -35,6 +35,7 @@ class BACnetPointSingular(BACnetPointBase):
     def patch(self, uuid):
         data = BACnetPointSingular.parser_patch.parse_args()
         point = copy.deepcopy(BACnetPointModel.find_by_uuid(uuid))
+        self.abort_if_bacnet_is_not_running()
         if point is None:
             abort(404, message=f"Does not exist {uuid}")
         try:
