@@ -15,6 +15,7 @@ class BACnetPointPlural(BACnetPointBase):
 
     @marshal_with(point_fields)
     def post(self):
+        self.abort_if_bacnet_is_not_running()
         _uuid = str(uuid.uuid4())
         data = BACnetPointPlural.parser.parse_args()
         return self.add_point(data, _uuid)

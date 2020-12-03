@@ -46,3 +46,7 @@ class BACnetPointBase(Resource):
             return point
         except Exception as e:
             abort(500, message=str(e))
+
+    def abort_if_bacnet_is_not_running(self):
+        if not BACServer.get_instance().status():
+            abort(400, message='Bacnet server is not running')
