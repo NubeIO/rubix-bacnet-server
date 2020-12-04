@@ -61,7 +61,7 @@ class MqttClient:
     def publish_mqtt_value(object_identifier, present_value):
         topic = f"bacnet/server/points/ao/{object_identifier}"
         retain = mqtt__retain
-        if not MqttClient.__client.is_connected():
+        if not MqttClient.get_instance().status():
             logger.error("MQTT is not connected...")
             logging.error(f"Failed MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
             return
