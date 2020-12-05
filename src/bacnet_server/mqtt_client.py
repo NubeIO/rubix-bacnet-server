@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt_client
 
 from src.ini_config import *
 
-MQTT_CLIENT_NAME = 'bacnet-flask-mqtt'
+MQTT_CLIENT_NAME = 'bacnet-server-mqtt'
 MQTT_TOPIC = 'rubix/points'
 
 logger = logging.getLogger(__name__)
