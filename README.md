@@ -22,8 +22,8 @@ PYTHONPATH=. python server/bac_server.py
 ```
 
 ```
-git clone --depth 1 https://github.com/NubeDev/bacnet-flask
-cd bacnet-flask/
+git clone --depth 1 https://github.com/NubeDev/bacnet-server
+cd bacnet-server/
 # if required install python3-venv
 sudo apt-get install python3-venv -y
 python3 -m venv venv
@@ -31,7 +31,7 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 # copy <project_dir>/settings/config.example.ini to <project_dir>/settings/config.ini; for local run
-# copy <project_dir>/settings/config.example.ini to /data/bacnet-flask/config.ini; for systemd/guicorn run
+# copy <project_dir>/settings/config.example.ini to /data/bacnet-server/config.ini; for systemd/guicorn run
 python run.py
 ```
 
