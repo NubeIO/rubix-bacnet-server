@@ -20,9 +20,9 @@ class BACnetPointModel(db.Model):
     units = db.Column(db.Enum(Units), nullable=False)
     description = db.Column(db.String(120), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
-    fault = db.Column(db.Boolean(), nullable=False)
-    data_round = db.Column(db.Integer(), nullable=False)
-    data_offset = db.Column(db.Float(), nullable=False)
+    fault = db.Column(db.Boolean(), nullable=True)
+    data_round = db.Column(db.Integer(), nullable=True)
+    data_offset = db.Column(db.Float(), nullable=True)
     point_store = db.relationship('BACnetPointStoreModel',
                                   backref='point',
                                   lazy=False,
