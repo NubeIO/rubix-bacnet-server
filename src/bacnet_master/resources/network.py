@@ -1,8 +1,7 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
-
-from src.source_drivers.bacnet.models.network import BacnetNetworkModel
-from src.source_drivers.bacnet.resources.fields import network_fields
-from src.source_drivers.bacnet.services.network import Network as NetworkService
+from src.bacnet_master.services.network import Network as NetworkService
+from src.bacnet_master.models.network import BacnetNetworkModel
+from src.bacnet_master.resources.fields import network_fields
 
 
 class Network(Resource):

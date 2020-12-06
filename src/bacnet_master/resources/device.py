@@ -1,8 +1,7 @@
 from flask_restful import Resource, reqparse, abort, marshal_with
-
-from src.source_drivers.bacnet.models.device import BacnetDeviceModel
-from src.source_drivers.bacnet.resources.fields import device_fields
-from src.source_drivers.bacnet.services.device import Device as DeviceService
+from src.bacnet_master.models.device import BacnetDeviceModel
+from src.bacnet_master.resources.fields import device_fields
+from src.bacnet_master.services.device import Device as DeviceService
 
 
 class Device(Resource):

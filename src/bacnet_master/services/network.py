@@ -1,8 +1,6 @@
 import logging
-
 import BAC0
-
-from src.source_drivers.bacnet.models.network import BacnetNetworkModel
+from src.bacnet_master.models.network import BacnetNetworkModel
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +39,7 @@ class Network:
             self.networks[net_url][network_device_id] = {}
 
         logger.info('=====================================================')
-        logger.info('...........Creating BACnet network with..............')
+        logger.info('...........Creating BACnet MASTER network with..............')
         logger.info(f'net_url: {net_url}')
         logger.info(f'network_device_id: {network_device_id}')
         logger.info(f'network_device_name: {network_device_name}')

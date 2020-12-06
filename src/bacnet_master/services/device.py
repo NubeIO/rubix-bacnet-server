@@ -1,4 +1,4 @@
-from src.source_drivers.bacnet.services.network import Network
+from src.bacnet_master.services.network import Network
 
 
 class Device:
