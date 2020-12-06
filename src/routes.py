@@ -27,7 +27,7 @@ api.add_resource(Device, f'/{bacnet_api_prefix}/dev/<string:uuid>')
 api.add_resource(Network, f'/{bacnet_api_prefix}/network/<string:uuid>')
 api.add_resource(DeviceList, f'/{bacnet_api_prefix}/devices')
 api.add_resource(DevicePoints, f'/{bacnet_api_prefix}/points/objects/<string:dev_uuid>')
-# get a point /dev_uuid/analogInput/1
+# get a point /dev_uuid/analogInput/1/85
 api.add_resource(DevicePoint, f'/{bacnet_api_prefix}/point/read/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:prop>')
 api.add_resource(NetworkList, f'/{bacnet_api_prefix}/networks')
 api.add_resource(NetworksIds, f'/{bacnet_api_prefix}/networks/ids')
