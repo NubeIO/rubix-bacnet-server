@@ -124,3 +124,22 @@ class DevicePoint(Resource):
             abort(500, message=str(e))
 
         return response
+
+
+class PointWritePresentValue(Resource):
+    def get(self, dev_uuid, obj, obj_instance, value):
+        response = {}
+        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
+        if not device:
+            abort(404, message='Device Not found')
+        response['network_uuid'] = device.network.network_uuid
+        response['bac_device_uuid'] = device.bac_device_uuid
+        response['bac_device_mac'] = device.bac_device_mac
+        response['pnt_type'] = obj
+        response['pnt_id'] = obj_instance
+        try:
+            response['point'] = DeviceService.get_instance().write_point_present_value(device, obj, obj_instance, value)
+        except Exception as e:
+            abort(500, message=str(e))
+
+        return response

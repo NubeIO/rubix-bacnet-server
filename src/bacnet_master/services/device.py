@@ -38,3 +38,13 @@ class Device:
             read = f"{dev_url} {obj} {obj_instance} {prop}"
             return network.read(read)
         raise Exception("Network not found")
+
+    # example point/76e9b1e6-4f3e-4391-9aba-93e1881ecfe4/analogInput/1/presentValue
+    def write_point_present_value(self, device, obj, obj_instance, value):
+        dev_url = self.get_dev_url(device)
+        network = self.get_network(device)
+        if network:
+            write = '%s %s %s presentValue %s' % (dev_url, obj, obj_instance, value)
+            return network.write(write)
+        raise Exception("Network not found")
+
