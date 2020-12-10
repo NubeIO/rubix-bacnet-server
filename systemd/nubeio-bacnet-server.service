@@ -3,6 +3,7 @@ Description=Flask Application for Nube BACNET SERVER
 After=network.target
 
 [Service]
+ExecStartPre=/bin/sleep 60
 Type=simple
 User=<user>
 WorkingDirectory=<working_dir>
