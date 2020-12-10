@@ -31,7 +31,7 @@ help() {
 start() {
     if [[ ${USER} != "" && ${WORKING_DIR} != "" && ${LIB_DIR} != "" ]]
     then
-        echo -e "${GREEN}Creating Linux Service${DEFAULT}"
+        echo -e "${GREEN}Creating Linux Service...${DEFAULT}"
         sudo cp systemd/${SERVICE} ${SERVICE_DIR}/${SERVICE}
         sed -i -e 's/<user>/'"${USER}"'/' ${SERVICE_DIR}/${SERVICE}
         sed -i -e 's,<working_dir>,'"${WORKING_DIR}"',' ${SERVICE_DIR}/${SERVICE}
@@ -40,61 +40,63 @@ start() {
         # Create data_dir and config.ini if not exist
         mkdir -p ${DATA_DIR}
         if [ ! -s ${DATA_DIR}/${CONFIG} ] ; then
-            echo "config.ini file doesn't exist (or it is empty)"
+            echo -e "${RED}config.ini file doesn't exist (or it is empty)${DEFAULT}"
             cp ${WORKING_DIR}/${CONFIG_EXAMPLE} ${DATA_DIR}/${CONFIG}
             sudo chmod -R +755 ${DATA_DIR}/${CONFIG}
         fi
         sudo chown -R ${USER}:${USER} ${DATA_DIR}
 
-        echo -e "${GREEN}Soft Un-linking Linux Service${DEFAULT}"
+        echo -e "${GREEN}Soft Un-linking Linux Service...${DEFAULT}"
         sudo unlink ${SERVICE_DIR_SOFT_LINK}/${SERVICE}
 
-        echo -e "${GREEN}Soft Linking Linux Service${DEFAULT}"
+        echo -e "${GREEN}Soft Linking Linux Service...${DEFAULT}"
         sudo ln -s ${SERVICE_DIR}/${SERVICE} ${SERVICE_DIR_SOFT_LINK}/${SERVICE}
 
-        echo -e "${GREEN}Enabling Linux Service${DEFAULT}"
+        echo -e "${GREEN}Enabling Linux Service...${DEFAULT}"
         sudo systemctl daemon-reload
         sudo systemctl enable ${SERVICE}
 
-        echo -e "${GREEN}Starting Linux Service${DEFAULT}"
+        echo -e "${GREEN}Starting Linux Service...${DEFAULT}"
         sudo systemctl restart ${SERVICE}
 
-        echo -e "${GREEN}Service is created and started, please reboot to confirm...${DEFAULT}"
+        echo -e "${GREEN}Service is created and started.${DEFAULT}"
     else
         echo -e ${RED}"-u=<user> -dir=<working_dir> -lib_dir=<lib_dir> these parameters should be on you input (-h, --help for help)${DEFAULT}"
     fi
 }
 
 disable() {
-    echo -e "${GREEN}Stopping Linux Service${DEFAULT}"
+    echo -e "${GREEN}Stopping Linux Service...${DEFAULT}"
     sudo systemctl stop ${SERVICE}
-    echo -e "${GREEN}Disabling Linux Service${DEFAULT}"
+    echo -e "${GREEN}Disabling Linux Service...${DEFAULT}"
     sudo systemctl disable ${SERVICE}
-    echo -e "${GREEN}Service is disabled...${DEFAULT}"
+    echo -e "${GREEN}Service is disabled.${DEFAULT}"
 }
 
 enable() {
-    echo -e "${GREEN}Enabling Linux Service${DEFAULT}"
+    echo -e "${GREEN}Enabling Linux Service...${DEFAULT}"
     sudo systemctl enable ${SERVICE}
-    echo -e "${GREEN}Starting Linux Service${DEFAULT}"
+    echo -e "${GREEN}Starting Linux Service...${DEFAULT}"
     sudo systemctl start ${SERVICE}
-    echo -e "${GREEN}Service is enabled...${DEFAULT}"
+    echo -e "${GREEN}Service is enabled.${DEFAULT}"
 }
 
 delete() {
-    echo -e "${GREEN}Stopping Linux Service${DEFAULT}"
+    echo -e "${GREEN}Stopping Linux Service...${DEFAULT}"
     sudo systemctl stop ${SERVICE}
-    echo -e "${GREEN}Un-linking Linux Service${DEFAULT}"
+    echo -e "${GREEN}Un-linking Linux Service...${DEFAULT}"
     sudo unlink ${SERVICE_DIR_SOFT_LINK}/${SERVICE}
-    echo -e "${GREEN}Removing Linux Service${DEFAULT}"
+    echo -e "${GREEN}Removing Linux Service...${DEFAULT}"
     sudo rm -r ${SERVICE_DIR}/${SERVICE}
-    echo -e "${GREEN}Service is deleted...${DEFAULT}"
+    echo -e "${GREEN}Hitting daemon-reload...${DEFAULT}"
+    sudo systemctl daemon-reload
+    echo -e "${GREEN}Service is deleted.${DEFAULT}"
 }
 
 restart() {
-    echo -e "${GREEN}Restarting Linux Service${DEFAULT}"
+    echo -e "${GREEN}Restarting Linux Service...${DEFAULT}"
     sudo systemctl restart ${SERVICE}
-    echo -e "${GREEN}Service is restarted...${DEFAULT}"
+    echo -e "${GREEN}Service is restarted.${DEFAULT}"
 }
 
 parseCommand() {
