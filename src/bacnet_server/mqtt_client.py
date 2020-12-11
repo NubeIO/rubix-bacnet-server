@@ -43,10 +43,9 @@ class MqttClient:
                     MqttClient.__client.connect(mqtt__host, mqtt__port, mqtt__keepalive)
                     break
                 except ConnectionRefusedError:
-                    if mqtt__debug:
-                        logger.error(
-                            f'MQTT connection failure: ConnectionRefusedError. Attempting reconnect in '
-                            f'{mqtt__attempt_reconnect_secs} seconds')
+                    logger.error(
+                        f'MQTT connection failure: ConnectionRefusedError. Attempting reconnect in '
+                        f'{mqtt__attempt_reconnect_secs} seconds')
                     time.sleep(mqtt__attempt_reconnect_secs)
         else:
             try:
@@ -65,8 +64,7 @@ class MqttClient:
             logger.error("MQTT is not connected...")
             logging.error(f"Failed MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
             return
-        if mqtt__debug:
-            logging.info(f"MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
+        logging.debug(f"MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
         MqttClient.__client.publish(topic, present_value, qos=1, retain=retain)
 
     @staticmethod

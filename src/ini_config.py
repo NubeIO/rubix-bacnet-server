@@ -21,6 +21,7 @@ device__local_obj_name = config.get('device', 'local_obj_name', fallback='Nube-I
 device__model_name = config.get('device', 'model_name', fallback='rubix-bac-stack-RC4')
 device__vendor_id = config.get('device', 'vendor_id', fallback='1173')
 device__vendor_name = config.get('device', 'vendor_name', fallback='Nube iO Operations Pty Ltd')
+device__attempt_reconnect_secs = config.getint('device', 'attempt_reconnect_secs', fallback=5)
 
 mqtt__host = config.get('mqtt', 'host', fallback='0.0.0.0')
 mqtt__port = config.getint('mqtt', 'port', fallback=1883)
@@ -30,4 +31,3 @@ mqtt__retain = config.getboolean('mqtt', 'retain', fallback=False)
 mqtt__publish_value = config.getboolean('mqtt', 'publish_value', fallback=True)
 mqtt__attempt_reconnect_on_unavailable = config.getboolean('mqtt', 'attempt_reconnect_on_unavailable', fallback=True)
 mqtt__attempt_reconnect_secs = config.getint('mqtt', 'attempt_reconnect_secs', fallback=5)
-mqtt__debug = config.getboolean('mqtt', 'debug', fallback=False)

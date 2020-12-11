@@ -12,7 +12,8 @@ from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_server import BACnetServerModel
 from src.bacnet_server.mqtt_client import MqttClient
-from src.ini_config import config, settings__enable_mqtt, mqtt__publish_value, mqtt__attempt_reconnect_secs
+from src.ini_config import config, settings__enable_mqtt, mqtt__publish_value, mqtt__attempt_reconnect_secs, \
+    device__attempt_reconnect_secs
 
 logger = logging.getLogger(__name__)
 
@@ -39,16 +40,22 @@ class BACServer:
         return self.__bacnet is not None and self.__sync_status
 
     def start_bac(self):
+        bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist()
+        self.keep_connecting(bacnet_server)
+        if settings__enable_mqtt and mqtt__publish_value:
+            while not MqttClient.get_instance().status():
+                logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
+                time.sleep(mqtt__attempt_reconnect_secs)
+        self.sync_stack()
+
+    def keep_connecting(self, bacnet_server):
         try:
-            bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist()
             self.connect(bacnet_server)
-            if settings__enable_mqtt and mqtt__publish_value:
-                while not MqttClient.get_instance().status():
-                    logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
-                    time.sleep(mqtt__attempt_reconnect_secs)
-            self.sync_stack()
         except Exception as e:
-            logging.error(f'Error: {str(e)}')
+            logging.error(e)
+            logger.warning("BACnet is not connected, waiting for BACnet server connection...")
+            time.sleep(device__attempt_reconnect_secs)
+            self.keep_connecting(bacnet_server)
 
     def restart_bac(self, old_bacnet_server, new_bacnet_server, restart_on_failure=True):
         """
@@ -60,12 +67,13 @@ class BACServer:
         if self.__bacnet:
             self.__bacnet.disconnect()  # on macOS it's not working
             time.sleep(1)  # as per their testing we need to sleep to make sure all sockets got closed
+
         self.__reset_variable()
         try:
             self.connect(new_bacnet_server)
             self.sync_stack()
         except Exception as e:
-            logging.error(f'Error: {str(e)}')
+            logging.error(e)
             if restart_on_failure:
                 try:
                     BACServer.get_instance().restart_bac(old_bacnet_server, old_bacnet_server, False)
