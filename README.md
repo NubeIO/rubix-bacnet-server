@@ -9,7 +9,8 @@
 
 #### Commands:
 ```bash
-sudo bash script.bash start -u=<pi|debian> -dir=<bacnet_flask_dir> -lib_dir=<common-py-libs-dir>
+sudo bash script.bash start -service_name=<service_name> -u=<pi|debian> -dir=<working_dir> -lib_dir=<common-py-libs-dir> -data_dir=<data_dir> -p=<port>
+sudo bash script.bash start -service_name=nubeio-bacnet-server.service -u=pi -dir=/home/pi/rubix-bacnet-server -lib_dir=/home/pi/common-py-libs -data_dir=/data/bacnet-server -p=1717
 sudo bash script.bash -h
 ```
 
