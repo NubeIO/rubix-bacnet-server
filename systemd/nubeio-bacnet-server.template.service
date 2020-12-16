@@ -7,7 +7,7 @@ ExecStartPre=/bin/sleep 60
 Type=simple
 User=<user>
 WorkingDirectory=<working_dir>
-ExecStart=<lib_dir>/venv/bin/gunicorn -b 0.0.0.0:1717 --worker-class gevent -w 1 run:app -e data_dir=/data/bacnet-server
+ExecStart=<lib_dir>/venv/bin/gunicorn -b 0.0.0.0:<port> --worker-class gevent -w 1 run:app -e data_dir=<data_dir>
 Restart=always
 RestartSec=10
 StandardOutput=syslog
