@@ -16,3 +16,9 @@ __pycache__/
 *.pyc
 config.ini
 *.log
+
+build/
+out/*
+!out/.gitkeep
+!docker/.env
+*.iml

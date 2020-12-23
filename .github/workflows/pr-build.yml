@@ -1,0 +1,132 @@
+name: pull-request-build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - "master"
+
+jobs:
+
+  context:
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'release/')
+    outputs:
+      pName: ${{ steps.grepProject.outputs.pName }}
+      projectVersion: ${{ steps.grepProject.outputs.tVer }}
+      commitId: ${{ steps.gitReleaseCommit.outputs.id }}
+      shouldRun: ${{ steps.validateVersion.outputs.isSameVersion == 'true' && startsWith(github.head_ref, 'release/') }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.NUBEIO_CI_GITHUBPROJECT_TOKEN }}
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v2
+        with:
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.NUBEIO_CI_GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.NUBEIO_CI_GPG_PASSPHARSE }}
+
+      - name: Grep project
+        id: grepProject
+        shell: bash
+        run: |
+          echo ::set-output name=cVer::$(head -n 5 pyproject.toml | grep version | cut -d ":" -f2 | grep -oP "(?<=\")([^\"]+)(?=\")")
+          echo ::set-output name=pName::$(head -n 5 pyproject.toml | grep name | cut -d ":" -f2 | grep -oP "(?<=\")([^\"]+)(?=\")")
+          echo ::set-output name=tVer::$(echo "${{ github.head_ref }}" | sed -e "s#release/##")
+
+      - name: Validate version
+        id: validateVersion
+        run: |
+          echo "Should Validate Version with semantic..."
+          echo "Project name: ${{ steps.grepProject.outputs.pName }}"
+          echo "Current version: ${{ steps.grepProject.outputs.cVer }}"
+          echo "Target version: ${{ steps.grepProject.outputs.tVer }}"
+          [[ ${{ steps.grepProject.outputs.cVer }} == ${{ steps.grepProject.outputs.tVer }} ]] && same=true || same=false
+          echo "Same version: $same"
+          echo ::set-output name=isSameVersion::$same
+
+      - name: Replace version
+        if: ${{ steps.validateVersion.outputs.isSameVersion == 'false' }}
+        run: |
+          sed -i "0,/${{ steps.grepProject.outputs.cVer }}/s//${{ steps.grepProject.outputs.tVer }}/" pyproject.toml
+
+      - name: GIT commit and push
+        if: ${{ steps.validateVersion.outputs.isSameVersion == 'false' }}
+        run: |
+          git commit -S -am "<ci-auto-commit> Update version"
+          git show --shortstat --show-signature
+          git push
+
+      - name: GIT get last commit
+        id: gitReleaseCommit
+        run: |
+          if [ "${{ steps.validateVersion.outputs.isSameVersion }}" == "true" ]; then
+             lastId=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})
+          else
+             lastId=$(git rev-parse --short HEAD)
+          fi
+          echo "$lastId"
+          echo ::set-output name=id::$lastId
+
+  build:
+    runs-on: ubuntu-latest
+    needs: context
+    if: needs.context.outputs.shouldRun == 'true' && github.event.action != 'closed'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+
+      - name: Install dependencies
+        run: $HOME/.poetry/bin/poetry install
+
+      - name: Packing app
+        run: $HOME/.poetry/bin/poetry run pyinstaller run.py -n ${{ needs.context.outputs.pName }} --clean --onefile
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: "${{ needs.context.outputs.pName }}-${{ needs.context.outputs.projectVersion }}-${{ needs.context.outputs.commitId }}"
+          path: dist/
+          if-no-files-found: 'error'
+          retention-days: 1
+
+  tag:
+    runs-on: ubuntu-latest
+    needs: context
+    if: needs.context.outputs.shouldRun == 'true' && github.event.action == 'closed' && github.event.pull_request.merged
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.NUBEIO_CI_GITHUBPROJECT_TOKEN }}
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v2
+        with:
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_tag_gpgsign: true
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.NUBEIO_CI_GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.NUBEIO_CI_GPG_PASSPHARSE }}
+
+      - name: GIT tag
+        run: |
+          git tag -s v${{ needs.context.outputs.projectVersion }} ${{ github.sha }} -m "Release v${{ needs.context.outputs.projectVersion }}"
+          git show v${{ needs.context.outputs.projectVersion }} --shortstat --show-signature
+          git push origin v${{ needs.context.outputs.projectVersion }}
