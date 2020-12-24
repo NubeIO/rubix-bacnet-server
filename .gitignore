@@ -18,7 +18,9 @@ config.ini
 *.log
 
 build/
+dist/
 out/*
 !out/.gitkeep
 !docker/.env
+*.spec
 *.iml
