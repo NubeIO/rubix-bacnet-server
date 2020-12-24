@@ -31,7 +31,7 @@ RUN groupadd -g $NUBEIO_GID nubeio \
     && chown -R rubix:nubeio $RUBIX_BACNET_DATA
 
 WORKDIR /usr/src/app/
-COPY --chown=rubix:nubeio --from=build /usr/src/app/dist/rubix-bacnet ./
+COPY --chown=rubix:nubeio --from=build /usr/src/app/dist/rubix-bacnet-server ./
 
 USER rubix:nubeio
 
