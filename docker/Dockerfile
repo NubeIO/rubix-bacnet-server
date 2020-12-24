@@ -10,7 +10,7 @@ ADD poetry.lock pyproject.toml ./
 RUN $HOME/.poetry/bin/poetry install
 
 ADD src src
-ADD run.py VERSION ./
+ADD run.py ./
 RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-bacnet-server --clean --onefile
 
 FROM python:$BASE_IMAGE_VERSION-slim
