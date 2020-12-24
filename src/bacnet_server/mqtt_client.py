@@ -1,74 +1,63 @@
-import logging
-import time
+from logging import Logger
 
 import paho.mqtt.client as mqtt_client
+import time
 
-from src.ini_config import *
-
-MQTT_CLIENT_NAME = 'bacnet-server-mqtt'
-MQTT_TOPIC = 'rubix/points'
-
-logger = logging.getLogger(__name__)
+from src import MqttSetting
+from src.utils import Singleton
 
 
-class MqttClient:
-    __instance = None
-    __client = None
+class MqttClient(metaclass=Singleton):
 
     def __init__(self):
-        if MqttClient.__instance:
-            raise Exception("MqttConnection class is a singleton class!")
-        else:
-            MqttClient.__instance = self
+        self.logger = None
+        self.__config = None
+        self.__client = None
 
-    @staticmethod
-    def get_instance():
-        if MqttClient.__instance is None:
-            MqttClient()
-        return MqttClient.__instance
+    @property
+    def config(self) -> MqttSetting:
+        return self.__config
 
     def status(self) -> bool:
-        if not MqttClient.__client:
-            return False
-        else:
-            return MqttClient.__client.is_connected()
+        return self.__client.is_connected() if self.config and self.config.enabled and self.__client else False
 
-    def start(self):
-        MqttClient.__client = mqtt_client.Client(MQTT_CLIENT_NAME)
-        MqttClient.__client.on_connect = MqttClient.__on_connect
-        MqttClient.__client.on_message = MqttClient.__on_message
-        if mqtt__attempt_reconnect_on_unavailable:
+    def start(self, config: MqttSetting, logger: Logger):
+        self.logger = logger or Logger(__name__)
+        self.__config = config
+        self.__client = mqtt_client.Client(self.config.name)
+        self.__client.on_connect = self.__on_connect
+        self.__client.on_message = self.__on_message
+        if self.config.attempt_reconnect_on_unavailable:
             while True:
                 try:
-                    MqttClient.__client.connect(mqtt__host, mqtt__port, mqtt__keepalive)
+                    self.__client.connect(self.config.host, self.config.port, self.config.keepalive)
                     break
                 except ConnectionRefusedError:
-                    logger.error(
+                    self.logger.error(
                         f'MQTT connection failure: ConnectionRefusedError. Attempting reconnect in '
-                        f'{mqtt__attempt_reconnect_secs} seconds')
-                    time.sleep(mqtt__attempt_reconnect_secs)
+                        f'{self.config.attempt_reconnect_secs} seconds')
+                    time.sleep(self.config.attempt_reconnect_secs)
         else:
             try:
-                MqttClient.__client.connect(mqtt__host, mqtt__port, mqtt__keepalive)
+                self.__client.connect(self.config.host, self.config.port, self.config.keepalive)
             except Exception as e:
-                MqttClient.__client = None
-                logger.error(str(e))
+                self.__client = None
+                self.logger.error(str(e))
                 return
-        MqttClient.__client.loop_forever()
+        self.__client.loop_forever()
 
-    @staticmethod
-    def publish_mqtt_value(object_identifier, present_value):
+    def publish_mqtt_value(self, object_identifier, present_value):
         topic = f"bacnet/server/points/ao/{object_identifier}"
-        retain = mqtt__retain
-        if not MqttClient.get_instance().status():
-            logger.error("MQTT is not connected...")
-            logging.error(f"Failed MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
+        retain = self.config.retain
+        if not self.status():
+            self.logger.error("MQTT is not connected...")
+            self.logger.error(
+                f"Failed MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
             return
-        logging.debug(f"MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
-        MqttClient.__client.publish(topic, present_value, qos=1, retain=retain)
+        self.logger.debug(f"MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
+        self.__client.publish(topic, present_value, qos=1, retain=retain)
 
-    @staticmethod
-    def __on_connect(client, userdata, flags, reason_code, properties=None):
+    def __on_connect(self, client, userdata, flags, reason_code, properties=None):
         if reason_code > 0:
             reasons = {
                 1: 'Connection refused - incorrect protocol version',
@@ -78,10 +67,9 @@ class MqttClient:
                 5: 'Connection refused - not authorised'
             }
             reason = reasons.get(reason_code, 'unknown')
-            MqttClient.__client = None
+            self.__client = None
             raise Exception(f'MQTT Connection Failure: {reason}')
-        MqttClient.__client.subscribe(f'{MQTT_TOPIC}/#')
+        self.__client.subscribe(f'{self.config.topic}/#')
 
-    @staticmethod
-    def __on_message(client, userdata, message):
+    def __on_message(self, client, userdata, message):
         pass

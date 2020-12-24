@@ -1,21 +1,37 @@
-import logging
+from logging import Logger
 from threading import Thread
 
-from src.bacnet_server.bac_server import BACServer
-from src.bacnet_server.mqtt_client import MqttClient
-from src.ini_config import *
+from flask import current_app
+from werkzeug.local import LocalProxy
 
-logger = logging.getLogger(__name__)
+
+class FlaskThread(Thread):
+    """
+    To make every new thread behinds Flask app context.
+    Maybe using another lightweight solution but richer: APScheduler <https://github.com/agronholm/apscheduler>
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.app = current_app._get_current_object()
+
+    def run(self):
+        with self.app.app_context():
+            super().run()
 
 
 class Background:
     @staticmethod
     def run():
+        from src import AppSetting
+        from src.bacnet_server import MqttClient, BACServer
+        setting: AppSetting = current_app.config[AppSetting.KEY]
+        logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
         logger.info("Running Background Task...")
-        if settings__enable_mqtt:
-            mqtt_thread = Thread(target=MqttClient.get_instance().start, daemon=True)
-            mqtt_thread.start()
+        if setting.mqtt.enabled:
+            FlaskThread(target=MqttClient().start, daemon=True,
+                        kwargs={'logger': logger, 'config': setting.mqtt}).start()
 
-        if settings__enable_bacnet_server:
-            bacnet_thread = Thread(target=BACServer.get_instance().start_bac, daemon=True)
-            bacnet_thread.start()
+        if setting.bacnet.enabled:
+            FlaskThread(target=BACServer().start_bac, daemon=True,
+                        kwargs={'logger': logger, 'config': setting.bacnet}).start()

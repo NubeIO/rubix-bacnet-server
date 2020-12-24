@@ -1,10 +1,11 @@
 import copy
-import logging
-import time
+from logging import Logger
 
 import BAC0
+import time
 from bacpypes.basetypes import EngineeringUnits
 
+from src import BACnetSetting
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
 from src.bacnet_server.helpers.helper_point_store import update_point_store
@@ -12,49 +13,44 @@ from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_server import BACnetServerModel
 from src.bacnet_server.mqtt_client import MqttClient
-from src.ini_config import config, settings__enable_mqtt, mqtt__publish_value, mqtt__attempt_reconnect_secs, \
-    device__attempt_reconnect_secs
-
-logger = logging.getLogger(__name__)
+from src.utils import Singleton
 
 
-class BACServer:
-    __instance = None
-    __sync_status = False
+class BACServer(metaclass=Singleton):
 
     def __init__(self):
-        if BACServer.__instance:
-            raise Exception("BACServer class is a singleton class!")
-        else:
-            self.__bacnet = None
-            self.__registry = {}
-            BACServer.__instance = self
+        self.logger = None
+        self.__config = None
+        self.__bacnet = None
+        self.__registry = {}
+        self.__sync_status = False
 
-    @staticmethod
-    def get_instance():
-        if BACServer.__instance is None:
-            BACServer()
-        return BACServer.__instance
+    @property
+    def config(self) -> BACnetSetting:
+        return self.__config
 
     def status(self):
-        return self.__bacnet is not None and self.__sync_status
+        return self.config and self.config.enabled and self.__bacnet and self.__sync_status
 
-    def start_bac(self):
-        bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist()
+    def start_bac(self, config: BACnetSetting, logger: Logger):
+        self.logger = logger or Logger(__name__)
+        self.__config = config
+        bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist(self.config)
         self.keep_connecting(bacnet_server)
-        if settings__enable_mqtt and mqtt__publish_value:
-            while not MqttClient.get_instance().status():
+        mqttc = MqttClient()
+        if mqttc.config.enabled and mqttc.config.publish_value:
+            while not mqttc.status():
                 logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
-                time.sleep(mqtt__attempt_reconnect_secs)
+                time.sleep(mqttc.config.attempt_reconnect_secs)
         self.sync_stack()
 
     def keep_connecting(self, bacnet_server):
         try:
             self.connect(bacnet_server)
         except Exception as e:
-            logging.error(e)
-            logger.warning("BACnet is not connected, waiting for BACnet server connection...")
-            time.sleep(device__attempt_reconnect_secs)
+            self.logger.error(e)
+            self.logger.warning("BACnet is not connected, waiting for BACnet server connection...")
+            time.sleep(self.config.attempt_reconnect_secs)
             self.keep_connecting(bacnet_server)
 
     def restart_bac(self, old_bacnet_server, new_bacnet_server, restart_on_failure=True):
@@ -73,19 +69,19 @@ class BACServer:
             self.connect(new_bacnet_server)
             self.sync_stack()
         except Exception as e:
-            logging.error(e)
+            self.logger.error(e)
             if restart_on_failure:
                 try:
-                    BACServer.get_instance().restart_bac(old_bacnet_server, old_bacnet_server, False)
+                    self.restart_bac(old_bacnet_server, old_bacnet_server, False)
                 except Exception as err:
-                    logging.error(f'Error on re-starting: {str(err)}')
+                    self.logger.error(f'Error on re-starting: {str(err)}')
                     raise Exception(f'Current configuration and even on revert server starting is got exception')
             raise e
 
     def sync_stack(self):
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
             self.add_point(point)
-        BACServer.__sync_status = True
+        self.__sync_status = True
 
     def connect(self, bacnet_server):
         self.__bacnet = BAC0.lite(ip=bacnet_server.ip,
@@ -119,8 +115,9 @@ class BACServer:
         self.__bacnet.this_application.add_object(ao)
         update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
-        if config.getboolean('mqtt', 'publish_value', fallback=False):
-            MqttClient.publish_mqtt_value(object_identifier, present_value)
+        mqttc = MqttClient()
+        if mqttc.config.publish_value:
+            mqttc.publish_mqtt_value(object_identifier, present_value)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)

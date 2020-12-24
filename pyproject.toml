@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "rubix-bacnet-server"
+version = "0.1.0"
+description = "Rubix BACnet"
+authors = ["NubeIO"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+BAC0 = "^20.11.21"
+bacpypes = "^0.18.3"
+gunicorn = "^20.0.4"
+Flask = "^1.1.2"
+Flask-Cors = "^3.0.9"
+Flask-RESTful = "^0.3.8"
+Flask-SQLAlchemy = "^2.4.4"
+paho-mqtt = "^1.5.1"
+gevent = [
+    { version = "20.12.0", markers = "platform_machine == 'x86_64'" },
+    { git = "https://github.com/gevent/gevent.git", tag = "20.12.0", markers = "platform_machine != 'x86_64'" }
+]
+
+[tool.poetry.dev-dependencies]
+pyinstaller = "^4.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
