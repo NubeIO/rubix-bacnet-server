@@ -3,8 +3,9 @@ name: docker-build-release
 on:
   push:
     branches:
-      - master
+      - dev
       - main
+      - master
     tags:
       - 'v*'
 
@@ -100,7 +101,7 @@ jobs:
         if: ${{ needs.context.outputs.isRelease == 'true' }}
         with:
           context: .
-          file: docker/build.Dockerfile
+          file: docker/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           build-args: |
             BASE_IMAGE_VERSION=3.9
@@ -140,7 +141,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/runtime.Dockerfile
+          file: docker/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           build-args: |
             BASE_IMAGE_VERSION=3.9
