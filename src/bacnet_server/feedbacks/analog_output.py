@@ -1,10 +1,10 @@
 from bacpypes.local.object import AnalogOutputCmdObject
 from bacpypes.primitivedata import Real
 
-from src.bacnet_server import MqttClient
 from src.bacnet_server.helpers.helper_point_array import create_object_identifier, serialize_priority_array
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
+from src.mqtt import MqttClient
 
 
 class AnalogOutputFeedbackObject(AnalogOutputCmdObject):

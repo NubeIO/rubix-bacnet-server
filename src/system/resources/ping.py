@@ -4,7 +4,8 @@ import time
 from flask import current_app
 from flask_restful import Resource
 
-from src.bacnet_server import BACServer, MqttClient
+from src.bacnet_server import BACServer
+from src.mqtt import MqttClient
 
 start_time = time.time()
 up_time_date = str(datetime.now())

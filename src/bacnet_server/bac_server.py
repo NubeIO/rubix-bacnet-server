@@ -12,7 +12,7 @@ from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_server import BACnetServerModel
-from src.bacnet_server.mqtt_client import MqttClient
+from src.mqtt import MqttClient
 from src.utils import Singleton
 
 
