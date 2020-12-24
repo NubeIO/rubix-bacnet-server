@@ -1,39 +1,65 @@
-# bacnet-server
+# Rubix BACnet server
 
+## Running in development
 
-### Running on Production
+- Use [`poetry`](https://github.com/python-poetry/poetry) to manage dependencies
+- Simple script to install
 
-#### One time setup:
-- Clone [this](https://github.com/NubeIO/common-py-libs)
-- Create `venv` on inside that directory (follow instruction on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
+    ```bash
+    ./setup.sh
+    ```
 
-#### Commands:
+- Join `venv`
+
+    ```bash
+    poetry shell
+    ```
+
+- Build local binary
+
+    ```bash
+    poetry run pyinstaller run.py -n rubix-bacnet-server --clean --onefile
+    ```
+
+  The output is: `dist/rubix-bacnet-server`
+
+## Docker build
+
+### Build
+
 ```bash
-sudo bash script.bash start -service_name=<service_name> -u=<pi|debian> -dir=<working_dir> -lib_dir=<common-py-libs-dir> -data_dir=<data_dir> -p=<port>
-sudo bash script.bash start -service_name=nubeio-bacnet-server.service -u=pi -dir=/home/pi/rubix-bacnet-server -lib_dir=/home/pi/common-py-libs -data_dir=/data/bacnet-server -p=1717
-sudo bash script.bash -h
+./docker.sh
 ```
 
-##### Note: _change /data/bac-flask/config.ini  as you want and restart -- `sudo bash script.bash restart`_
+The output image is: `rubix-bacnet-server:dev`
 
+### Run
 
-## To run a file that imports other classes
-```
-PYTHONPATH=. python server/bac_server.py
+```bash
+docker volume create rubix-bacnet-server-data
+docker run --rm -it -p 1919:1919 -v rubix-bacnet-server-data:/data --name rubix-bacnet-server rubix-bacnet-server:dev
 ```
 
-```
-git clone --depth 1 https://github.com/NubeDev/bacnet-server
-cd bacnet-server/
-# if required install python3-venv
-sudo apt-get install python3-venv -y
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-# copy <project_dir>/settings/config.example.ini to <project_dir>/settings/config.ini; for local run
-# copy <project_dir>/settings/config.example.ini to /data/bacnet-server/config.ini; for systemd/guicorn run
-python run.py
+## Deploy on Production
+
+- Download release artifact
+- Review help and start
+
+```bash
+$ rubix-bacnet-server -h
+Usage: rubix-bacnet-server [OPTIONS]
+
+Options:
+  -p, --port INTEGER              Port  [default: 1717]
+  -d, --data-dir PATH             Application data dir
+  --prod                          Production mode
+  -s, --setting-file TEXT         Rubix BACnet: setting ini file
+  -l, --logging-conf TEXT         Rubix BACnet: logging config file
+  --workers INTEGER               Gunicorn: The number of worker processes for handling requests.
+  -c, --gunicorn-config TEXT      Gunicorn: config file(gunicorn.conf.py)
+  --log-level [FATAL|ERROR|WARN|INFO|DEBUG]
+                                  Logging level
+  -h, --help                      Show this message and exit.
 ```
 
 ## Setup systemd
@@ -50,55 +76,64 @@ sudo systemctl stop nubeio-bacnet-server.service
 sudo systemctl restart nubeio-bacnet-server.service
 ```
 
-
 ## CURL
 
 Get flask server details
+
 ```
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/ping
 ```
 
 Get bacnet server details
+
 ```
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/server
 ```
 
 Get bacnet server points
+
 ```
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/points
 ```
 
-### 
+###   
+
 HTTP PATCH new bacnet server `device_id`
+
 ```
 curl --data '{"device_id": "1233"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
 ```
 
 HTTP PATCH new bacnet server `ip`
+
 ```
 curl --data '{"ip": "192.168.0.123"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
 ```
 
-
-
 ## HTTP GET:
+
 Will return all the points
+
 ```
 /api/bacnet/points
 ```
 
 Will return all the a point when the UUID is passed in
+
 ```
 /api/bacnet/points/<uuid>
 ```
 
-
 ## HTTP POST:
+
 Add a new point
+
 ```
 /api/bacnet/points
 ```
+
 body:
+
 ```
 {
   "object_type": "analogOutput",
@@ -132,15 +167,16 @@ body:
 }
 ```
 
-
-
 ## HTTP PATCH:
+
 Update an existing point
+
 ```
 /api/bacnet/points/<uuid>
 ```
 
 body:
+
 ```
 {
   "object_type": "analogOutput",
@@ -156,14 +192,12 @@ body:
 }
 ```
 
-
-
 ## Edit the Server Settings
-
 
 ### HTTP GET
 
 /api/bacnet/server
+
 ```
 {
     "ip": "192.168.0.101",
@@ -178,9 +212,8 @@ body:
 
 ### HTTP PATCH
 
-/api/bacnet/server
-Any feild can be uppdated aswell
-ip, port, device_id, local_obj_name, model_name, vendor_id, vendor_name
+/api/bacnet/server Any feild can be uppdated aswell ip, port, device_id, local_obj_name, model_name, vendor_id,
+vendor_name
 
 ```
 {
@@ -188,10 +221,10 @@ ip, port, device_id, local_obj_name, model_name, vendor_id, vendor_name
 }
 ```
 
-
 ## Using a bacnet master to test
 
 ### Using bacstack to test for a BO
+
 ```
 read presentValue
 ./bacrp 123 4 1 85
@@ -203,8 +236,8 @@ Write a value to @16 of null
 ./bacwp 123 4 1 85 16 -1 0 0
 ```
 
-
 ### Using bacstack to test for a AO
+
 ```
 read presentValue
 ./bacrp 123 1 1 85
@@ -216,10 +249,10 @@ Write a value to @16 of null
 ./bacwp 123 1 1 85 16 -1 0 0
 ```
 
-
 ### Using bacstack to read device/point info
 
 point info
+
 ```
 pointName
 ./bacrp 123 1 1 77
@@ -232,6 +265,7 @@ pointEventState
 ```
 
 device info, if the deviceId is 123
+
 ```
 debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 77
 "nube-io"
