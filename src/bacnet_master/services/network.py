@@ -1,42 +1,32 @@
 import logging
+
 import BAC0
+
 from src.bacnet_master.models.network import BacnetNetworkModel
 
 logger = logging.getLogger(__name__)
 
 
 class Network:
-    __instance = None
-
-    @staticmethod
-    def get_instance():
-        if not Network.__instance:
-            Network()
-        return Network.__instance
 
     def __init__(self):
-        if Network.__instance:
-            raise Exception("Network class is a singleton!")
-        else:
-            Network.__instance = self
-            self.networks = {}
+        self.__networks = {}
 
     def start(self):
         logger.info("Network Start...")
-        network_service = Network.get_instance()
         for network in BacnetNetworkModel.query.all():
-            network_service.add_network(network)
+            self.add_network(network)
 
     def add_network(self, network):
         net_url = f"{network.network_ip}/{network.network_mask}:{network.network_port}"
         network_device_id = network.network_device_id
         network_device_name = network.network_device_name
 
-        if not self.networks.get(net_url):
-            self.networks[net_url] = {}
+        if not self.__networks.get(net_url):
+            self.__networks[net_url] = {}
 
-        if not self.networks.get(net_url).get(network_device_id):
-            self.networks[net_url][network_device_id] = {}
+        if not self.__networks.get(net_url).get(network_device_id):
+            self.__networks[net_url][network_device_id] = {}
 
         logger.info('=====================================================')
         logger.info('...........Creating BACnet MASTER network with..............')
@@ -48,7 +38,7 @@ class Network:
 
         try:
             network = BAC0.lite(ip=net_url, deviceId=network_device_id, localObjName=network_device_name)
-            self.networks[net_url][network_device_id][network_device_name] = network
+            self.__networks[net_url][network_device_id][network_device_name] = network
         except:
             logger.error("Initialization error!")
 
@@ -57,7 +47,7 @@ class Network:
         network_device_id = network.network_device_id
         network_device_name = network.network_device_name
 
-        network = self.networks.get(net_url, {}).get(network_device_id, {}).get(network_device_name)
+        network = self.__networks.get(net_url, {}).get(network_device_id, {}).get(network_device_name)
         if network:
             pass
             # TODO: uncomment, disconnect is not working fine
@@ -68,4 +58,4 @@ class Network:
         net_url = f'{network.network_ip}/{network.network_mask}:{network.network_port}'
         network_device_id = network.network_device_id
         network_device_name = network.network_device_name
-        return self.networks.get(net_url, {}).get(network_device_id, {}).get(network_device_name)
+        return self.__networks.get(net_url, {}).get(network_device_id, {}).get(network_device_name)
