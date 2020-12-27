@@ -18,10 +18,10 @@
 - Build local binary
 
     ```bash
-    poetry run pyinstaller run.py -n rubix-bacnet-server --clean --onefile
+    poetry run pyinstaller run.py -n rubix-bacnet --clean --onefile
     ```
 
-  The output is: `dist/rubix-bacnet-server`
+  The output is: `dist/rubix-bacnet`
 
 ## Docker build
 
@@ -31,13 +31,13 @@
 ./docker.sh
 ```
 
-The output image is: `rubix-bacnet-server:dev`
+The output image is: `rubix-bacnet:dev`
 
 ### Run
 
 ```bash
-docker volume create rubix-bacnet-server-data
-docker run --rm -it -p 1919:1919 -v rubix-bacnet-server-data:/data --name rubix-bacnet-server rubix-bacnet-server:dev
+docker volume create rubix-bacnet-data
+docker run --rm -it -p 1919:1919 -v rubix-bacnet-data:/data --name rubix-bacnet rubix-bacnet:dev
 ```
 
 ## Deploy on Production
@@ -46,8 +46,8 @@ docker run --rm -it -p 1919:1919 -v rubix-bacnet-server-data:/data --name rubix-
 - Review help and start
 
 ```bash
-$ rubix-bacnet-server -h
-Usage: rubix-bacnet-server [OPTIONS]
+$ rubix-bacnet -h
+Usage: rubix-bacnet [OPTIONS]
 
 Options:
   -p, --port INTEGER              Port  [default: 1717]

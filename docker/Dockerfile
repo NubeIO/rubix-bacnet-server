@@ -11,7 +11,7 @@ RUN $HOME/.poetry/bin/poetry install
 
 ADD src src
 ADD run.py ./
-RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-bacnet-server --clean --onefile
+RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-bacnet --clean --onefile
 
 FROM python:$BASE_IMAGE_VERSION-slim
 
@@ -31,7 +31,7 @@ RUN groupadd -g $NUBEIO_GID nubeio \
     && chown -R rubix:nubeio $RUBIX_BACNET_DATA
 
 WORKDIR /usr/src/app/
-COPY --chown=rubix:nubeio --from=build /usr/src/app/dist/rubix-bacnet-server ./
+COPY --chown=rubix:nubeio --from=build /usr/src/app/dist/rubix-bacnet ./
 
 USER rubix:nubeio
 
@@ -39,4 +39,4 @@ VOLUME $RUBIX_BACNET_DATA
 
 EXPOSE 1717
 
-ENTRYPOINT [ "./rubix-bacnet-server" ]
+ENTRYPOINT [ "./rubix-bacnet" ]
