@@ -4,10 +4,8 @@ import multiprocessing
 import os
 
 import click
-from gunicorn.glogging import Logger
-from gunicorn.workers.ggevent import GeventWorker
 
-from src import create_app, AppSetting, GunicornFlaskApplication
+from src import AppSetting, GunicornFlaskApplication
 
 CLI_CTX_SETTINGS = dict(help_option_names=["-h", "--help"], max_content_width=120)
 
@@ -33,13 +31,11 @@ def cli(port, data_dir, prod, workers, setting_file, logging_conf, gunicorn_conf
     options = {
         'bind': '%s:%s' % ('0.0.0.0', port),
         'workers': workers if prod else 1,
-        'worker_class': GeventWorker.__module__ + '.' + GeventWorker.__qualname__,
-        'logger_class': Logger.__module__ + '.' + Logger.__name__,
         'log_level': ('INFO' if prod else 'DEBUG' if log_level is None else log_level).lower(),
         'preload_app': True,
         'config': gunicorn_config
     }
-    GunicornFlaskApplication(create_app(setting), options).run()
+    GunicornFlaskApplication(setting, options).run()
 
 
 if __name__ == '__main__':
