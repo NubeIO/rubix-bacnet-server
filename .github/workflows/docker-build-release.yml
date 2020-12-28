@@ -59,11 +59,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       registry:
-        image: zero88/registry:latest
+        image: zero88/gh-registry:latest
         ports:
           - 5000:5000
         options: >-
-          -v /home/runner:/tmp/registry
+          -v /home/runner:/var/lib/registry
           --name registry
     needs: context
     steps:
@@ -76,6 +76,10 @@ jobs:
           key: ${{ runner.os }}-docker-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-docker-
+
+      - name: Validate cache
+        run: |
+          docker buildx imagetools inspect localhost:5000/${{ needs.context.outputs.name }}:buildcache
 
       - name: Docker meta
         id: docker_meta
@@ -154,7 +158,10 @@ jobs:
           push: true
 
       - name: Cleanup Docker build cache if any
-        run: docker buildx prune --filter until=72h --keep-storage 5GB -f
+        run: |
+          docker buildx imagetools inspect localhost:5000/${{ needs.context.outputs.name }}:buildcache
+          echo "======================================================"
+          docker buildx prune --filter until=72h --keep-storage 5GB -f
 
       - name: Create Release
         if: ${{ needs.context.outputs.isRelease == 'true' }}
