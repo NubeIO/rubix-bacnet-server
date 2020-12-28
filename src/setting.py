@@ -14,6 +14,7 @@ class BaseSetting(ABC):
 
 
 class BACnetSetting(BaseSetting):
+    KEY = 'bacnet'
 
     def __init__(self):
         self.enabled: bool = True
@@ -28,6 +29,7 @@ class BACnetSetting(BaseSetting):
 
 
 class MqttSetting(BaseSetting):
+    KEY = 'mqtt'
 
     def __init__(self):
         self.enabled = True
@@ -71,9 +73,11 @@ class AppSetting:
         return self.__bacnet_setting
 
     def reload(self, setting_file: str, logging_file: str):
-        parser = self.__read_file(setting_file, self.__data_dir)
-        self.__mqtt_setting = self.__mqtt_setting.reload(self.__load_setting('mqtt', parser))
-        self.__bacnet_setting = self.__bacnet_setting.reload(self.__load_setting('bacnet', parser))
+        return self._reload(self.__read_file(setting_file, self.__data_dir))
+
+    def _reload(self, parser):
+        self.__mqtt_setting = self.__mqtt_setting.reload(self.__load_setting(MqttSetting.KEY, parser))
+        self.__bacnet_setting = self.__bacnet_setting.reload(self.__load_setting(BACnetSetting.KEY, parser))
         return self
 
     def init_app(self, app: Flask):
