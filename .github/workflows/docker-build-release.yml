@@ -154,6 +154,7 @@ jobs:
           cache-from: type=registry,ref=localhost:5000/${{ needs.context.outputs.name }}:buildcache
           cache-to: type=registry,ref=localhost:5000/${{ needs.context.outputs.name }}:buildcache,mode=max
           tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
           pull: true
           push: true
 
