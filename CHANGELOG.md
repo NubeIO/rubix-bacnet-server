@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## [v1.3.0-rc](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.3.0-rc) (2020-12-24)
+## [v1.3.0-rc.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.3.0-rc.1) (2020-12-28)
 
-### Fix issue/updates
+### Added
 
-- Make app as binary execution
+- **Breaking Changes**: Make delivery artifact as `binary`
+- Change setting.conf format
 - Dockerize
