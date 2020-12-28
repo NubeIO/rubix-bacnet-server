@@ -1,6 +1,6 @@
+import json
 import os
 from abc import ABC
-from configparser import ConfigParser
 
 from flask import Flask
 
@@ -11,6 +11,12 @@ class BaseSetting(ABC):
         if setting is not None:
             self.__dict__ = {k: setting.get(k, v) for k, v in self.__dict__.items()}
         return self
+
+    def serialize(self, pretty=True) -> str:
+        return json.dumps(self, default=lambda o: o.__dict__, indent=2 if pretty else None)
+
+    def to_dict(self):
+        return json.loads(self.serialize(pretty=False))
 
 
 class BACnetSetting(BaseSetting):
@@ -72,12 +78,15 @@ class AppSetting:
     def bacnet(self) -> BACnetSetting:
         return self.__bacnet_setting
 
-    def reload(self, setting_file: str, logging_file: str):
-        return self._reload(self.__read_file(setting_file, self.__data_dir))
+    def serialize(self, pretty=True) -> str:
+        m = {BACnetSetting.KEY: self.bacnet, MqttSetting.KEY: self.mqtt, 'prod': self.prod, 'data_dir': self.data_dir}
+        return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
+                          indent=2 if pretty else None)
 
-    def _reload(self, parser):
-        self.__mqtt_setting = self.__mqtt_setting.reload(self.__load_setting(MqttSetting.KEY, parser))
-        self.__bacnet_setting = self.__bacnet_setting.reload(self.__load_setting(BACnetSetting.KEY, parser))
+    def reload(self, setting_file: str, logging_file: str, is_json_str=False):
+        data = self.__read_file(setting_file, self.__data_dir, is_json_str)
+        self.__mqtt_setting = self.__mqtt_setting.reload(data.get(MqttSetting.KEY))
+        self.__bacnet_setting = self.__bacnet_setting.reload(data.get(BACnetSetting.KEY))
         return self
 
     def init_app(self, app: Flask):
@@ -92,18 +101,13 @@ class AppSetting:
         return d
 
     @staticmethod
-    def __read_file(setting_file: str, _dir: str):
+    def __read_file(setting_file: str, _dir: str, is_json_str=False):
+        if is_json_str:
+            return json.loads(setting_file)
         if setting_file is None or setting_file.strip() == '':
-            return None
+            return {}
         s = setting_file if os.path.isabs(setting_file) else os.path.join(_dir, setting_file)
         if not os.path.isfile(s) or not os.path.exists(s):
-            return None
-        parser = ConfigParser()
-        parser.read(setting_file)
-        return parser
-
-    @staticmethod
-    def __load_setting(section: str, parser: ConfigParser):
-        if parser is None:
-            return None
-        return dict(parser.items(section)) if parser.has_section(section) else None
+            return {}
+        with open(s) as json_file:
+            return json.load(json_file)
