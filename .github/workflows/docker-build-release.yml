@@ -3,8 +3,9 @@ name: docker-build-release
 on:
   push:
     branches:
-      - master
+      - dev
       - main
+      - master
     tags:
       - 'v*'
 
@@ -58,11 +59,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       registry:
-        image: zero88/registry:latest
+        image: zero88/gh-registry:latest
         ports:
           - 5000:5000
         options: >-
-          -v /home/runner:/tmp/registry
+          -v /home/runner:/var/lib/registry
           --name registry
     needs: context
     steps:
@@ -75,6 +76,10 @@ jobs:
           key: ${{ runner.os }}-docker-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-docker-
+
+      - name: Validate cache
+        run: |
+          docker buildx imagetools inspect localhost:5000/${{ needs.context.outputs.name }}:buildcache || echo "Not Found"
 
       - name: Docker meta
         id: docker_meta
@@ -100,7 +105,7 @@ jobs:
         if: ${{ needs.context.outputs.isRelease == 'true' }}
         with:
           context: .
-          file: docker/build.Dockerfile
+          file: docker/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           build-args: |
             BASE_IMAGE_VERSION=3.9
@@ -140,7 +145,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/runtime.Dockerfile
+          file: docker/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           build-args: |
             BASE_IMAGE_VERSION=3.9
@@ -149,11 +154,15 @@ jobs:
           cache-from: type=registry,ref=localhost:5000/${{ needs.context.outputs.name }}:buildcache
           cache-to: type=registry,ref=localhost:5000/${{ needs.context.outputs.name }}:buildcache,mode=max
           tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
           pull: true
           push: true
 
       - name: Cleanup Docker build cache if any
-        run: docker buildx prune --filter until=72h --keep-storage 5GB -f
+        run: |
+          docker buildx imagetools inspect localhost:5000/${{ needs.context.outputs.name }}:buildcache
+          echo "======================================================"
+          docker buildx prune --filter until=72h --keep-storage 5GB -f
 
       - name: Create Release
         if: ${{ needs.context.outputs.isRelease == 'true' }}

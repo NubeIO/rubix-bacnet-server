@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, abort
 
-from src.bacnet_server.bac_server import BACServer
+from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
 
 
@@ -42,11 +42,11 @@ class BACnetPointBase(Resource):
             priority_array_write = data.pop('priority_array_write')
             point = BACnetPointModel(uuid=uuid, **data)
             point.save_to_db(priority_array_write)
-            BACServer.get_instance().add_point(point)
+            BACServer().add_point(point)
             return point
         except Exception as e:
             abort(500, message=str(e))
 
     def abort_if_bacnet_is_not_running(self):
-        if not BACServer.get_instance().status():
+        if not BACServer().status():
             abort(400, message='Bacnet server is not running')

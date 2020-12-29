@@ -2,7 +2,7 @@ import copy
 
 from flask_restful import marshal_with, abort, reqparse
 
-from src.bacnet_server.bac_server import BACServer
+from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 from src.bacnet_server.resources.mod_fields import point_fields
@@ -46,9 +46,9 @@ class BACnetPointName(BACnetPointBase):
             if priority_array_write:
                 PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
             BACnetPointModel.filter_by_uuid(point.uuid).update(non_none_data)
-            BACServer.get_instance().remove_point(point)
+            BACServer().remove_point(point)
             point_return = BACnetPointModel.find_by_uuid(point.uuid)
-            BACServer.get_instance().add_point(point_return)
+            BACServer().add_point(point_return)
             return point_return
         except Exception as e:
             abort(500, message=str(e))

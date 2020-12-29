@@ -1,12 +1,11 @@
-import os
-import time
 from datetime import datetime
 
+import time
+from flask import current_app
 from flask_restful import Resource
 
-from src.bacnet_server.bac_server import BACServer
-from src.bacnet_server.mqtt_client import MqttClient
-from src.ini_config import settings__enable_mqtt, settings__enable_bacnet_server
+from src.bacnet_server import BACServer
+from src.mqtt import MqttClient
 
 start_time = time.time()
 up_time_date = str(datetime.now())
@@ -26,17 +25,21 @@ class Ping(Resource):
         up_min = "{:.2f}".format(up_min)
         up_hour = up_time / 3600
         up_hour = "{:.2f}".format(up_hour)
-        deployment_mode = 'production' if os.environ.get("data_dir") is not None else 'development'
+        from src import AppSetting
+        setting: AppSetting = current_app.config[AppSetting.KEY]
+        deployment_mode = 'production' if setting.prod else 'development'
 
+        mqttc = MqttClient()
+        bac_server = BACServer()
         return {
             'up_time_date': up_time_date,
             'up_min': up_min,
             'up_hour': up_hour,
             'deployment_mode': deployment_mode,
-            'mqtt_client_status': MqttClient.get_instance().status(),
-            'bacnet_server_status': BACServer.get_instance().status(),
+            'mqtt_client_status': mqttc.status(),
+            'bacnet_server_status': bac_server.status(),
             'settings': {
-                'enable_mqtt': settings__enable_mqtt,
-                'enable_bacnet_server': settings__enable_bacnet_server,
+                'enable_mqtt': mqttc.config.enabled,
+                'enable_bacnet_server': bac_server.config.enabled,
             },
         }

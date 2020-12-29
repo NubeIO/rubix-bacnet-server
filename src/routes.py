@@ -1,6 +1,6 @@
+from flask import Blueprint
 from flask_restful import Api
 
-from src import app
 from src.bacnet_server.resources.point.point_name import BACnetPointName
 from src.bacnet_server.resources.point.point_object import BACnetPointObject
 from src.bacnet_server.resources.point.point_plural import BACnetPointPlural
@@ -8,28 +8,31 @@ from src.bacnet_server.resources.point.point_singular import BACnetPointSingular
 from src.bacnet_server.resources.server.server import BACnetServer
 from src.system.resources.ping import Ping
 
-api_prefix = 'api'
-api = Api(app)
+bp_bacnet_server = Blueprint('bacnet_server', __name__, url_prefix='/api/bacnet')
+api_bacnet_server = Api(bp_bacnet_server)
 
-api.add_resource(BACnetServer, f'/{api_prefix}/bacnet/server')
-api.add_resource(BACnetPointPlural, f'/{api_prefix}/bacnet/points')
-api.add_resource(BACnetPointSingular, f'/{api_prefix}/bacnet/points/uuid/<string:uuid>')
-api.add_resource(BACnetPointObject, f'/{api_prefix}/bacnet/points/obj/<string:object_type>/<string:address>')
-api.add_resource(BACnetPointName, f'/{api_prefix}/bacnet/points/name/<string:object_name>')
-api.add_resource(Ping, f'/{api_prefix}/system/ping')
-
+api_bacnet_server.add_resource(BACnetServer, '/bacnet/server')
+api_bacnet_server.add_resource(BACnetPointPlural, '/bacnet/points')
+api_bacnet_server.add_resource(BACnetPointSingular, '/bacnet/points/uuid/<string:uuid>')
+api_bacnet_server.add_resource(BACnetPointObject, '/bacnet/points/obj/<string:object_type>/<string:address>')
+api_bacnet_server.add_resource(BACnetPointName, '/bacnet/points/name/<string:object_name>')
+api_bacnet_server.add_resource(Ping, '/system/ping')
 
 from src.bacnet_master.resources.device import Device, DeviceList, DevicePoints, DevicePoint, PointWritePresentValue
 from src.bacnet_master.resources.network import Network, NetworkList, NetworksIds
 
-bacnet_api_prefix = f'{api_prefix}/bac/master/'
-api.add_resource(Device, f'/{bacnet_api_prefix}/dev/<string:uuid>')
-api.add_resource(Network, f'/{bacnet_api_prefix}/network/<string:uuid>')
-api.add_resource(DeviceList, f'/{bacnet_api_prefix}/devices')
-api.add_resource(DevicePoints, f'/{bacnet_api_prefix}/points/objects/<string:dev_uuid>')
-# get a point /dev_uuid/analogInput/1/85
-api.add_resource(DevicePoint, f'/{bacnet_api_prefix}/point/read/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:prop>')
-api.add_resource(NetworkList, f'/{bacnet_api_prefix}/networks')
-api.add_resource(NetworksIds, f'/{bacnet_api_prefix}/networks/ids')
+bp_bacnet_master = Blueprint('bacnet_master', __name__, url_prefix='/api/bac/master')
+api_bacnet_master = Api(bp_bacnet_master)
 
-api.add_resource(PointWritePresentValue, f'/{bacnet_api_prefix}/point/write/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:value>')
+api_bacnet_master.add_resource(Device, '/dev/<string:uuid>')
+api_bacnet_master.add_resource(Network, '/network/<string:uuid>')
+api_bacnet_master.add_resource(DeviceList, '/devices')
+api_bacnet_master.add_resource(DevicePoints, '/points/objects/<string:dev_uuid>')
+# get a point /dev_uuid/analogInput/1/85
+api_bacnet_master.add_resource(DevicePoint,
+                               '/point/read/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:prop>')
+api_bacnet_master.add_resource(NetworkList, '/networks')
+api_bacnet_master.add_resource(NetworksIds, '/networks/ids')
+
+api_bacnet_master.add_resource(PointWritePresentValue,
+                               '/point/write/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:value>')

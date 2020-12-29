@@ -51,7 +51,7 @@ class Network(Resource):
         data = Network.parser.parse_args()
         network = Network.create_network_model_obj(uuid, data)
         network.save_to_db()
-        NetworkService.get_instance().add_network(network)
+        NetworkService().add_network(network)
         return network, 201
 
     @marshal_with(network_fields)
@@ -68,7 +68,7 @@ class Network(Resource):
             network.network_device_id = data['network_device_id']
             network.network_device_name = data['network_device_name']
         network.save_to_db()
-        NetworkService.get_instance().add_network(network)
+        NetworkService().add_network(network)
         return network, 201
 
     def delete(self, uuid):
@@ -76,7 +76,7 @@ class Network(Resource):
         network = BacnetNetworkModel.find_by_network_uuid(network_uuid)
         if network:
             network.delete_from_db()
-            NetworkService.get_instance().delete_network(network)
+            NetworkService().delete_network(network)
         return '', 204
 
     @staticmethod
