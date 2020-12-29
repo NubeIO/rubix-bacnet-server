@@ -69,6 +69,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Fallback version to deal with GitHub Cache
+        run: sed -i "0,/${{ needs.context.outputs.version }}/s//0.0.0/" pyproject.toml
+
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
