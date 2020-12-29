@@ -19,7 +19,7 @@ def number_of_workers():
 @click.option('-d', '--data-dir', type=click.Path(), help='Application data dir',
               default=lambda: os.environ.get(AppSetting.DATA_DIR_ENV, AppSetting.default_data_dir))
 @click.option('--prod', is_flag=True, help='Production mode')
-@click.option('-s', '--setting-file', help='Rubix BACnet: setting ini file')
+@click.option('-s', '--setting-file', help='Rubix BACnet: setting json file')
 @click.option('-l', '--logging-conf', help='Rubix BACnet: logging config file')
 @click.option('--workers', type=int, default=lambda: number_of_workers(),
               help='Gunicorn: The number of worker processes for handling requests.')
