@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v1.3.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.3.1) (2021-01-08)
+
+### Added
+
+Bump version
+
+
 ## [v1.3.0](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.3.0) (2020-12-29)
 
 ### Added
