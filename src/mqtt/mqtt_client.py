@@ -1,6 +1,7 @@
 from logging import Logger
 
 import paho.mqtt.client as mqtt_client
+import threading
 import time
 
 from src import MqttSetting
@@ -12,7 +13,7 @@ class MqttClient(metaclass=Singleton):
     def __init__(self):
         self.logger = None
         self.__config = None
-        self.__client = None
+        self.__client: mqtt_client.Client = None
 
     @property
     def config(self) -> MqttSetting:
@@ -57,6 +58,9 @@ class MqttClient(metaclass=Singleton):
         self.logger.debug(f"MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
         self.__client.publish(topic, present_value, qos=1, retain=retain)
 
+    def mock_subscribe(self, mock_topic="/python/mqtt"):
+        self.__client.subscribe(mock_topic)
+
     def __on_connect(self, client, userdata, flags, reason_code, properties=None):
         if reason_code > 0:
             reasons = {
@@ -69,7 +73,10 @@ class MqttClient(metaclass=Singleton):
             reason = reasons.get(reason_code, 'unknown')
             self.__client = None
             raise Exception(f'MQTT Connection Failure: {reason}')
+        print(f'{threading.main_thread()}::{threading.current_thread()}::Success connected {flags} {reason_code}')
+        self.mock_subscribe()
         self.__client.subscribe(f'{self.config.topic}/#')
 
     def __on_message(self, client, userdata, message):
-        pass
+        print(f"Received `{message.payload.decode()}` from `{message.topic}` topic")
+        # pass
