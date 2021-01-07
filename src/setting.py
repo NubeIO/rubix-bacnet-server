@@ -23,7 +23,7 @@ class BACnetSetting(BaseSetting):
     KEY = 'bacnet'
 
     def __init__(self):
-        self.enabled: bool = True
+        self.enabled: bool = False
         self.ip = '192.168.0.100'
         self.port = 47808
         self.device_id = 123
@@ -38,7 +38,7 @@ class MqttSetting(BaseSetting):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = True
+        self.enabled = False
         self.name = 'bacnet-server-mqtt'
         self.host = '0.0.0.0'
         self.port = 1883
@@ -52,8 +52,9 @@ class MqttSetting(BaseSetting):
 
 
 class AppSetting:
+    PORT: int = 1717
     DATA_DIR_ENV = 'RUBIX_BACNET_DATA'
-    KEY: str = 'APP_SETTING'
+    FLASK_KEY: str = 'APP_SETTING'
     default_data_dir: str = 'out'
 
     def __init__(self, **kwargs):
@@ -90,7 +91,7 @@ class AppSetting:
         return self
 
     def init_app(self, app: Flask):
-        app.config[AppSetting.KEY] = self
+        app.config[AppSetting.FLASK_KEY] = self
         return self
 
     @staticmethod

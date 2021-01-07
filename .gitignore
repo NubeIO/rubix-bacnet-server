@@ -14,7 +14,6 @@ data.db
 log_bac0_app.log
 __pycache__/
 *.pyc
-config.ini
 *.log
 
 build/

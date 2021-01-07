@@ -1,6 +1,6 @@
 {
   "bacnet": {
-    "enabled": true,
+    "enabled": false,
     "ip": "192.168.0.100",
     "port": 47808,
     "device_id": 123,
@@ -11,7 +11,7 @@
     "attempt_reconnect_secs": 5
   },
   "mqtt": {
-    "enabled": true,
+    "enabled": false,
     "name": "bacnet-server-mqtt",
     "host": "0.0.0.0",
     "port": 1883,

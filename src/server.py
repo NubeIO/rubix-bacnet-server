@@ -25,7 +25,7 @@ def on_exit(server: Arbiter):
 
 
 def when_ready(server: Arbiter):
-    server.log.info("Server is ready. Spawning workers...")
+    server.log.info("Server is ready. Doing something before spawning workers...")
     server.app.application.setup()
 
 
