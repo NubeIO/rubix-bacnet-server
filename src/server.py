@@ -1,9 +1,7 @@
 from abc import ABC
-
 from gunicorn.app.base import BaseApplication
 from gunicorn.arbiter import Arbiter
 from gunicorn.glogging import Logger
-from gunicorn.workers.ggevent import GeventWorker
 
 from .app import create_app
 from .setting import AppSetting
@@ -13,7 +11,8 @@ def init_gunicorn_option(_options=None):
     from gevent import monkey as curious_george
     curious_george.patch_all()
     options = _options or {}
-    options.update({'worker_class': GeventWorker.__module__ + '.' + GeventWorker.__qualname__,
+    options.update({'worker_class': 'sync',
+                    # 'worker_class': GeventWorker.__module__ + '.' + GeventWorker.__qualname__,
                     'logger_class': Logger.__module__ + '.' + Logger.__name__,
                     'when_ready': when_ready,
                     'on_exit': on_exit})
