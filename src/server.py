@@ -1,16 +1,19 @@
 from abc import ABC
+
 from gunicorn.app.base import BaseApplication
 from gunicorn.arbiter import Arbiter
 from gunicorn.glogging import Logger
-from gunicorn.workers.sync import SyncWorker
+from gunicorn.workers.ggevent import GeventWorker
 
-from .app import create_app
+from .app import create_app, db
 from .setting import AppSetting
 
 
 def init_gunicorn_option(_options=None):
+    from gevent import monkey as curious_george
+    curious_george.patch_all()
     options = _options or {}
-    options.update({'worker_class': SyncWorker.__module__ + '.' + SyncWorker.__qualname__,
+    options.update({'worker_class': GeventWorker.__module__ + '.' + GeventWorker.__qualname__,
                     'logger_class': Logger.__module__ + '.' + Logger.__name__,
                     'when_ready': when_ready,
                     'on_exit': on_exit})
@@ -23,7 +26,6 @@ def on_exit(server: Arbiter):
 
 def when_ready(server: Arbiter):
     server.log.info("Server is ready. Doing something before spawning workers...")
-    server.app.application.setup()
 
 
 class GunicornFlaskApplication(BaseApplication, ABC):
@@ -42,3 +44,11 @@ class GunicornFlaskApplication(BaseApplication, ABC):
     def load(self):
         self.application = create_app(self._app_setting)
         return self.application
+
+    def wsgi(self):
+        output = super(GunicornFlaskApplication, self).wsgi()
+        with self.application.app_context():
+            db.create_all()
+            from src.background import Background
+            Background.run()
+        return output

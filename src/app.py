@@ -1,6 +1,5 @@
 import logging
 import os
-from functools import partial
 
 from flask import Flask
 from flask_cors import CORS
@@ -29,9 +28,6 @@ def create_app(app_setting) -> Flask:
             self.logger.handlers = gunicorn_logger.handlers
             self.logger.setLevel(gunicorn_logger.level)
             self.logger.info(self.config['SQLALCHEMY_DATABASE_URI'])
-            db.create_all()
-            from src.background import Background
-            Background.run()
 
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, _):
@@ -46,5 +42,5 @@ def create_app(app_setting) -> Flask:
         _app.register_blueprint(bp_system)
         return _app
 
-    app.setup = partial(setup, app)
+    setup(app)
     return register_router(app)
