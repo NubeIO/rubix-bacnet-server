@@ -23,7 +23,7 @@ class BACnetSetting(BaseSetting):
     KEY = 'bacnet'
 
     def __init__(self):
-        self.enabled: bool = False
+        self.enabled: bool = True
         self.ip = '192.168.0.100'
         self.port = 47808
         self.device_id = 123
@@ -38,7 +38,7 @@ class MqttSetting(BaseSetting):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = False
+        self.enabled = True
         self.name = 'bacnet-server-mqtt'
         self.host = '0.0.0.0'
         self.port = 1883
