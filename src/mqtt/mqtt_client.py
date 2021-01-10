@@ -47,7 +47,7 @@ class MqttClient(metaclass=Singleton):
         self.__client.loop_forever()
 
     def publish_mqtt_value(self, object_identifier, present_value):
-        topic = f"bacnet/server/points/ao/{object_identifier}"
+        topic = f"rubix/bacnet/server/points/ao/{object_identifier}"
         retain = self.config.retain
         if not self.status():
             self.logger.error("MQTT is not connected...")
