@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v1.3.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.3.2) (2021-01-10)
+
+### Added
+
+- Fixes to threading as there was issues with the BACnet server
+- updated MQTT topic to `rubix/bacnet`
+
 ## [v1.3.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.3.1) (2021-01-08)
 
 ### Added
