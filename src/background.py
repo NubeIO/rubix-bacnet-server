@@ -1,10 +1,11 @@
-from logging import Logger
+import logging
 from threading import Thread
 
 from flask import current_app
-from werkzeug.local import LocalProxy
 
 from .setting import AppSetting
+
+logger = logging.getLogger(__name__)
 
 
 class FlaskThread(Thread):
@@ -28,12 +29,9 @@ class Background:
         from src.bacnet_server import BACServer
         from src.mqtt import MqttClient
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
-        logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
         logger.info("Running Background Task...")
         if setting.mqtt.enabled:
-            FlaskThread(target=MqttClient().start, daemon=True,
-                        kwargs={'logger': logger, 'config': setting.mqtt}).start()
+            FlaskThread(target=MqttClient().start, daemon=True, kwargs={'config': setting.mqtt}).start()
 
         if setting.bacnet.enabled:
-            FlaskThread(target=BACServer().start_bac, daemon=True,
-                        kwargs={'logger': logger, 'config': setting.bacnet}).start()
+            FlaskThread(target=BACServer().start_bac, daemon=True, kwargs={'config': setting.bacnet}).start()

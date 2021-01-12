@@ -33,7 +33,7 @@ class BACnetServer(Resource):
         BACnetServerModel.query.filter().update(data_to_update)
         new_bacnet_server = BACnetServerModel.find_one()
         try:
-            BACServer().restart_bac(old_bacnet_server, new_bacnet_server)
+            BACServer().restart_bac(new_bacnet_server)
             db.session.commit()
             return new_bacnet_server
         except Exception as e:
