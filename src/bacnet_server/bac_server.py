@@ -1,8 +1,8 @@
 import copy
-from logging import Logger
+import logging
+import time
 
 import BAC0
-import time
 from bacpypes.basetypes import EngineeringUnits
 
 from src import BACnetSetting
@@ -15,11 +15,12 @@ from src.bacnet_server.models.model_server import BACnetServerModel
 from src.mqtt import MqttClient
 from src.utils import Singleton
 
+logger = logging.getLogger(__name__)
+
 
 class BACServer(metaclass=Singleton):
 
     def __init__(self):
-        self.logger = None
         self.__config = None
         self.__bacnet = None
         self.__bacnet_server = None
@@ -34,8 +35,7 @@ class BACServer(metaclass=Singleton):
     def status(self) -> bool:
         return bool(self.config and self.config.enabled and self.__bacnet and self.__sync_status)
 
-    def start_bac(self, config: BACnetSetting, logger: Logger):
-        self.logger = logger or Logger(__name__)
+    def start_bac(self, config: BACnetSetting):
         self.__config = config
         self.__bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist(self.config)
         self.loop_forever()
@@ -44,8 +44,8 @@ class BACServer(metaclass=Singleton):
         try:
             self.connect(self.__bacnet_server)
         except Exception as e:
-            self.logger.error(e)
-            self.logger.warning("BACnet is not connected, waiting for BACnet server connection...")
+            logger.error(e)
+            logger.warning("BACnet is not connected, waiting for BACnet server connection...")
             self.check_to_restart()
             time.sleep(self.config.attempt_reconnect_secs)
             self.loop_forever()
@@ -54,7 +54,7 @@ class BACServer(metaclass=Singleton):
         if mqttc.config.enabled and mqttc.config.publish_value:
             while not mqttc.status():
                 self.check_to_restart()
-                self.logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
+                logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
                 time.sleep(self.config.attempt_reconnect_secs)
         self.sync_stack()
 

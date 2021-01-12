@@ -29,7 +29,7 @@ if __name__ == '__main__':
       }
     }
     '''
-    app_setting = AppSetting().reload(setting, None, is_json_str=True)
+    app_setting = AppSetting().reload_settings(setting, is_json_str=True)
     print(type(app_setting.mqtt))
     print(type(app_setting.bacnet))
     print(type(app_setting.mqtt.enabled))
