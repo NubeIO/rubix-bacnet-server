@@ -22,6 +22,8 @@ class BACServer(metaclass=Singleton):
         self.logger = None
         self.__config = None
         self.__bacnet = None
+        self.__bacnet_server = None
+        self.__new_bacnet_server = None
         self.__registry = {}
         self.__sync_status = False
 
@@ -29,54 +31,51 @@ class BACServer(metaclass=Singleton):
     def config(self) -> BACnetSetting:
         return self.__config
 
-    def status(self):
-        return self.config and self.config.enabled and self.__bacnet and self.__sync_status
+    def status(self) -> bool:
+        return bool(self.config and self.config.enabled and self.__bacnet and self.__sync_status)
 
     def start_bac(self, config: BACnetSetting, logger: Logger):
         self.logger = logger or Logger(__name__)
         self.__config = config
-        bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist(self.config)
-        self.keep_connecting(bacnet_server)
-        mqttc = MqttClient()
-        if mqttc.config.enabled and mqttc.config.publish_value:
-            while not mqttc.status():
-                logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
-                time.sleep(mqttc.config.attempt_reconnect_secs)
-        self.sync_stack()
+        self.__bacnet_server = BACnetServerModel.create_default_server_if_does_not_exist(self.config)
+        self.loop_forever()
 
-    def keep_connecting(self, bacnet_server):
+    def loop_forever(self):
         try:
-            self.connect(bacnet_server)
+            self.connect(self.__bacnet_server)
         except Exception as e:
             self.logger.error(e)
             self.logger.warning("BACnet is not connected, waiting for BACnet server connection...")
+            self.check_to_restart()
             time.sleep(self.config.attempt_reconnect_secs)
-            self.keep_connecting(bacnet_server)
+            self.loop_forever()
 
-    def restart_bac(self, old_bacnet_server, new_bacnet_server, restart_on_failure=True):
-        """
-        It tries to establish connection with new configuration,
-        If it fails it will re-establish connection with old one,
-        Even this re-establishment with old one got error, we send an error message
-        """
+        mqttc = MqttClient()
+        if mqttc.config.enabled and mqttc.config.publish_value:
+            while not mqttc.status():
+                self.check_to_restart()
+                self.logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
+                time.sleep(self.config.attempt_reconnect_secs)
+        self.sync_stack()
 
+        # keep listening changes
+        while not (self.__new_bacnet_server and self.__new_bacnet_server != self.__bacnet_server):
+            time.sleep(1)
+        self.__bacnet_server = self.__new_bacnet_server
+        self.loop_forever()
+
+    def check_to_restart(self):
+        if self.__new_bacnet_server and self.__new_bacnet_server != self.__bacnet_server:
+            self.__bacnet_server = self.__new_bacnet_server
+            self.loop_forever()
+
+    def restart_bac(self, new_bacnet_server):
         if self.__bacnet:
             self.__bacnet.disconnect()  # on macOS it's not working
             time.sleep(1)  # as per their testing we need to sleep to make sure all sockets got closed
 
         self.__reset_variable()
-        try:
-            self.connect(new_bacnet_server)
-            self.sync_stack()
-        except Exception as e:
-            self.logger.error(e)
-            if restart_on_failure:
-                try:
-                    self.restart_bac(old_bacnet_server, old_bacnet_server, False)
-                except Exception as err:
-                    self.logger.error(f'Error on re-starting: {str(err)}')
-                    raise Exception(f'Current configuration and even on revert server starting is got exception')
-            raise e
+        self.__new_bacnet_server = new_bacnet_server
 
     def sync_stack(self):
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
