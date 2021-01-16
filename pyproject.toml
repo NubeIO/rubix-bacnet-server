@@ -18,6 +18,7 @@ gevent = [
     { version = "20.12.1", markers = "platform_machine == 'x86_64'" },
     { git = "https://github.com/gevent/gevent.git", tag = "20.12.1", markers = "platform_machine != 'x86_64'" }
 ]
+toml = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^4.1"
