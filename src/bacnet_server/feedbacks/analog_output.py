@@ -28,4 +28,4 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
                 present_value = float(present_value)
             mqttc = MqttClient()
             if mqttc.config.enabled:
-                mqttc.publish_mqtt_value(object_identifier, present_value)
+                mqttc.publish_mqtt_value(mqttc.get_topic(object_identifier, 'ao'), present_value)

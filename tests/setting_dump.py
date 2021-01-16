@@ -25,11 +25,13 @@ if __name__ == '__main__':
         "attempt_reconnect_on_unavailable": true,
         "attempt_reconnect_secs": 5,
         "publish_value": true,
-        "topic": "rubix/points"
+        "topic": "rubix/bacnet_server/points"
+        "publish_debug": true,
+        "debug_topic" = 'rubix/bacnet_server/debug'
       }
     }
     '''
-    app_setting = AppSetting().reload_settings(setting, is_json_str=True)
+    app_setting = AppSetting().reload(setting, is_json_str=True)
     print(type(app_setting.mqtt))
     print(type(app_setting.bacnet))
     print(type(app_setting.mqtt.enabled))

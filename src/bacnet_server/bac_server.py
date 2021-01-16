@@ -116,7 +116,7 @@ class BACServer(metaclass=Singleton):
         self.__registry[object_identifier] = ao
         mqttc = MqttClient()
         if mqttc.config.publish_value:
-            mqttc.publish_mqtt_value(object_identifier, present_value)
+            mqttc.publish_mqtt_value(mqttc.get_topic(object_identifier, 'ao'), present_value)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
