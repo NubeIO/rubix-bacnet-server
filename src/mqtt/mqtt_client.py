@@ -46,16 +46,14 @@ class MqttClient(metaclass=Singleton):
                 return
         self.__client.loop_forever()
 
-    def publish_mqtt_value(self, object_identifier, present_value):
-        topic = f"rubix/bacnet/server/points/ao/{object_identifier}"
-        retain = self.config.retain
+    def get_topic(self, object_identifier, type_):
+        return f"{self.config.topic}/{type_}/{object_identifier}"
+
+    def publish_mqtt_value(self, topic, present_value):
         if not self.status():
-            logger.error("MQTT is not connected...")
-            logger.error(
-                f"Failed MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
             return
-        logger.debug(f"MQTT_PUBLISH: {{'topic': {topic}, 'payload': {present_value}, 'retain': {retain}}}")
-        self.__client.publish(topic, present_value, qos=1, retain=retain)
+        retain = self.config.retain
+        self.__client.publish(topic, str(present_value), qos=self.config.qos, retain=retain)
 
     def __on_connect(self, client, userdata, flags, reason_code, properties=None):
         if reason_code > 0:
@@ -70,6 +68,9 @@ class MqttClient(metaclass=Singleton):
             self.__client = None
             raise Exception(f'MQTT Connection Failure: {reason}')
         self.__client.subscribe(f'{self.config.topic}/#')
+
+    def publish_debug(self, payload):
+        self.publish_mqtt_value(self.config.debug_topic, payload)
 
     def __on_message(self, client, userdata, message):
         pass

@@ -18,7 +18,7 @@
 - Build local binary
 
     ```bash
-    poetry run pyinstaller run.py -n rubix-bacnet --clean --onefile --add-data config:config
+    poetry run pyinstaller run.py -n rubix-bacnet --clean --onefile --add-data pyproject.toml:. --add-data config:config
     ```
 
   The output is: `dist/rubix-bacnet`
