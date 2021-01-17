@@ -53,8 +53,6 @@ class MqttClient(metaclass=Singleton):
         if not self.status():
             return
         retain = self.config.retain
-        logger.debug(
-            "MQTT_PUBLISH: 'topic': {}, 'payload': {}, 'retain': {}".format(topic, present_value, self.config.retain))
         self.__client.publish(topic, str(present_value), qos=self.config.qos, retain=retain)
 
     def __on_connect(self, client, userdata, flags, reason_code, properties=None):

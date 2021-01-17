@@ -1,4 +1,3 @@
-import logging
 import os
 from abc import ABC
 
@@ -12,9 +11,7 @@ from .pyinstaller import resource_path
 from .setting import AppSetting
 
 
-def init_logger(_app_setting: AppSetting, _options=None):
-    from src.utils.custom_logger import CustomLogger
-    logging.setLoggerClass(CustomLogger)
+def init_logconfig_option(_app_setting: AppSetting, _options=None):
     options = _options or {}
     if not (_options.get('logconfig') and os.path.isabs(_options.get('logconfig'))):
         logconfig = os.path.join(_app_setting.data_dir, (_options.get('logconfig') or AppSetting.default_logging_conf))
@@ -47,7 +44,7 @@ def when_ready(server: Arbiter):
 class GunicornFlaskApplication(BaseApplication, ABC):
 
     def __init__(self, _app_setting: AppSetting, _options=None):
-        self._options = init_logger(_app_setting, _options)
+        self._options = init_logconfig_option(_app_setting, _options)
         self._options = init_gunicorn_option(_options)
         super(GunicornFlaskApplication, self).__init__()
         self._app_setting = _app_setting
