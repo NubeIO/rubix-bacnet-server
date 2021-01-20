@@ -23,6 +23,6 @@
     "publish_value": true,
     "topic": "rubix/bacnet_server/points",
     "publish_debug": true,
-    "debug_topic": "rubix/bacnet_server/debug"
+    "debug_topic": "rubix/bacnet/server/debug"
   }
 }
