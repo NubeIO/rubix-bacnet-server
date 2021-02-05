@@ -45,6 +45,9 @@ class MqttSetting(BaseSetting):
         self.name = 'bacnet-server-mqtt'
         self.host = '0.0.0.0'
         self.port = 1883
+        self.authentication = False
+        self.username = 'username'
+        self.password = 'password'
         self.keepalive = 60
         self.qos = 1
         self.retain = False
