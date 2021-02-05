@@ -25,6 +25,8 @@ class MqttClient(metaclass=Singleton):
     def start(self, config: MqttSetting):
         self.__config = config
         self.__client = mqtt_client.Client(self.config.name)
+        if self.config.authentication:
+            self.__client.username_pw_set(self.config.username, self.config.password)
         self.__client.on_connect = self.__on_connect
         self.__client.on_message = self.__on_message
         if self.config.attempt_reconnect_on_unavailable:
