@@ -19,6 +19,7 @@ gevent = [
     { git = "https://github.com/gevent/gevent.git", tag = "20.12.1", markers = "platform_machine != 'x86_64'" }
 ]
 toml = "^0.10.2"
+mqtt-rest-bridge = {git = "https://github.com/NubeIO/mqtt-rest-bridge", rev = "v1.0.0"}
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^4.1"
