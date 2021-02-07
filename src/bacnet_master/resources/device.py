@@ -89,7 +89,7 @@ class Device(Resource):
 
 class DeviceList(Resource):
     @classmethod
-    @marshal_with(device_fields, envelope="devices")
+    @marshal_with(device_fields)
     def get(cls):
         return BacnetDeviceModel.query.all()
 

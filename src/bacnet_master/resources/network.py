@@ -94,12 +94,12 @@ class Network(Resource):
 
 
 class NetworkList(Resource):
-    @marshal_with(network_fields, envelope="networks")
+    @marshal_with(network_fields)
     def get(self):
         return BacnetNetworkModel.query.all()
 
 
 class NetworksIds(Resource):
-    @marshal_with({'network_uuid': fields.String}, envelope="networks")
+    @marshal_with({'network_uuid': fields.String})
     def get(self):
         return BacnetNetworkModel.query.all()

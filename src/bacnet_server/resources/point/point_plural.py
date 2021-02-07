@@ -10,7 +10,7 @@ from src.bacnet_server.resources.point.point_base import BACnetPointBase
 
 class BACnetPointPlural(BACnetPointBase):
     @classmethod
-    @marshal_with(point_fields, envelope="points")
+    @marshal_with(point_fields)
     def get(cls):
         return BACnetPointModel.query.all()
 
