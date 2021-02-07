@@ -24,18 +24,20 @@ class BACnetPointSingular(BACnetPointBase):
     parser_patch.add_argument('data_round', type=int, required=False)
     parser_patch.add_argument('data_offset', type=float, required=False)
 
+    @classmethod
     @marshal_with(point_fields)
-    def get(self, uuid):
+    def get(cls, uuid):
         point = BACnetPointModel.find_by_uuid(uuid)
         if not point:
             abort(404, message='BACnet Point is not found')
         return point
 
+    @classmethod
     @marshal_with(point_fields)
-    def patch(self, uuid):
+    def patch(cls, uuid):
         data = BACnetPointSingular.parser_patch.parse_args()
         point = copy.deepcopy(BACnetPointModel.find_by_uuid(uuid))
-        self.abort_if_bacnet_is_not_running()
+        cls.abort_if_bacnet_is_not_running()
         if point is None:
             abort(404, message=f"Does not exist {uuid}")
         try:
@@ -54,7 +56,8 @@ class BACnetPointSingular(BACnetPointBase):
         except Exception as e:
             abort(500, message=str(e))
 
-    def delete(self, uuid):
+    @classmethod
+    def delete(cls, uuid):
         point = BACnetPointModel.find_by_uuid(uuid)
         if point:
             BACServer().remove_point(point)

@@ -37,7 +37,8 @@ class BACnetPointBase(Resource):
     nested_priority_array_write_parser.add_argument('_15', type=float, location=('priority_array_write',))
     nested_priority_array_write_parser.add_argument('_16', type=float, location=('priority_array_write',))
 
-    def add_point(self, data, uuid):
+    @classmethod
+    def add_point(cls, data, uuid):
         try:
             priority_array_write = data.pop('priority_array_write')
             point = BACnetPointModel(uuid=uuid, **data)
@@ -47,6 +48,7 @@ class BACnetPointBase(Resource):
         except Exception as e:
             abort(500, message=str(e))
 
-    def abort_if_bacnet_is_not_running(self):
+    @classmethod
+    def abort_if_bacnet_is_not_running(cls):
         if not BACServer().status():
             abort(400, message='Bacnet server is not running')

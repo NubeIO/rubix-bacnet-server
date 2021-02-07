@@ -1,6 +1,8 @@
 from flask import Blueprint
 from flask_restful import Api
 
+from src.bacnet_master.resources.device import Device, DeviceList, DevicePoints, DevicePoint, PointWritePresentValue
+from src.bacnet_master.resources.network import Network, NetworkList, NetworksIds
 from src.bacnet_server.resources.point.point_name import BACnetPointName
 from src.bacnet_server.resources.point.point_object import BACnetPointObject
 from src.bacnet_server.resources.point.point_plural import BACnetPointPlural
@@ -16,8 +18,6 @@ api_bacnet_server.add_resource(BACnetPointPlural, '/points')
 api_bacnet_server.add_resource(BACnetPointSingular, '/points/uuid/<string:uuid>')
 api_bacnet_server.add_resource(BACnetPointObject, '/points/obj/<string:object_type>/<string:address>')
 api_bacnet_server.add_resource(BACnetPointName, '/points/name/<string:object_name>')
-from src.bacnet_master.resources.device import Device, DeviceList, DevicePoints, DevicePoint, PointWritePresentValue
-from src.bacnet_master.resources.network import Network, NetworkList, NetworksIds
 
 bp_bacnet_master = Blueprint('bacnet_master', __name__, url_prefix='/api/bac/master')
 api_bacnet_master = Api(bp_bacnet_master)

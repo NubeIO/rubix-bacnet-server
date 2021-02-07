@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse, abort, marshal_with
+
 from src.bacnet_master.models.device import BacnetDeviceModel
 from src.bacnet_master.resources.fields import device_fields
 from src.bacnet_master.services.device import Device as DeviceService
@@ -71,7 +72,8 @@ class Device(Resource):
         device.save_to_db()
         return device
 
-    def delete(self, uuid):
+    @classmethod
+    def delete(cls, uuid):
         device = BacnetDeviceModel.find_by_bac_device_uuid(uuid)
         if device:
             device.delete_from_db()
@@ -86,13 +88,15 @@ class Device(Resource):
 
 
 class DeviceList(Resource):
+    @classmethod
     @marshal_with(device_fields, envelope="devices")
-    def get(self):
+    def get(cls):
         return BacnetDeviceModel.query.all()
 
 
 class DevicePoints(Resource):
-    def get(self, dev_uuid):
+    @classmethod
+    def get(cls, dev_uuid):
         response = {}
         device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
         if not device:
@@ -108,7 +112,8 @@ class DevicePoints(Resource):
 
 
 class DevicePoint(Resource):
-    def get(self, dev_uuid, obj, obj_instance, prop):
+    @classmethod
+    def get(cls, dev_uuid, obj, obj_instance, prop):
         response = {}
         device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
         if not device:
@@ -127,7 +132,8 @@ class DevicePoint(Resource):
 
 
 class PointWritePresentValue(Resource):
-    def get(self, dev_uuid, obj, obj_instance, value):
+    @classmethod
+    def get(cls, dev_uuid, obj, obj_instance, value):
         response = {}
         device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
         if not device:

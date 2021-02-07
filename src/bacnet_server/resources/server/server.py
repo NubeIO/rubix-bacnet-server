@@ -1,5 +1,3 @@
-import copy
-
 from flask_restful import reqparse, marshal_with, Resource, abort
 
 from src import db
@@ -18,15 +16,16 @@ class BACnetServer(Resource):
     parser.add_argument('vendor_id', type=str)
     parser.add_argument('vendor_name', type=str)
 
+    @classmethod
     @marshal_with(server_field)
-    def get(self):
+    def get(cls):
         return BACnetServerModel.find_one()
 
+    @classmethod
     @marshal_with(server_field)
-    def patch(self):
+    def patch(cls):
         data = BACnetServer.parser.parse_args()
         data_to_update = {}
-        old_bacnet_server = copy.deepcopy(BACnetServerModel.find_one())
         for key in data.keys():
             if data[key] is not None:
                 data_to_update[key] = data[key]
