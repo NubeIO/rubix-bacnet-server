@@ -7,6 +7,7 @@ from src.bacnet_server.resources.point.point_name import BACnetPointName
 from src.bacnet_server.resources.point.point_object import BACnetPointObject
 from src.bacnet_server.resources.point.point_plural import BACnetPointPlural
 from src.bacnet_server.resources.point.point_singular import BACnetPointSingular
+from src.bacnet_server.resources.point.point_sync import BACnetPointSync
 from src.bacnet_server.resources.server.server import BACnetServer
 from src.system.resources.ping import Ping
 
@@ -18,6 +19,10 @@ api_bacnet_server.add_resource(BACnetPointPlural, '/points')
 api_bacnet_server.add_resource(BACnetPointSingular, '/points/uuid/<string:uuid>')
 api_bacnet_server.add_resource(BACnetPointObject, '/points/obj/<string:object_type>/<string:address>')
 api_bacnet_server.add_resource(BACnetPointName, '/points/name/<string:object_name>')
+
+bp_bacnet_sync = Blueprint('bacnet_sync', __name__, url_prefix='/api/bacnet/sync')
+api_bacnet_sync = Api(bp_bacnet_sync)
+api_bacnet_sync.add_resource(BACnetPointSync, '/points/uuid/<string:uuid>')
 
 bp_bacnet_master = Blueprint('bacnet_master', __name__, url_prefix='/api/bac/master')
 api_bacnet_master = Api(bp_bacnet_master)
