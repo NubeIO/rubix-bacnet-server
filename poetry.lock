@@ -255,7 +255,7 @@ requests = "2.25.1"
 type = "git"
 url = "https://github.com/NubeIO/mqtt-rest-bridge"
 reference = "v1.0.0"
-resolved_reference = "564638ce5c1663e494bd976db927a41bfe178a5d"
+resolved_reference = "989300f6bab491433df2685c7611500fbb01c02e"
 
 [[package]]
 name = "netifaces"

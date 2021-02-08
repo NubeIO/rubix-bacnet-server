@@ -1,4 +1,6 @@
 from flask_restful import Resource, reqparse, abort
+from flask_restful.reqparse import request
+from mrb.validator import is_bridge
 
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
@@ -43,7 +45,7 @@ class BACnetPointBase(Resource):
             priority_array_write = data.pop('priority_array_write')
             point = BACnetPointModel(uuid=uuid, **data)
             point.save_to_db(priority_array_write)
-            BACServer().add_point(point)
+            BACServer().add_point(point, not is_bridge(request.args))
             return point
         except Exception as e:
             abort(500, message=str(e))

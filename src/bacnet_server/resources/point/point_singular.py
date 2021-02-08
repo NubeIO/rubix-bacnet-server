@@ -1,6 +1,8 @@
 import copy
 
 from flask_restful import abort, marshal_with, reqparse
+from flask_restful.reqparse import request
+from mrb.validator import is_bridge
 
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
@@ -51,7 +53,7 @@ class BACnetPointSingular(BACnetPointBase):
                 PriorityArrayModel.filter_by_point_uuid(uuid).update(priority_array_write)
             BACServer().remove_point(point)
             point_return = BACnetPointModel.find_by_uuid(uuid)
-            BACServer().add_point(point_return)
+            BACServer().add_point(point_return, not is_bridge(request.args))
             return point_return
         except Exception as e:
             abort(500, message=str(e))
