@@ -39,6 +39,7 @@
     "qos": 1,
     "retain": false,
     "attempt_reconnect_on_unavailable": true,
-    "attempt_reconnect_secs": 5
+    "attempt_reconnect_secs": 5,
+    "timeout": 10
   }
 }
