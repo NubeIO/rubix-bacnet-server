@@ -30,7 +30,7 @@
   },
   "mqtt_rest_bridge_listener": {
     "enabled": true,
-    "name": "mqtt_rest_bridge_listener",
+    "name": "bacnet_mqtt_rest_bridge_listener",
     "host": "localhost",
     "port": 1883,
     "username": "username",
