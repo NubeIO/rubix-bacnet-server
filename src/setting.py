@@ -1,11 +1,9 @@
 import json
-import logging.config
 import os
 from abc import ABC
 
 from flask import Flask
-
-from src.pyinstaller import resource_path
+from mrb.setting import MqttSetting as MqttRestBridgeSetting
 
 
 class BaseSetting(ABC):
@@ -64,20 +62,32 @@ class AppSetting:
     DATA_DIR_ENV = 'RUBIX_BACNET_DATA'
     FLASK_KEY: str = 'APP_SETTING'
     default_data_dir: str = 'out'
+    default_identifier: str = 'bacnet'
     default_setting_file: str = 'config.json'
     default_logging_conf: str = 'logging.conf'
     fallback_logging_conf: str = 'config/logging.example.conf'
     fallback_prod_logging_conf: str = 'config/logging.prod.example.conf'
 
     def __init__(self, **kwargs):
+        self.__port = kwargs.get('port') or AppSetting.PORT
         self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)
+        self.__identifier = kwargs.get('identifier') or AppSetting.default_identifier
         self.__prod = kwargs.get('prod') or False
         self.__mqtt_setting = MqttSetting()
         self.__bacnet_setting = BACnetSetting()
+        self.__mqtt_rest_bridge_setting = MqttRestBridgeSetting()
+
+    @property
+    def port(self):
+        return self.__port
 
     @property
     def data_dir(self):
         return self.__data_dir
+
+    @property
+    def identifier(self):
+        return self.__identifier
 
     @property
     def prod(self) -> bool:
@@ -90,6 +100,10 @@ class AppSetting:
     @property
     def bacnet(self) -> BACnetSetting:
         return self.__bacnet_setting
+
+    @property
+    def mqtt_rest_bridge_setting(self) -> MqttRestBridgeSetting:
+        return self.__mqtt_rest_bridge_setting
 
     def serialize(self, pretty=True) -> str:
         m = {BACnetSetting.KEY: self.bacnet, MqttSetting.KEY: self.mqtt, 'prod': self.prod, 'data_dir': self.data_dir}

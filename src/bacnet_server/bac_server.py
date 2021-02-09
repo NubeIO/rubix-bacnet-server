@@ -95,7 +95,7 @@ class BACServer(metaclass=Singleton):
         self.__bacnet = None
         self.__registry = {}
 
-    def add_point(self, point):
+    def add_point(self, point, sync_to_ps: bool = True):
         [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
         # TODO: Switch cases for different type of points
         object_identifier = create_object_identifier(point.object_type.name, point.address)
@@ -112,7 +112,7 @@ class BACServer(metaclass=Singleton):
             description=point.description,
         )
         self.__bacnet.this_application.add_object(ao)
-        update_point_store(point.uuid, present_value)
+        update_point_store(point.uuid, present_value, sync_to_ps)
         self.__registry[object_identifier] = ao
         mqttc = MqttClient()
         if mqttc.config.publish_value:

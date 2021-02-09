@@ -1,6 +1,8 @@
 import copy
 
 from flask_restful import marshal_with, abort, reqparse
+from flask_restful.reqparse import request
+from mrb.validator import is_bridge
 
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
@@ -23,18 +25,20 @@ class BACnetPointName(BACnetPointBase):
     parser_patch.add_argument('data_round', type=int, required=False)
     parser_patch.add_argument('data_offset', type=float, required=False)
 
+    @classmethod
     @marshal_with(point_fields)
-    def get(self, object_name):
+    def get(cls, object_name):
         point = BACnetPointModel.find_by_object_name(object_name)
         if not point:
             abort(404, message='BACnet Point is not found')
         return point
 
+    @classmethod
     @marshal_with(point_fields)
-    def patch(self, object_name):
+    def patch(cls, object_name):
         data = BACnetPointName.parser_patch.parse_args()
         point = copy.deepcopy(BACnetPointModel.find_by_object_name(object_name))
-        self.abort_if_bacnet_is_not_running()
+        cls.abort_if_bacnet_is_not_running()
         if point is None:
             abort(404, message=f"Does not exist {object_name}")
         try:
@@ -48,7 +52,7 @@ class BACnetPointName(BACnetPointBase):
             BACnetPointModel.filter_by_uuid(point.uuid).update(non_none_data)
             BACServer().remove_point(point)
             point_return = BACnetPointModel.find_by_uuid(point.uuid)
-            BACServer().add_point(point_return)
+            BACServer().add_point(point_return, not is_bridge(request.args))
             return point_return
         except Exception as e:
             abort(500, message=str(e))

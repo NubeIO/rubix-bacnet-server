@@ -27,5 +27,19 @@
     "topic": "rubix/bacnet_server/points",
     "publish_debug": true,
     "debug_topic": "rubix/bacnet/server/debug"
+  },
+  "mqtt_rest_bridge_listener": {
+    "enabled": true,
+    "name": "mqtt_rest_bridge_listener",
+    "host": "localhost",
+    "port": 1883,
+    "username": "username",
+    "password": "password",
+    "keepalive": 60,
+    "qos": 1,
+    "retain": false,
+    "attempt_reconnect_on_unavailable": true,
+    "attempt_reconnect_secs": 5,
+    "timeout": 10
   }
 }

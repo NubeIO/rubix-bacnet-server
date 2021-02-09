@@ -9,18 +9,21 @@ from src.bacnet_server.resources.point.point_base import BACnetPointBase
 
 
 class BACnetPointPlural(BACnetPointBase):
-    @marshal_with(point_fields, envelope="points")
-    def get(self):
+    @classmethod
+    @marshal_with(point_fields)
+    def get(cls):
         return BACnetPointModel.query.all()
 
+    @classmethod
     @marshal_with(point_fields)
-    def post(self):
-        self.abort_if_bacnet_is_not_running()
+    def post(cls):
+        cls.abort_if_bacnet_is_not_running()
         _uuid = str(uuid.uuid4())
         data = BACnetPointPlural.parser.parse_args()
-        return self.add_point(data, _uuid)
+        return cls.add_point(data, _uuid)
 
-    def delete(self):
+    @classmethod
+    def delete(cls):
         BACnetPointModel.delete_all_from_db()
         BACServer().remove_all_points()
         return '', 204

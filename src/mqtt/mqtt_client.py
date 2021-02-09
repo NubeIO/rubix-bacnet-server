@@ -46,7 +46,11 @@ class MqttClient(metaclass=Singleton):
                 self.__client = None
                 logger.error(str(e))
                 return
+        logger.info(f'MQTT client {self.config.name} connected {self.to_string()}')
         self.__client.loop_forever()
+
+    def to_string(self) -> str:
+        return f'{self.config.host}:{self.config.port}'
 
     def get_topic(self, object_identifier, type_):
         return f"{self.config.topic}/{type_}/{object_identifier}"
