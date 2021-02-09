@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v1.3.7](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.3.7) (2021-02-09)
+
+### Added
+
+- MQTT REST bridge integration & Generic Point <> BACnet Point sync service
+
+
 ## [v1.3.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.3.2) (2021-01-10)
 
 ### Added
