@@ -114,6 +114,7 @@ class AppSetting:
         data = self.__read_file(setting_file, self.__data_dir, is_json_str)
         self.__mqtt_setting = self.__mqtt_setting.reload(data.get(MqttSetting.KEY))
         self.__bacnet_setting = self.__bacnet_setting.reload(data.get(BACnetSetting.KEY))
+        self.__mqtt_rest_bridge_setting = self.__mqtt_rest_bridge_setting.reload(data.get('mqtt_rest_bridge_listener'))
         return self
 
     def init_app(self, app: Flask):
