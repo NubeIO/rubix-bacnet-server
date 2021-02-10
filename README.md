@@ -202,7 +202,7 @@ body:
 {
     "ip": "192.168.0.101",
     "port": 47808,
-    "device_id": "123",
+    "device_id": "2508",
     "local_obj_name": "Nube-IO",
     "model_name": "rubix-bac-stack-RC4",
     "vendor_id": "1173",
@@ -217,7 +217,7 @@ vendor_name
 
 ```
 {
-       "device_id": "123"
+       "device_id": "2508"
 }
 ```
 
@@ -227,26 +227,26 @@ vendor_name
 
 ```
 read presentValue
-./bacrp 123 4 1 85
+./bacrp 2508 4 1 85
 read array
-./bacrp 123 4 1 87
+./bacrp 2508 4 1 87
 Write a value to @16 of 1
-./bacwp 123 4 1 85 16 -1 9 1
+./bacwp 2508 4 1 85 16 -1 9 1
 Write a value to @16 of null
-./bacwp 123 4 1 85 16 -1 0 0
+./bacwp 2508 4 1 85 16 -1 0 0
 ```
 
 ### Using bacstack to test for a AO
 
 ```
 read presentValue
-./bacrp 123 1 1 85
+./bacrp 2508 1 1 85
 read array
-./bacrp 123 1 1 87
+./bacrp 2508 1 1 87
 Write a value to @16 of 1
-./bacwp 123 1 1 85 16 -1 4 1
+./bacwp 2508 1 1 85 16 -1 4 1
 Write a value to @16 of null
-./bacwp 123 1 1 85 16 -1 0 0
+./bacwp 2508 1 1 85 16 -1 0 0
 ```
 
 ### Using bacstack to read device/point info
@@ -255,11 +255,11 @@ point info
 
 ```
 pointName
-./bacrp 123 1 1 77
+./bacrp 2508 1 1 77
 pointDisc
-./bacrp 123 1 1 28
+./bacrp 2508 1 1 28
 pointUnits
-./bacrp 123 1 1 117
+./bacrp 2508 1 1 117
 pointEventState
 ./bacrp 123 1 1 36
 ```
@@ -267,14 +267,14 @@ pointEventState
 device info, if the deviceId is 123
 
 ```
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 77
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 77
 "nube-io"
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 75
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 75
 (device, 123)
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 112
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 112
 operational-read-only
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 121
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 121
 "NUBE-IO-IO vendor_name"
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 123 8 123 120
+debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 120
 1173
 ```
