@@ -254,8 +254,8 @@ requests = "2.25.1"
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/mqtt-rest-bridge"
-reference = "v1.0.0"
-resolved_reference = "8699a5b719026183eb6c2fff3266ce37ecf720c7"
+reference = "v1.1.0"
+resolved_reference = "e848e96f4ec5d85a37bb4dd18f83f06e99d0a3dc"
 
 [[package]]
 name = "netifaces"
@@ -445,7 +445,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "c73346cedd1e349c1a764f56df7bad5c4f8d9ad67f0388ec5b02d93d6255b2b0"
+content-hash = "bc5d865b748c464f637f460d526ec2908e0b95087c6ffadad489d57312e32455"
 
 [metadata.files]
 altgraph = [

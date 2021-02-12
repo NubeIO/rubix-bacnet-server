@@ -39,4 +39,10 @@ class Background:
 
         if setting.mqtt_rest_bridge_setting.enabled:
             FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
-                                              mqtt_setting=setting.mqtt_rest_bridge_setting).start, daemon=True).start()
+                                              mqtt_setting=setting.mqtt_rest_bridge_setting,
+                                              callback=Background.sync_points_values).start, daemon=True).start()
+
+    @staticmethod
+    def sync_points_values():
+        from .bacnet_server.models.model_point_store import BACnetPointStoreModel
+        BACnetPointStoreModel.sync_points_values()

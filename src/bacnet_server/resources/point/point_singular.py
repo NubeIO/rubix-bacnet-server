@@ -7,7 +7,7 @@ from mrb.validator import is_bridge
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
-from src.bacnet_server.resources.mod_fields import point_fields
+from src.bacnet_server.resources.model_fields import point_fields
 from src.bacnet_server.resources.point.point_base import BACnetPointBase
 
 

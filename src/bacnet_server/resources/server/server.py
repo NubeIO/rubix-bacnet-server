@@ -3,7 +3,7 @@ from flask_restful import reqparse, marshal_with, Resource, abort
 from src import db
 from src.bacnet_server.bac_server import BACServer
 from src.bacnet_server.models.model_server import BACnetServerModel
-from src.bacnet_server.resources.mod_fields import server_field
+from src.bacnet_server.resources.model_fields import server_field
 
 
 class BACnetServer(Resource):
