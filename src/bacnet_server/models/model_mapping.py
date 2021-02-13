@@ -17,7 +17,7 @@ class BPGPointMapping(ModelBase):
     @validates('generic_point_uuid')
     def validate_generic_point_uuid(self, _, value):
         response: Response = api_to_topic_mapper(api=f'/api/generic/points/{value}',
-                                                 destination_identifier=f'ps', http_method=HttpMethod.GET)
+                                                 destination_identifier='ps', http_method=HttpMethod.GET)
         if response.error:
             raise ValueError(response.error_message)
         return value
