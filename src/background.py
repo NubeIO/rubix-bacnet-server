@@ -44,5 +44,6 @@ class Background:
 
     @staticmethod
     def sync_points_values():
+        """Sync Points values to the Point Server Points"""
         from .bacnet_server.models.model_point_store import BACnetPointStoreModel
         BACnetPointStoreModel.sync_points_values()

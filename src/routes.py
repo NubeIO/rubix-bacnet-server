@@ -21,15 +21,15 @@ api_bacnet_server.add_resource(BACnetPointObject, '/points/obj/<string:object_ty
 api_bacnet_server.add_resource(BACnetPointName, '/points/name/<string:object_name>')
 
 # BACnet points <> Generic points mappings
-bp_bp_gp_mapping = Blueprint('bp_gp_mappings', __name__, url_prefix='/api/bp_gp/mappings')
-api_bp_gp_mapping = Api(bp_bp_gp_mapping)
-api_bp_gp_mapping.add_resource(BPGPMappingResourceList, '')
-api_bp_gp_mapping.add_resource(GBPMappingResourceByBACnetPointUUID, '/bacnet/<string:point_uuid>')
-api_bp_gp_mapping.add_resource(GBPMappingResourceByGenericPointUUID, '/generic/<string:point_uuid>')
+bp_mapping_bp_gp = Blueprint('mappings_bp_gp', __name__, url_prefix='/api/mappings/bp_gp')
+api_mapping_bp_gp = Api(bp_mapping_bp_gp)
+api_mapping_bp_gp.add_resource(BPGPMappingResourceList, '')
+api_mapping_bp_gp.add_resource(GBPMappingResourceByBACnetPointUUID, '/bacnet/<string:point_uuid>')
+api_mapping_bp_gp.add_resource(GBPMappingResourceByGenericPointUUID, '/generic/<string:point_uuid>')
 
-bp_bp_gp_sync = Blueprint('bp_gp_sync', __name__, url_prefix='/api/bp_gp/sync')
-api_bp_gp_sync = Api(bp_bp_gp_sync)
-api_bp_gp_sync.add_resource(BPGPSync, '')
+bp_sync_bp_gp = Blueprint('sync_bp_gp', __name__, url_prefix='/api/sync/bp_gp')
+api_sync_bp_gp = Api(bp_sync_bp_gp)
+api_sync_bp_gp.add_resource(BPGPSync, '')
 
 bp_system = Blueprint('system', __name__, url_prefix='/api/system')
 api_system = Api(bp_system)
