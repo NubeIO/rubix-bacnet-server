@@ -1,29 +1,8 @@
-from threading import Thread
-
-from mrb.mapper import api_to_topic_mapper
-from mrb.message import HttpMethod, Response
-from mrb.validator import is_valid
-
 from src import db
 
 
-def update_point_store(point_uuid: str, present_value: float, sync_to_ps: bool = True):
+def update_point_store(point_uuid: str, present_value: float, sync: bool = True):
     from src.bacnet_server.models.model_point_store import BACnetPointStoreModel
     point_store = BACnetPointStoreModel(point_uuid=point_uuid, present_value=present_value)
-    point_store.update()
+    point_store.update(sync)
     db.session.commit()
-    Thread(target=sync_to_point_server, daemon=True,
-           kwargs={'point_uuid': point_uuid, 'present_value': present_value, 'sync_to_ps': sync_to_ps}).start()
-
-
-def sync_to_point_server(point_uuid: str, present_value: float, sync_to_ps: bool):
-    if sync_to_ps:
-        mapping: Response = api_to_topic_mapper(api=f"/api/gbp/mapping/bacnet/{point_uuid}",
-                                                destination_identifier='ps',
-                                                http_method=HttpMethod.GET)
-        if is_valid(mapping):
-            api_to_topic_mapper(
-                api=f"/api/generic/points_value/uuid/{mapping.content.get('generic_point_uuid')}",
-                destination_identifier='ps',
-                body={"priority_array": {"_16": present_value}},
-                http_method=HttpMethod.PATCH)

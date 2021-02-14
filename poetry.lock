@@ -23,8 +23,8 @@ optional = false
 python-versions = "*"
 
 [package.dependencies]
-bacpypes = "*"
 colorama = "*"
+bacpypes = "*"
 netifaces = "*"
 
 [[package]]
@@ -87,15 +87,15 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.dependencies]
-click = ">=5.1"
 itsdangerous = ">=0.24"
 Jinja2 = ">=2.10.1"
+click = ">=5.1"
 Werkzeug = ">=0.15"
 
 [package.extras]
-dev = ["pytest", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
-docs = ["sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
 dotenv = ["python-dotenv"]
+docs = ["sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
+dev = ["pytest", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
 
 [[package]]
 name = "flask-cors"
@@ -118,8 +118,8 @@ optional = false
 python-versions = "*"
 
 [package.dependencies]
-aniso8601 = ">=0.82"
 Flask = ">=0.8"
+aniso8601 = ">=0.82"
 pytz = "*"
 six = ">=1.3.0"
 
@@ -155,17 +155,17 @@ optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
 [package.dependencies]
-cffi = {version = ">=1.12.2", markers = "platform_python_implementation == \"CPython\" and sys_platform == \"win32\""}
-greenlet = {version = ">=0.4.17,<2.0", markers = "platform_python_implementation == \"CPython\""}
-"zope.event" = "*"
 "zope.interface" = "*"
+greenlet = {version = ">=0.4.17,<2.0", markers = "platform_python_implementation == \"CPython\""}
+cffi = {version = ">=1.12.2", markers = "platform_python_implementation == \"CPython\" and sys_platform == \"win32\""}
+"zope.event" = "*"
 
 [package.extras]
-dnspython = ["dnspython (>=1.16.0,<2.0)", "idna"]
+test = ["dnspython (>=1.16.0,<2.0)", "idna", "requests", "objgraph", "cffi (>=1.12.2)", "selectors2", "futures", "mock", "backports.socketpair", "contextvars (==2.4)", "coverage (>=5.0)", "coveralls (>=1.7.0)", "psutil (>=5.7.0)"]
 docs = ["repoze.sphinx.autointerface", "sphinxcontrib-programoutput"]
+dnspython = ["dnspython (>=1.16.0,<2.0)", "idna"]
 monitor = ["psutil (>=5.7.0)"]
 recommended = ["dnspython (>=1.16.0,<2.0)", "idna", "cffi (>=1.12.2)", "selectors2", "backports.socketpair", "psutil (>=5.7.0)"]
-test = ["dnspython (>=1.16.0,<2.0)", "idna", "requests", "objgraph", "cffi (>=1.12.2)", "selectors2", "futures", "mock", "backports.socketpair", "contextvars (==2.4)", "coverage (>=5.0)", "coveralls (>=1.7.0)", "psutil (>=5.7.0)"]
 
 [[package]]
 name = "greenlet"
@@ -184,10 +184,10 @@ optional = false
 python-versions = ">=3.4"
 
 [package.extras]
-eventlet = ["eventlet (>=0.9.7)"]
+tornado = ["tornado (>=0.2)"]
 gevent = ["gevent (>=0.13)"]
 setproctitle = ["setproctitle"]
-tornado = ["tornado (>=0.2)"]
+eventlet = ["eventlet (>=0.9.7)"]
 
 [[package]]
 name = "idna"
@@ -240,7 +240,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
 [[package]]
 name = "mqtt-rest-bridge"
-version = "1.0.0"
+version = "1.1.0"
 description = "MQTT-REST-Bridge"
 category = "main"
 optional = false
@@ -254,8 +254,8 @@ requests = "2.25.1"
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/mqtt-rest-bridge"
-reference = "v1.0.0"
-resolved_reference = "8699a5b719026183eb6c2fff3266ce37ecf720c7"
+reference = "v1.1.0"
+resolved_reference = "c675833f46e3cf7044bf3f6abcc9cc2cc6296f5f"
 
 [[package]]
 name = "netifaces"
@@ -304,15 +304,15 @@ optional = false
 python-versions = "*"
 
 [package.dependencies]
-altgraph = "*"
-macholib = {version = ">=1.8", markers = "sys_platform == \"darwin\""}
-pefile = {version = ">=2017.8.1", markers = "sys_platform == \"win32\""}
-pyinstaller-hooks-contrib = ">=2020.6"
 pywin32-ctypes = {version = ">=0.2.0", markers = "sys_platform == \"win32\""}
+pyinstaller-hooks-contrib = ">=2020.6"
+altgraph = "*"
+pefile = {version = ">=2017.8.1", markers = "sys_platform == \"win32\""}
+macholib = {version = ">=1.8", markers = "sys_platform == \"darwin\""}
 
 [package.extras]
-encryption = ["tinyaes (>=1.0.0)"]
 hook_testing = ["pytest (>=2.7.3)", "execnet (>=1.5.0)", "psutil"]
+encryption = ["tinyaes (>=1.0.0)"]
 
 [[package]]
 name = "pyinstaller-hooks-contrib"
@@ -347,9 +347,9 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.dependencies]
+idna = ">=2.5,<3"
 certifi = ">=2017.4.17"
 chardet = ">=3.0.2,<5"
-idna = ">=2.5,<3"
 urllib3 = ">=1.21.1,<1.27"
 
 [package.extras]
@@ -373,16 +373,16 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.extras]
-mssql = ["pyodbc"]
-mssql_pymssql = ["pymssql"]
-mssql_pyodbc = ["pyodbc"]
-mysql = ["mysqlclient"]
-oracle = ["cx-oracle"]
-postgresql = ["psycopg2"]
 postgresql_pg8000 = ["pg8000"]
-postgresql_psycopg2binary = ["psycopg2-binary"]
+postgresql = ["psycopg2"]
 postgresql_psycopg2cffi = ["psycopg2cffi"]
 pymysql = ["pymysql"]
+mssql_pymssql = ["pymssql"]
+postgresql_psycopg2binary = ["psycopg2-binary"]
+mysql = ["mysqlclient"]
+oracle = ["cx-oracle"]
+mssql = ["pyodbc"]
+mssql_pyodbc = ["pyodbc"]
 
 [[package]]
 name = "toml"
@@ -414,8 +414,8 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.extras]
-dev = ["pytest", "pytest-timeout", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinx-issues"]
 watchdog = ["watchdog"]
+dev = ["pytest", "pytest-timeout", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinx-issues"]
 
 [[package]]
 name = "zope.event"
@@ -426,8 +426,8 @@ optional = false
 python-versions = "*"
 
 [package.extras]
-docs = ["sphinx"]
 test = ["zope.testrunner"]
+docs = ["sphinx"]
 
 [[package]]
 name = "zope.interface"
@@ -438,14 +438,14 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.extras]
-docs = ["sphinx", "repoze.sphinx.autointerface"]
 test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
+docs = ["sphinx", "repoze.sphinx.autointerface"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "c73346cedd1e349c1a764f56df7bad5c4f8d9ad67f0388ec5b02d93d6255b2b0"
+content-hash = "bc5d865b748c464f637f460d526ec2908e0b95087c6ffadad489d57312e32455"
 
 [metadata.files]
 altgraph = [

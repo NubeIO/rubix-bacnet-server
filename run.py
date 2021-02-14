@@ -7,7 +7,8 @@ import click
 
 from src import AppSetting, GunicornFlaskApplication
 
-CLI_CTX_SETTINGS = dict(help_option_names=["-h", "--help"], max_content_width=120)
+CLI_CTX_SETTINGS = dict(help_option_names=["-h", "--help"], max_content_width=120, ignore_unknown_options=True,
+                        allow_extra_args=True)
 
 
 def number_of_workers():
@@ -22,7 +23,7 @@ def number_of_workers():
               help='Identifier')
 @click.option('--prod', is_flag=True, help='Production mode')
 @click.option('-s', '--setting-file', help='Rubix BACnet: setting json file', default=AppSetting.default_setting_file)
-@click.option('-l', '--logging-conf', help='Rubix-Lora: logging config file')
+@click.option('-l', '--logging-conf', help='Rubix BACnet: logging config file')
 @click.option('--workers', type=int, help='Gunicorn: The number of worker processes for handling requests.')
 @click.option('-c', '--gunicorn-config', help='Gunicorn: config file(gunicorn.conf.py)')
 @click.option('--log-level', type=click.Choice(['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG'], case_sensitive=False),
