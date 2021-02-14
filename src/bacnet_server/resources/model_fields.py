@@ -55,7 +55,8 @@ server_field = {
     'vendor_name': fields.String,
 }
 
-bp_gp_mapping_fields = {
+mapping_bp_gp_fields = {
+    'uuid': fields.String,
     'bacnet_point_uuid': fields.String,
     'generic_point_uuid': fields.String,
     'bacnet_point_name': fields.String,

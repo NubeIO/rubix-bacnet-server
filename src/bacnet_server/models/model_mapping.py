@@ -9,7 +9,8 @@ from src.bacnet_server.models.model_base import ModelBase
 class BPGPointMapping(ModelBase):
     __tablename__ = 'mappings_bp_gp'
 
-    bacnet_point_uuid = db.Column(db.String(80), db.ForeignKey('bac_points.uuid'), primary_key=True, nullable=False)
+    uuid = db.Column(db.String, primary_key=True)
+    bacnet_point_uuid = db.Column(db.String(80), db.ForeignKey('bac_points.uuid'), nullable=False)
     generic_point_uuid = db.Column(db.String, nullable=False, unique=True)
     bacnet_point_name = db.Column(db.String(80), nullable=False)
     generic_point_name = db.Column(db.String(80), nullable=False)
