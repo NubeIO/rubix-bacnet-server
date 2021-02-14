@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.3.9](https://github.com/NubeIO/rubix-point-server/tree/v1.3.9) (2020-02-15)
+### Added
+- Updates to protocal-bridge
 
 ## [v1.3.8](https://github.com/NubeIO/rubix-point-server/tree/v1.3.2) (2020-02-09)
 ### Added
