@@ -33,21 +33,24 @@ class BACnetPointStoreModel(db.Model):
                                              or_(self.__table__.c.present_value != self.present_value))))
         updated: bool = bool(res.rowcount)
         if updated and sync:
-            FlaskThread(target=self.__sync_point_value, daemon=True).start()
+            FlaskThread(target=self.sync_point_value, daemon=True).start()
         return updated
 
-    def __sync_point_value(self):
+    def sync_point_value_with_mapping(self, mapping: BPGPointMapping):
+        api_to_topic_mapper(
+            api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
+            destination_identifier='ps',
+            body={"priority_array": {"_16": self.present_value}},
+            http_method=HttpMethod.PATCH)
+
+    def sync_point_value(self):
         mapping: BPGPointMapping = BPGPointMapping.find_by_bacnet_point_uuid(self.point_uuid)
         if mapping:
-            api_to_topic_mapper(
-                api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
-                destination_identifier='ps',
-                body={"priority_array": {"_16": self.present_value}},
-                http_method=HttpMethod.PATCH)
+            self.sync_point_value_with_mapping(mapping)
 
     @classmethod
     def sync_points_values(cls):
         mappings: List[BPGPointMapping] = BPGPointMapping.find_all()
         for mapping in mappings:
             point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)
-            FlaskThread(target=point_store.__sync_point_value, daemon=True).start()
+            FlaskThread(target=point_store.sync_point_value, daemon=True).start()
