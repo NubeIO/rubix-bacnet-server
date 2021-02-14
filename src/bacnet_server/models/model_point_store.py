@@ -53,4 +53,5 @@ class BACnetPointStoreModel(db.Model):
         mappings: List[BPGPointMapping] = BPGPointMapping.find_all()
         for mapping in mappings:
             point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)
-            FlaskThread(target=point_store.sync_point_value, daemon=True).start()
+            if point_store:
+                FlaskThread(target=point_store.sync_point_value, daemon=True).start()
