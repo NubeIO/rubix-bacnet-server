@@ -20,7 +20,7 @@ class MqttClient(metaclass=Singleton):
         return self.__config
 
     def status(self) -> bool:
-        return self.__client.is_connected() if self.config and self.config.enabled and self.__client else False
+        return bool(self.__client.is_connected() if self.config and self.config.enabled and self.__client else False)
 
     def start(self, config: MqttSetting):
         self.__config = config

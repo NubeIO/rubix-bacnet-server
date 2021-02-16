@@ -240,7 +240,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
 [[package]]
 name = "mqtt-rest-bridge"
-version = "1.1.0"
+version = "1.1.1"
 description = "MQTT-REST-Bridge"
 category = "main"
 optional = false
@@ -254,8 +254,8 @@ requests = "2.25.1"
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/mqtt-rest-bridge"
-reference = "v1.1.0"
-resolved_reference = "c675833f46e3cf7044bf3f6abcc9cc2cc6296f5f"
+reference = "v1.1.1"
+resolved_reference = "2586dd8abfd0acb5765f8e09d9d5087a12796aea"
 
 [[package]]
 name = "netifaces"
@@ -445,7 +445,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "bc5d865b748c464f637f460d526ec2908e0b95087c6ffadad489d57312e32455"
+content-hash = "b2996553b6cb281dff9e9431a14ecde070b370c069f3a6c324351bc227c5b133"
 
 [metadata.files]
 altgraph = [
