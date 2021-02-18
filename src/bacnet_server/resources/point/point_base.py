@@ -53,4 +53,4 @@ class BACnetPointBase(Resource):
     @classmethod
     def abort_if_bacnet_is_not_running(cls):
         if not BACServer().status():
-            abort(400, message='Bacnet server is not running')
+            abort(400, message='BACnet server is not running')
