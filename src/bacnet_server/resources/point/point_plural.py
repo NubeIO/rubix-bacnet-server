@@ -12,7 +12,7 @@ class BACnetPointPlural(BACnetPointBase):
     @classmethod
     @marshal_with(point_fields)
     def get(cls):
-        return BACnetPointModel.query.all()
+        return BACnetPointModel.find_all()
 
     @classmethod
     @marshal_with(point_fields)
