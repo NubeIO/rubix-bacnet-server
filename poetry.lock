@@ -375,8 +375,8 @@ SQLAlchemy = ">=1.3.23"
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/rubix-http"
-reference = "v1.0.0"
-resolved_reference = "deb8c8f02692f22c783396c2b2b3721b57175943"
+reference = "v1.0.1"
+resolved_reference = "f6a5bb0e547ce367b273844cd91be86cf4f25fac"
 
 [[package]]
 name = "six"
@@ -467,7 +467,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "b12af4fc31bda05d9c6c07ad75573896fe59aae4ac240b0a7bb8c573a0994106"
+content-hash = "a16aa03455d8fdc31488eb9f87251866dd2db4af059a4d0b5fb895a27b6d450d"
 
 [metadata.files]
 altgraph = [

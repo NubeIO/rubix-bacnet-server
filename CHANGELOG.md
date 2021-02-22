@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.4.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.2) (2020-02-22)
+### Added
+- Point query issue fix
+- Upgrade rubix-http version
+
 ## [v1.4.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.1) (2020-02-22)
 ### Added
 - Support for Generic Point payload write

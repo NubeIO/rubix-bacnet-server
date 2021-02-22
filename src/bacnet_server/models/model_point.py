@@ -46,7 +46,7 @@ class BACnetPointModel(db.Model):
 
     @classmethod
     def find_all(cls):
-        return cls.query.query.all()
+        return cls.query.all()
 
     @classmethod
     def find_by_uuid(cls, uuid):
