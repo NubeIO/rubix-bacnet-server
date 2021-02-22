@@ -1,9 +1,9 @@
-from flask_restful import Resource
+from rubix_http.resource import RubixResource
 
 from src.bacnet_server.models.model_point_store import BACnetPointStoreModel
 
 
-class BPGPSync(Resource):
+class BPGPSync(RubixResource):
 
     @classmethod
     def get(cls):

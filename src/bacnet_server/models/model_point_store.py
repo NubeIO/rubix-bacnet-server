@@ -43,7 +43,7 @@ class BACnetPointStoreModel(db.Model):
         api_to_topic_mapper(
             api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
             destination_identifier='ps',
-            body={"priority_array": {"_16": self.present_value}},
+            body={"value": self.present_value},
             http_method=HttpMethod.PATCH)
 
     def __sync_point_value(self):

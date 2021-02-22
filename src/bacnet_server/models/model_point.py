@@ -1,3 +1,7 @@
+import re
+
+from sqlalchemy.orm import validates
+
 from src import db
 from src.bacnet_server.interfaces.point.points import PointType, Units, BACnetEventState
 from src.bacnet_server.models.model_point_store import BACnetPointStoreModel
@@ -33,6 +37,16 @@ class BACnetPointModel(db.Model):
 
     def __repr__(self):
         return f"BACnetPointModel({self.uuid})"
+
+    @validates('object_name')
+    def validate_object_name(self, _, value):
+        if not re.match("^([A-Za-z0-9_-])+$", value):
+            raise ValueError("object_name should be alphanumeric and can contain '_', '-'")
+        return value
+
+    @classmethod
+    def find_all(cls):
+        return cls.query.query.all()
 
     @classmethod
     def find_by_uuid(cls, uuid):
