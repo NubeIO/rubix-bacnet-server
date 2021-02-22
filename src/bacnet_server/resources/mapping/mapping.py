@@ -1,8 +1,9 @@
 import uuid as uuid_
 from abc import abstractmethod
 
-from flask_restful import Resource, marshal_with, reqparse, abort
-from sqlalchemy.exc import IntegrityError
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src.bacnet_server.models.model_mapping import BPGPointMapping
 from src.bacnet_server.models.model_point_store import BACnetPointStoreModel
@@ -15,7 +16,7 @@ def sync_point_value(mapping: BPGPointMapping):
     return mapping
 
 
-class BPGPMappingResourceList(Resource):
+class BPGPMappingResourceList(RubixResource):
     @classmethod
     @marshal_with(mapping_bp_gp_fields)
     def get(cls):
@@ -29,37 +30,30 @@ class BPGPMappingResourceList(Resource):
         parser.add_argument('generic_point_uuid', type=str, required=True)
         parser.add_argument('bacnet_point_name', type=str, required=True)
         parser.add_argument('generic_point_name', type=str, required=True)
-        try:
-            data = parser.parse_args()
-            data.uuid = str(uuid_.uuid4())
-            mapping: BPGPointMapping = BPGPointMapping(**data)
-            mapping.save_to_db()
-            sync_point_value(mapping)
-            return mapping
-        except IntegrityError as e:
-            abort(400, message=str(e.orig))
-        except ValueError as e:
-            abort(400, message=str(e))
-        except Exception as e:
-            abort(500, message=str(e))
+
+        data = parser.parse_args()
+        data.uuid = str(uuid_.uuid4())
+        mapping: BPGPointMapping = BPGPointMapping(**data)
+        mapping.save_to_db()
+        sync_point_value(mapping)
+        return mapping
 
 
-class BPGPMappingResourceBase(Resource):
+class BPGPMappingResourceBase(RubixResource):
     @classmethod
     @marshal_with(mapping_bp_gp_fields)
     def get(cls, uuid):
         mapping = cls.get_mapping(uuid)
         if not mapping:
-            abort(404, message=f'Does not exist {uuid}')
+            raise NotFoundException('Does not exist {uuid}')
         return mapping
 
     @classmethod
     def delete(cls, uuid):
         mapping = cls.get_mapping(uuid)
-        if mapping is None:
-            abort(404, message=f'Does not exist {uuid}')
-        else:
-            mapping.delete_from_db()
+        if not mapping:
+            raise NotFoundException(f'Does not exist {uuid}')
+        mapping.delete_from_db()
         return '', 204
 
     @classmethod
@@ -81,15 +75,12 @@ class BPGPMappingResourceByUUID(BPGPMappingResourceBase):
         data = BPGPMappingResourceByUUID.parser.parse_args()
         mapping = cls.get_mapping(uuid)
         if not mapping:
-            abort(404, message='Does not exist {}'.format(uuid))
-        try:
-            BPGPointMapping.filter_by_uuid(uuid).update(data)
-            BPGPointMapping.commit()
-            output_mapping: BPGPointMapping = cls.get_mapping(uuid)
-            sync_point_value(output_mapping)
-            return output_mapping
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException(f'Does not exist {uuid}')
+        BPGPointMapping.filter_by_uuid(uuid).update(data)
+        BPGPointMapping.commit()
+        output_mapping: BPGPointMapping = cls.get_mapping(uuid)
+        sync_point_value(output_mapping)
+        return output_mapping
 
     @classmethod
     def get_mapping(cls, uuid) -> BPGPointMapping:

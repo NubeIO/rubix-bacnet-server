@@ -1,9 +1,10 @@
 import copy
 from abc import abstractmethod
 
-from flask_restful import reqparse, abort, marshal_with
+from flask_restful import reqparse, marshal_with
 from flask_restful.reqparse import request
 from mrb.validator import is_bridge
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
@@ -31,7 +32,7 @@ class BACnetPointSingular(BACnetPointBase):
     def get(cls, **kwargs):
         point: BACnetPointModel = cls.get_point(**kwargs)
         if not point:
-            abort(404, message='BACnet Point is not found')
+            raise NotFoundException('BACnet Point is not found')
         return point
 
     @classmethod
@@ -41,28 +42,25 @@ class BACnetPointSingular(BACnetPointBase):
         point: BACnetPointModel = copy.deepcopy(cls.get_point(**kwargs))
         cls.abort_if_bacnet_is_not_running()
         if point is None:
-            abort(404, message=f"Does not exist with {kwargs}")
-        try:
-            priority_array_write = data.pop('priority_array_write')
-            non_none_data = {}
-            for key in data.keys():
-                if data[key] is not None:
-                    non_none_data[key] = data[key]
-            if priority_array_write:
-                PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
-            BACnetPointModel.filter_by_uuid(point.uuid).update(non_none_data)
-            BACServer().remove_point(point)
-            point_return = BACnetPointModel.find_by_uuid(point.uuid)
-            BACServer().add_point(point_return, not is_bridge(request.args))
-            return point_return
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException(f"Does not exist with {kwargs}")
+        priority_array_write = data.pop('priority_array_write')
+        non_none_data = {}
+        for key in data.keys():
+            if data[key] is not None:
+                non_none_data[key] = data[key]
+        if priority_array_write:
+            PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
+        BACnetPointModel.filter_by_uuid(point.uuid).update(non_none_data)
+        BACServer().remove_point(point)
+        point_return = BACnetPointModel.find_by_uuid(point.uuid)
+        BACServer().add_point(point_return, not is_bridge(request.args))
+        return point_return
 
     @classmethod
     def delete(cls, **kwargs):
         point: BACnetPointModel = cls.get_point(**kwargs)
         if not point:
-            abort(404, message=f'Not found {kwargs}')
+            raise NotFoundException(f'Not found {kwargs}')
         BACServer().remove_point(point)
         point.delete_from_db()
         return '', 204

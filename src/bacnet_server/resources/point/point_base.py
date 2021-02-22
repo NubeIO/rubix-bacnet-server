@@ -1,12 +1,14 @@
-from flask_restful import Resource, reqparse, abort
+from flask_restful import reqparse
 from flask_restful.reqparse import request
 from mrb.validator import is_bridge
+from rubix_http.exceptions.exception import BadDataException
+from rubix_http.resource import RubixResource
 
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
 
 
-class BACnetPointBase(Resource):
+class BACnetPointBase(RubixResource):
     parser = reqparse.RequestParser()
     parser.add_argument('object_type', type=str)
     parser.add_argument('object_name', type=str)
@@ -41,16 +43,13 @@ class BACnetPointBase(Resource):
 
     @classmethod
     def add_point(cls, data, uuid):
-        try:
-            priority_array_write = data.pop('priority_array_write')
-            point = BACnetPointModel(uuid=uuid, **data)
-            point.save_to_db(priority_array_write)
-            BACServer().add_point(point, not is_bridge(request.args))
-            return point
-        except Exception as e:
-            abort(500, message=str(e))
+        priority_array_write = data.pop('priority_array_write')
+        point = BACnetPointModel(uuid=uuid, **data)
+        point.save_to_db(priority_array_write)
+        BACServer().add_point(point, not is_bridge(request.args))
+        return point
 
     @classmethod
     def abort_if_bacnet_is_not_running(cls):
         if not BACServer().status():
-            abort(400, message='BACnet server is not running')
+            raise BadDataException('BACnet server is not running')

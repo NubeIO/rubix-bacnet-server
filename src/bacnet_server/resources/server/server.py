@@ -1,4 +1,5 @@
-from flask_restful import reqparse, marshal_with, Resource, abort
+from flask_restful import reqparse, marshal_with
+from rubix_http.resource import RubixResource
 
 from src import db
 from src.bacnet_server.bac_server import BACServer
@@ -6,7 +7,7 @@ from src.bacnet_server.models.model_server import BACnetServerModel
 from src.bacnet_server.resources.model_fields import server_field
 
 
-class BACnetServer(Resource):
+class BACnetServer(RubixResource):
     parser = reqparse.RequestParser()
     parser.add_argument('ip', type=str)
     parser.add_argument('port', type=int)
@@ -31,10 +32,6 @@ class BACnetServer(Resource):
                 data_to_update[key] = data[key]
         BACnetServerModel.query.filter().update(data_to_update)
         new_bacnet_server = BACnetServerModel.find_one()
-        try:
-            BACServer().restart_bac(new_bacnet_server)
-            db.session.commit()
-            return new_bacnet_server
-        except Exception as e:
-            db.session.rollback()
-            abort(501, message=str(e))
+        BACServer().restart_bac(new_bacnet_server)
+        db.session.commit()
+        return new_bacnet_server
