@@ -4,6 +4,7 @@ from abc import ABC
 
 from flask import Flask
 from mrb.setting import MqttSetting as MqttRestBridgeSetting
+from rubix_mqtt.setting import MqttSettingBase
 
 
 class BaseSetting(ABC):
@@ -25,7 +26,7 @@ class BACnetSetting(BaseSetting):
 
     def __init__(self):
         self.enabled: bool = True
-        self.ip = '192.168.0.100'
+        self.ip = '0.0.0.0'
         self.port = 47808
         self.device_id = 123
         self.local_obj_name = 'Nube-IO'
@@ -35,22 +36,12 @@ class BACnetSetting(BaseSetting):
         self.attempt_reconnect_secs = 5
 
 
-class MqttSetting(BaseSetting):
+class MqttSetting(MqttSettingBase):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = True
+        super().__init__()
         self.name = 'bacnet-server-mqtt'
-        self.host = '0.0.0.0'
-        self.port = 1883
-        self.authentication = False
-        self.username = 'username'
-        self.password = 'password'
-        self.keepalive = 60
-        self.qos = 1
-        self.retain = False
-        self.attempt_reconnect_on_unavailable = True
-        self.attempt_reconnect_secs = 5
         self.publish_value = True
         self.topic = 'rubix/bacnet_server/points'
         self.publish_debug = True
