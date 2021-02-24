@@ -240,7 +240,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
 [[package]]
 name = "mqtt-rest-bridge"
-version = "1.1.1"
+version = "1.1.2"
 description = "MQTT-REST-Bridge"
 category = "main"
 optional = false
@@ -250,12 +250,13 @@ develop = false
 [package.dependencies]
 paho-mqtt = "1.5.1"
 requests = "2.25.1"
+rubix-mqtt = "rev v1.0.0"
 
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/mqtt-rest-bridge"
-reference = "v1.1.1"
-resolved_reference = "2586dd8abfd0acb5765f8e09d9d5087a12796aea"
+reference = "v1.1.2"
+resolved_reference = "6926f50067323b2098e48b984d3b0b11fede0b8b"
 
 [[package]]
 name = "netifaces"
@@ -379,6 +380,39 @@ reference = "v1.0.1"
 resolved_reference = "f6a5bb0e547ce367b273844cd91be86cf4f25fac"
 
 [[package]]
+name = "rubix-mqtt"
+version = "1.0.0"
+description = "Rubix MQTT for creating MQTT connection"
+category = "main"
+optional = false
+python-versions = "*"
+develop = false
+
+[package.dependencies]
+paho-mqtt = ">=1.5.1"
+
+[package.source]
+type = "git"
+url = "https://github.com/NubeIO/rubix-mqtt"
+reference = "v1.0.0"
+resolved_reference = "56a1c85485545c9519c782d794b5a02acde22498"
+
+[[package]]
+name = "rubix-registry"
+version = "1.0.0"
+description = "Rubix Registry"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+develop = false
+
+[package.source]
+type = "git"
+url = "https://github.com/NubeIO/rubix-registry"
+reference = "v1.0.0"
+resolved_reference = "cbd039aac2eafc3bdeb10aead8a3180f86335a1b"
+
+[[package]]
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -467,7 +501,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "a16aa03455d8fdc31488eb9f87251866dd2db4af059a4d0b5fb895a27b6d450d"
+content-hash = "8632d07b42282db4d39847228e4df2b3859fb341cc0196507141d1abc173d84b"
 
 [metadata.files]
 altgraph = [
@@ -719,6 +753,8 @@ requests = [
     {file = "requests-2.25.1.tar.gz", hash = "sha256:27973dd4a904a4f13b263a19c866c13b92a39ed1c964655f025f3f8d3d75b804"},
 ]
 rubix-http = []
+rubix-mqtt = []
+rubix-registry = []
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},

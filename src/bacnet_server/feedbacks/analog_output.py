@@ -26,6 +26,6 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
                 present_value = float(present_value.value)
             elif type(present_value) is float:
                 present_value = float(present_value)
-            mqttc = MqttClient()
-            if mqttc.config.enabled:
-                mqttc.publish_mqtt_value(mqttc.get_topic(object_identifier, 'ao'), present_value)
+            mqtt_client = MqttClient()
+            topic_suffix: str = mqtt_client.make_topic(('ao', object_identifier))
+            mqtt_client.publish_value(topic_suffix, present_value)

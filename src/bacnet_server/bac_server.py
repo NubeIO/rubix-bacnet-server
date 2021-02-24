@@ -50,9 +50,9 @@ class BACServer(metaclass=Singleton):
             time.sleep(self.config.attempt_reconnect_secs)
             self.loop_forever()
 
-        mqttc = MqttClient()
-        if mqttc.config.enabled and mqttc.config.publish_value:
-            while not mqttc.status():
+        mqtt_client = MqttClient()
+        if mqtt_client.config.enabled and mqtt_client.config.publish_value:
+            while not mqtt_client.status():
                 self.check_to_restart()
                 logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
                 time.sleep(self.config.attempt_reconnect_secs)
@@ -60,7 +60,7 @@ class BACServer(metaclass=Singleton):
 
         # keep listening changes
         while not (self.__new_bacnet_server and self.__new_bacnet_server != self.__bacnet_server):
-            time.sleep(1)
+            time.sleep(2)
         self.__bacnet_server = self.__new_bacnet_server
         self.loop_forever()
 
@@ -114,9 +114,9 @@ class BACServer(metaclass=Singleton):
         self.__bacnet.this_application.add_object(ao)
         update_point_store(point.uuid, present_value, sync)
         self.__registry[object_identifier] = ao
-        mqttc = MqttClient()
-        if mqttc.config.publish_value:
-            mqttc.publish_mqtt_value(mqttc.get_topic(object_identifier, 'ao'), present_value)
+        mqtt_client = MqttClient()
+        topic_suffix: str = mqtt_client.make_topic(('ao', object_identifier))
+        mqtt_client.publish_value(topic_suffix, present_value)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
