@@ -398,6 +398,21 @@ reference = "v1.0.0"
 resolved_reference = "56a1c85485545c9519c782d794b5a02acde22498"
 
 [[package]]
+name = "rubix-registry"
+version = "1.0.0"
+description = "Rubix Registry"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+develop = false
+
+[package.source]
+type = "git"
+url = "https://github.com/NubeIO/rubix-registry"
+reference = "v1.0.0"
+resolved_reference = "cbd039aac2eafc3bdeb10aead8a3180f86335a1b"
+
+[[package]]
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -486,7 +501,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "ee8790d9684af9d995fffb7321c6553f1d08acfb73dcd020ddd42ce628ba84a5"
+content-hash = "8632d07b42282db4d39847228e4df2b3859fb341cc0196507141d1abc173d84b"
 
 [metadata.files]
 altgraph = [
@@ -739,6 +754,7 @@ requests = [
 ]
 rubix-http = []
 rubix-mqtt = []
+rubix-registry = []
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},

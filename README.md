@@ -52,8 +52,9 @@ Usage: rubix-bacnet [OPTIONS]
 Options:
   -p, --port INTEGER              Port  [default: 1717]
   -d, --data-dir PATH             Application data dir
+  -i, --identifier TEXT           Identifier  [default: bacnet]
   --prod                          Production mode
-  -s, --setting-file TEXT         Rubix BACnet: setting ini file
+  -s, --setting-file TEXT         Rubix BACnet: setting json file
   -l, --logging-conf TEXT         Rubix BACnet: logging config file
   --workers INTEGER               Gunicorn: The number of worker processes for handling requests.
   -c, --gunicorn-config TEXT      Gunicorn: config file(gunicorn.conf.py)
@@ -62,79 +63,71 @@ Options:
   -h, --help                      Show this message and exit.
 ```
 
-## Setup systemd
+### MQTT client
+
+##### Topic structure
+
+Publish value topic
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/bacnet_server/points/<type>/<object_identifier>
+```
+
+Debug topic
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/bacnet_server/debug
+```
+
+Example debug topic
 
 ```
-sudo cp systemd/nubeio-bacnet-server.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl disable nubeio-bacnet-server.service
-sudo systemctl enable nubeio-bacnet-server.service
-sudo journalctl -f -u nubeio-bacnet-server.service
-sudo systemctl status nubeio-bacnet-server.service
-sudo systemctl start nubeio-bacnet-server.service
-sudo systemctl stop nubeio-bacnet-server.service
-sudo systemctl restart nubeio-bacnet-server.service
++/+/+/+/+/+/rubix/bacnet_server/debug
 ```
 
 ## CURL
 
 Get flask server details
 
-```
-curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/ping
+```bash
+curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/system/ping
 ```
 
 Get bacnet server details
 
-```
+```bash
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/server
 ```
 
 Get bacnet server points
 
-```
+```bash
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/points
 ```
 
-###   
-
 HTTP PATCH new bacnet server `device_id`
 
-```
+```bash
 curl --data '{"device_id": "1233"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
 ```
 
 HTTP PATCH new bacnet server `ip`
 
-```
+```bash
 curl --data '{"ip": "192.168.0.123"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
 ```
 
-## HTTP GET:
+## Get details
 
-Will return all the points
 
-```
-/api/bacnet/points
-```
+> GET: `/api/bacnet/points`
 
-Will return all the a point when the UUID is passed in
+> GET: `/api/bacnet/points/uuid/<uuid>`
 
-```
-/api/bacnet/points/<uuid>
-```
+## Add a new point
 
-## HTTP POST:
+> POST: /api/bacnet/points
 
-Add a new point
-
-```
-/api/bacnet/points
-```
-
-body:
-
-```
+> Body
+```json
 {
   "object_type": "analogOutput",
   "object_name": "object_name",
@@ -171,13 +164,10 @@ body:
 
 Update an existing point
 
-```
-/api/bacnet/points/<uuid>
-```
+> PATCH: `/api/bacnet/points/uuid/<uuid>`
 
-body:
-
-```
+> Body
+```json
 {
   "object_type": "analogOutput",
   "object_name": "object_name",
@@ -192,13 +182,11 @@ body:
 }
 ```
 
-## Edit the Server Settings
+## BACnet server
 
-### HTTP GET
+> GET: `/api/bacnet/server`
 
-/api/bacnet/server
-
-```
+```json
 {
     "ip": "192.168.0.101",
     "port": 47808,
@@ -210,14 +198,11 @@ body:
 }
 ```
 
-### HTTP PATCH
+> PATCH: `/api/bacnet/server`
 
-/api/bacnet/server Any feild can be uppdated aswell ip, port, device_id, local_obj_name, model_name, vendor_id,
-vendor_name
-
-```
+```json
 {
-       "device_id": "2508"
+    "device_id": "2508"
 }
 ```
 
@@ -251,7 +236,7 @@ Write a value to @16 of null
 
 ### Using bacstack to read device/point info
 
-point info
+Point info
 
 ```
 pointName
@@ -264,7 +249,7 @@ pointEventState
 ./bacrp 123 1 1 36
 ```
 
-device info, if the deviceId is 123
+Device info, if the deviceId is 123
 
 ```
 debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 77
