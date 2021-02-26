@@ -27,9 +27,9 @@ class MqttClient(MqttClientBase, metaclass=Singleton):
         return super().config
 
     @allow_only_on_prefix
-    def publish_value(self, topic_suffix: str, payload: str):
+    def publish_value(self, topic_suffix: tuple, payload: str):
         if self.config.publish_value:
-            self.__publish_mqtt_value(self.make_topic((self.config.topic, topic_suffix)), payload)
+            self.__publish_mqtt_value(self.make_topic((self.config.topic,) + topic_suffix), payload)
 
     @allow_only_on_prefix
     def publish_debug(self, payload: str):

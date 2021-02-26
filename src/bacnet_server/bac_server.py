@@ -115,8 +115,7 @@ class BACServer(metaclass=Singleton):
         update_point_store(point.uuid, present_value, sync)
         self.__registry[object_identifier] = ao
         mqtt_client = MqttClient()
-        topic_suffix: str = mqtt_client.make_topic(('ao', object_identifier))
-        mqtt_client.publish_value(topic_suffix, present_value)
+        mqtt_client.publish_value(('ao', object_identifier), present_value)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)

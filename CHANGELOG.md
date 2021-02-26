@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.4.4](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.4) (2020-02-26)
+### Added
+- Publish value topic issue fix
+
 ## [v1.4.3](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.3) (2020-02-25)
 ### Added
 - Use rubix-mqtt base
