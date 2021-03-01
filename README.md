@@ -51,13 +51,15 @@ Usage: rubix-bacnet [OPTIONS]
 
 Options:
   -p, --port INTEGER              Port  [default: 1717]
+  -g, --global-dir PATH           Global dir
   -d, --data-dir PATH             Application data dir
+  -c, --conf-dir PATH             Application config dir
   -i, --identifier TEXT           Identifier  [default: bacnet]
   --prod                          Production mode
   -s, --setting-file TEXT         Rubix BACnet: setting json file
   -l, --logging-conf TEXT         Rubix BACnet: logging config file
   --workers INTEGER               Gunicorn: The number of worker processes for handling requests.
-  -c, --gunicorn-config TEXT      Gunicorn: config file(gunicorn.conf.py)
+  --gunicorn-config TEXT          Gunicorn: config file(gunicorn.conf.py)
   --log-level [FATAL|ERROR|WARN|INFO|DEBUG]
                                   Logging level
   -h, --help                      Show this message and exit.
