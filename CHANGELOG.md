@@ -1,4 +1,10 @@
 # CHANGELOG
+## [v1.4.5](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.5) (2020-03-03)
+### Added
+- Upgrade MQTT rest bridge (listener issue fix)
+- Stackoverflow issue fix: infinite recursion is removed out
+- Separate data and config files
+
 ## [v1.4.4](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.4) (2020-02-26)
 ### Added
 - Publish value topic issue fix
