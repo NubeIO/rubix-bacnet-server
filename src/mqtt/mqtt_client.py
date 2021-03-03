@@ -24,7 +24,7 @@ class MqttClient(MqttClientBase, metaclass=Singleton):
 
     @property
     def config(self) -> MqttSetting:
-        return super().config
+        return super().config if isinstance(super().config, MqttSetting) else MqttSetting()
 
     @allow_only_on_prefix
     def publish_value(self, topic_suffix: tuple, payload: str):
