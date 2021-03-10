@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.4.6](https://github.com/NubeIO/lora-raw/tree/v1.3.7) (2020-03-10)
+### Added
+- Point Server Generic API uuid/name change support
+
 ## [v1.4.5](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.5) (2020-03-03)
 ### Added
 - Upgrade MQTT rest bridge (listener issue fix)
