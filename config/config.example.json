@@ -1,7 +1,7 @@
 {
   "bacnet": {
     "enabled": true,
-    "ip": "0.0.0.0",
+    "ip": "192.168.0.100",
     "port": 47808,
     "device_id": 2508,
     "local_obj_name": "Nube-IO",
