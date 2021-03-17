@@ -1,3 +1,4 @@
+from threading import Thread
 from typing import List
 
 from mrb.brige import MqttRestBridge
@@ -5,7 +6,7 @@ from mrb.mapper import api_to_topic_mapper
 from mrb.message import HttpMethod
 from sqlalchemy import and_, or_
 
-from src import db, FlaskThread
+from src import db
 from src.bacnet_server.models.model_mapping import BPGPointMapping
 
 
@@ -34,7 +35,7 @@ class BACnetPointStoreModel(db.Model):
                                              or_(self.__table__.c.present_value != self.present_value))))
         updated: bool = bool(res.rowcount)
         if MqttRestBridge.status() and updated and sync:
-            FlaskThread(target=self.__sync_point_value, daemon=True).start()
+            self.__sync_point_value()
         return updated
 
     def sync_point_value_with_mapping(self, mapping: BPGPointMapping):
@@ -49,7 +50,7 @@ class BACnetPointStoreModel(db.Model):
     def __sync_point_value(self):
         mapping: BPGPointMapping = BPGPointMapping.find_by_bacnet_point_uuid(self.point_uuid)
         if mapping:
-            self.sync_point_value_with_mapping(mapping)
+            Thread(target=self.sync_point_value_with_mapping, args=(mapping,), daemon=True)
 
     @classmethod
     def sync_points_values(cls):
@@ -59,4 +60,4 @@ class BACnetPointStoreModel(db.Model):
         for mapping in mappings:
             point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)
             if point_store:
-                FlaskThread(target=point_store.__sync_point_value, daemon=True).start()
+                point_store.__sync_point_value()
