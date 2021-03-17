@@ -1,4 +1,10 @@
 # CHANGELOG
+## [v1.4.7](https://github.com/NubeIO/lora-raw/tree/v1.4.7) (2020-03-17)
+### Added
+- Fix: PATCH lock issue (#105)
+- Fix: point name change (#106)
+- Fix: BACnet server restart on runtime (#106)
+
 ## [v1.4.6](https://github.com/NubeIO/lora-raw/tree/v1.3.7) (2020-03-10)
 ### Added
 - Point Server Generic API uuid/name change support
