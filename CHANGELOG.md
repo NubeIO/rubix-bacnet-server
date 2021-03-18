@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.4.8](https://github.com/NubeIO/lora-raw/tree/v1.4.8) (2020-03-19)
+### Added
+- Fix: issue with point mapping
+
 ## [v1.4.7](https://github.com/NubeIO/lora-raw/tree/v1.4.7) (2020-03-17)
 ### Added
 - Fix: PATCH lock issue (#105)
