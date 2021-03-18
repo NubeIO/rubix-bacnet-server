@@ -1,6 +1,7 @@
-from threading import Thread
+import logging
 from typing import List
 
+import gevent
 from mrb.brige import MqttRestBridge
 from mrb.mapper import api_to_topic_mapper
 from mrb.message import HttpMethod
@@ -8,6 +9,8 @@ from sqlalchemy import and_, or_
 
 from src import db
 from src.bacnet_server.models.model_mapping import BPGPointMapping
+
+logger = logging.getLogger(__name__)
 
 
 class BACnetPointStoreModel(db.Model):
@@ -38,24 +41,28 @@ class BACnetPointStoreModel(db.Model):
             self.__sync_point_value()
         return updated
 
-    def sync_point_value_with_mapping(self, mapping: BPGPointMapping):
+    def __sync_to_generic_point(self, generic_point_uuid: str):
         if not MqttRestBridge.status():
             return
         api_to_topic_mapper(
-            api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
+            api=f"/api/generic/points_value/uuid/{generic_point_uuid}",
             destination_identifier='ps',
             body={"value": self.present_value},
             http_method=HttpMethod.PATCH)
 
+    def sync_point_value_with_mapping(self, mapping: BPGPointMapping):
+        gevent.spawn(self.__sync_to_generic_point, mapping.generic_point_uuid)
+
     def __sync_point_value(self):
         mapping: BPGPointMapping = BPGPointMapping.find_by_bacnet_point_uuid(self.point_uuid)
         if mapping:
-            Thread(target=self.sync_point_value_with_mapping, args=(mapping,), daemon=True)
+            self.sync_point_value_with_mapping(mapping)
 
     @classmethod
     def sync_points_values(cls):
-        if not MqttRestBridge.status():
-            return
+        while not MqttRestBridge.status():
+            logger.warning('Waiting for MQTT connection to be connected...')
+            gevent.sleep(2)
         mappings: List[BPGPointMapping] = BPGPointMapping.find_all()
         for mapping in mappings:
             point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)

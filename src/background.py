@@ -1,5 +1,6 @@
 import logging
 from threading import Thread
+from time import sleep
 
 from flask import current_app
 from mrb.brige import MqttRestBridge
@@ -37,6 +38,9 @@ class Background:
         if setting.bacnet.enabled:
             FlaskThread(target=BACServer().start_bac, daemon=True, kwargs={'config': setting.bacnet}).start()
 
+        # Sync
+        sleep(5)
+        logger.info("Starting Sync Services...")
         if setting.mqtt_rest_bridge_setting.enabled:
             FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
                                               mqtt_setting=setting.mqtt_rest_bridge_setting,
@@ -46,10 +50,16 @@ class Background:
     def sync_on_start():
         from mrb.mapper import api_to_topic_mapper
         from mrb.message import HttpMethod
-        """Sync mapped points values from LoRa > BACnet points values"""
+        """
+        Sync mapped points values from LoRa > BACnet points values
+        Because: LoRa Points <> Generic | BACnet Points
+        """
         FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_bp", 'destination_identifier': 'lora',
                                                         'http_method': HttpMethod.GET}).start()
 
-        """Sync mapped points values from BACnet > Generic points values"""
+        """
+        Sync mapped points values from BACnet > Generic points values
+        Because: BACnet Points <> Generic Points
+        """
         from .bacnet_server.models.model_point_store import BACnetPointStoreModel
         FlaskThread(target=BACnetPointStoreModel.sync_points_values).start()
