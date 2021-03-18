@@ -30,7 +30,7 @@ class BACnetServer(RubixResource):
         for key in data.keys():
             if data[key] is not None:
                 data_to_update[key] = data[key]
-        BACnetServerModel.query.filter().update(data_to_update)
+        BACnetServerModel.find_one().update(**data_to_update)
         new_bacnet_server = BACnetServerModel.find_one()
         BACServer().restart_bac(new_bacnet_server)
         db.session.commit()
