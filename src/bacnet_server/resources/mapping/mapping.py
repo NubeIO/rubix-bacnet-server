@@ -12,7 +12,7 @@ from src.bacnet_server.resources.model_fields import mapping_bp_gp_fields
 
 def sync_point_value(mapping: BPGPointMapping):
     point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)
-    point_store.sync_point_value_with_mapping(mapping)
+    point_store.sync_point_value_bp_to_mp()
     return mapping
 
 

@@ -7,4 +7,4 @@ class BPGPSync(RubixResource):
 
     @classmethod
     def get(cls):
-        BACnetPointStoreModel.sync_points_values()
+        BACnetPointStoreModel.sync_points_values_bp_to_gp_process()
