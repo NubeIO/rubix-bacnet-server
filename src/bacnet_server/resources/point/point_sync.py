@@ -3,7 +3,7 @@ from rubix_http.resource import RubixResource
 from src.bacnet_server.models.model_point_store import BACnetPointStoreModel
 
 
-class BPGPSync(RubixResource):
+class BPToGPSync(RubixResource):
 
     @classmethod
     def get(cls):

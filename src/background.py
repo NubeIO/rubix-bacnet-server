@@ -47,11 +47,11 @@ class Background:
         from mrb.mapper import api_to_topic_mapper
         from mrb.message import HttpMethod
         """Sync mapped points values from LoRa > BACnet points values"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_bp", 'destination_identifier': 'lora',
+        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_to_bp", 'destination_identifier': 'lora',
                                                         'http_method': HttpMethod.GET}).start()
 
         """Sync mapped points values from Modbus > BACnet points values"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/mp_bp", 'destination_identifier': 'ps',
+        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/mp_to_bp", 'destination_identifier': 'ps',
                                                         'http_method': HttpMethod.GET}).start()
 
         """Sync mapped points values from BACnet > Generic points values"""

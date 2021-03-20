@@ -35,10 +35,10 @@ def create_app(app_setting) -> Flask:
         cursor.close()
 
     def register_router(_app) -> Flask:
-        from src.routes import bp_bacnet_server, bp_mapping_bp_gp, bp_sync_bp_gp, bp_system
+        from src.routes import bp_bacnet_server, bp_mapping_bp_gp, bp_sync, bp_system
         _app.register_blueprint(bp_bacnet_server)
         _app.register_blueprint(bp_mapping_bp_gp)
-        _app.register_blueprint(bp_sync_bp_gp)
+        _app.register_blueprint(bp_sync)
         _app.register_blueprint(bp_system)
         return _app
 
