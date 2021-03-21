@@ -5,7 +5,7 @@ import gevent
 from mrb.brige import MqttRestBridge
 from mrb.mapper import api_to_topic_mapper
 from mrb.message import HttpMethod, Response
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 
 from src import db
 from src.bacnet_server.models.model_mapping import BPGPointMapping
@@ -30,14 +30,14 @@ class BACnetPointStoreModel(db.Model):
     def create_new_point_store_model(cls, point_uuid):
         return BACnetPointStoreModel(point_uuid=point_uuid, present_value=0)
 
-    def update(self, sync: bool = True) -> bool:
+    def update(self) -> bool:
         res = db.session.execute(self.__table__
                                  .update()
                                  .values(present_value=self.present_value)
                                  .where(and_(self.__table__.c.point_uuid == self.point_uuid,
-                                             or_(self.__table__.c.present_value != self.present_value))))
+                                             self.__table__.c.present_value != self.present_value)))
         updated: bool = bool(res.rowcount)
-        if MqttRestBridge.status() and updated and sync:
+        if MqttRestBridge.status() and updated:
             """BACnet > Generic point value"""
             self.__sync_point_value_bp_to_gp_process()
             """BACnet > Modbus point value"""
@@ -57,7 +57,7 @@ class BACnetPointStoreModel(db.Model):
     def __sync_point_value_bp_to_mp_process(self):
         gevent.spawn(self.sync_point_value_bp_to_mp)
 
-    def __sync_point_value_bp_to_gp(self, generic_point_uuid: str):
+    def sync_point_value_bp_to_gp(self, generic_point_uuid: str):
         api_to_topic_mapper(
             api=f"/api/generic/points_value/uuid/{generic_point_uuid}",
             destination_identifier='ps',
@@ -67,11 +67,11 @@ class BACnetPointStoreModel(db.Model):
     def __sync_point_value_bp_to_gp_process(self):
         mapping: BPGPointMapping = BPGPointMapping.find_by_bacnet_point_uuid(self.point_uuid)
         if mapping:
-            gevent.spawn(self.__sync_point_value_bp_to_gp, mapping.generic_point_uuid)
+            gevent.spawn(self.sync_point_value_bp_to_gp, mapping.generic_point_uuid)
 
     @classmethod
-    def sync_points_values_bp_to_gp_process(cls):
-        if not MqttRestBridge.status():
+    def sync_points_values_bp_to_gp_process(cls, force_sync: bool = False):
+        if not MqttRestBridge.status() and not force_sync:
             return
         mappings: List[BPGPointMapping] = BPGPointMapping.find_all()
         for mapping in mappings:

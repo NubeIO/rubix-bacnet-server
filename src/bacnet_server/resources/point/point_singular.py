@@ -2,8 +2,6 @@ import copy
 from abc import abstractmethod
 
 from flask_restful import reqparse, marshal_with
-from flask_restful.reqparse import request
-from mrb.validator import is_bridge
 from rubix_http.exceptions.exception import NotFoundException
 
 from src.bacnet_server import BACServer
@@ -54,7 +52,7 @@ class BACnetPointSingular(BACnetPointBase):
         BACnetPointModel.filter_by_uuid(point.uuid).update(non_none_data)
         BACServer().remove_point(point)
         point_return = BACnetPointModel.find_by_uuid(point.uuid)
-        BACServer().add_point(point_return, not is_bridge(request.args))
+        BACServer().add_point(point_return)
         return point_return
 
     @classmethod

@@ -56,4 +56,4 @@ class Background:
 
         """Sync mapped points values from BACnet > Generic points values"""
         from .bacnet_server.models.model_point_store import BACnetPointStoreModel
-        BACnetPointStoreModel.sync_points_values_bp_to_gp_process()
+        BACnetPointStoreModel.sync_points_values_bp_to_gp_process(force_sync=True)
