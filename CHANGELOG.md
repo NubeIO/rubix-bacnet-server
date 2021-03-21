@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.4.9](https://github.com/NubeIO/lora-raw/tree/v1.4.9) (2020-03-23)
+### Added
+- Modbus <> BACnet point two way binding
+
 ## [v1.4.8](https://github.com/NubeIO/lora-raw/tree/v1.4.8) (2020-03-19)
 ### Added
 - Fix: issue with point mapping
