@@ -1,6 +1,4 @@
 from flask_restful import reqparse
-from flask_restful.reqparse import request
-from mrb.validator import is_bridge
 from rubix_http.exceptions.exception import BadDataException
 from rubix_http.resource import RubixResource
 
@@ -46,7 +44,7 @@ class BACnetPointBase(RubixResource):
         priority_array_write = data.pop('priority_array_write')
         point = BACnetPointModel(uuid=uuid, **data)
         point.save_to_db(priority_array_write)
-        BACServer().add_point(point, not is_bridge(request.args))
+        BACServer().add_point(point)
         return point
 
     @classmethod

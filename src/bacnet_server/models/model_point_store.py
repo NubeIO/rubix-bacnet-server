@@ -4,8 +4,8 @@ from typing import List
 import gevent
 from mrb.brige import MqttRestBridge
 from mrb.mapper import api_to_topic_mapper
-from mrb.message import HttpMethod
-from sqlalchemy import and_, or_
+from mrb.message import HttpMethod, Response
+from sqlalchemy import and_
 
 from src import db
 from src.bacnet_server.models.model_mapping import BPGPointMapping
@@ -30,41 +30,51 @@ class BACnetPointStoreModel(db.Model):
     def create_new_point_store_model(cls, point_uuid):
         return BACnetPointStoreModel(point_uuid=point_uuid, present_value=0)
 
-    def update(self, sync: bool = True) -> bool:
+    def update(self) -> bool:
         res = db.session.execute(self.__table__
                                  .update()
                                  .values(present_value=self.present_value)
                                  .where(and_(self.__table__.c.point_uuid == self.point_uuid,
-                                             or_(self.__table__.c.present_value != self.present_value))))
+                                             self.__table__.c.present_value != self.present_value)))
         updated: bool = bool(res.rowcount)
-        if MqttRestBridge.status() and updated and sync:
-            self.__sync_point_value()
+        if MqttRestBridge.status() and updated:
+            """BACnet > Generic point value"""
+            self.__sync_point_value_bp_to_gp_process()
+            """BACnet > Modbus point value"""
+            self.__sync_point_value_bp_to_mp_process()
         return updated
 
-    def __sync_to_generic_point(self, generic_point_uuid: str):
-        if not MqttRestBridge.status():
-            return
+    def sync_point_value_bp_to_mp(self):
+        response: Response = api_to_topic_mapper(api=f"api/mappings/mp_gbp/bacnet/{self.point_uuid}",
+                                                 destination_identifier='ps',
+                                                 http_method=HttpMethod.GET)
+        if not response.error:
+            api_to_topic_mapper(api=f"/api/modbus/points_value/uuid/{response.content.get('modbus_point_uuid')}",
+                                destination_identifier='ps',
+                                body={"value": self.present_value},
+                                http_method=HttpMethod.PATCH)
+
+    def __sync_point_value_bp_to_mp_process(self):
+        gevent.spawn(self.sync_point_value_bp_to_mp)
+
+    def sync_point_value_bp_to_gp(self, generic_point_uuid: str):
         api_to_topic_mapper(
             api=f"/api/generic/points_value/uuid/{generic_point_uuid}",
             destination_identifier='ps',
             body={"value": self.present_value},
             http_method=HttpMethod.PATCH)
 
-    def sync_point_value_with_mapping(self, mapping: BPGPointMapping):
-        gevent.spawn(self.__sync_to_generic_point, mapping.generic_point_uuid)
-
-    def __sync_point_value(self):
+    def __sync_point_value_bp_to_gp_process(self):
         mapping: BPGPointMapping = BPGPointMapping.find_by_bacnet_point_uuid(self.point_uuid)
         if mapping:
-            self.sync_point_value_with_mapping(mapping)
+            gevent.spawn(self.sync_point_value_bp_to_gp, mapping.generic_point_uuid)
 
     @classmethod
-    def sync_points_values(cls):
-        while not MqttRestBridge.status():
-            logger.warning('Waiting for MQTT connection to be connected...')
-            gevent.sleep(2)
+    def sync_points_values_bp_to_gp_process(cls, force_sync: bool = False):
+        if not MqttRestBridge.status() and not force_sync:
+            return
         mappings: List[BPGPointMapping] = BPGPointMapping.find_all()
         for mapping in mappings:
             point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)
             if point_store:
-                point_store.__sync_point_value()
+                point_store.__sync_point_value_bp_to_gp_process()
