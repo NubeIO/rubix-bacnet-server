@@ -13,7 +13,8 @@ class BACnetPointModel(db.Model):
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     object_type = db.Column(db.Enum(PointType), nullable=False)
     object_name = db.Column(db.String(80), nullable=False, unique=True)
-    address = db.Column(db.Integer(), nullable=False, unique=True)
+    use_next_available_address = db.Column(db.Boolean(), nullable=False, default=False)
+    address = db.Column(db.Integer(), nullable=True, unique=True)
     relinquish_default = db.Column(db.Float(), nullable=False)
     priority_array_write = db.relationship('PriorityArrayModel',
                                            backref='point',

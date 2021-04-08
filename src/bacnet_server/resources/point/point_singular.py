@@ -15,6 +15,7 @@ class BACnetPointSingular(BACnetPointBase):
     parser_patch = reqparse.RequestParser()
     parser_patch.add_argument('object_type', type=str, required=False)
     parser_patch.add_argument('object_name', type=str, required=False)
+    parser_patch.add_argument('use_next_available_address', type=bool, required=False)
     parser_patch.add_argument('address', type=int, required=False)
     parser_patch.add_argument('relinquish_default', type=float, required=False)
     parser_patch.add_argument("priority_array_write", type=dict, required=False)

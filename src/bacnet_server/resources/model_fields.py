@@ -30,6 +30,7 @@ point_fields = {
     'uuid': fields.String,
     'object_type': fields.String(attribute="object_type.name"),
     'object_name': fields.String,
+    'use_next_available_address': fields.Boolean,
     'address': fields.Integer,
     'relinquish_default': fields.Float,
     'priority_array_write': fields.Nested(priority_array_write_fields),
