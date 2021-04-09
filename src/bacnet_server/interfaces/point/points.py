@@ -39,7 +39,7 @@ class PointType(enum.Enum):
     analogOutput = 1
     # analogValue= 2
     # binaryInput= 3
-    binaryOutput = 2
+    # binaryOutput = 2
     # binaryValue= 5
 
 
