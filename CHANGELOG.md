@@ -1,24 +1,28 @@
 # CHANGELOG
 
-## [v1.5.0](https://github.com/NubeIO/lora-raw/tree/v1.5.0) (2020-04-12)
+## [v1.5.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.5.1) (2020-04-12)
 ### Added
-- On create point next available addres
--
-## [v1.4.9](https://github.com/NubeIO/lora-raw/tree/v1.4.9) (2020-03-23)
+- Fix: On create point next available address
+
+## [v1.5.0](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.5.0) (2020-04-12)
+### Added
+- On create point next available address
+
+## [v1.4.9](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.9) (2020-03-23)
 ### Added
 - Modbus <> BACnet point two way binding
 
-## [v1.4.8](https://github.com/NubeIO/lora-raw/tree/v1.4.8) (2020-03-19)
+## [v1.4.8](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.8) (2020-03-19)
 ### Added
 - Fix: issue with point mapping
 
-## [v1.4.7](https://github.com/NubeIO/lora-raw/tree/v1.4.7) (2020-03-17)
+## [v1.4.7](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.7) (2020-03-17)
 ### Added
 - Fix: PATCH lock issue (#105)
 - Fix: point name change (#106)
 - Fix: BACnet server restart on runtime (#106)
 
-## [v1.4.6](https://github.com/NubeIO/lora-raw/tree/v1.3.7) (2020-03-10)
+## [v1.4.6](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.4.6) (2020-03-10)
 ### Added
 - Point Server Generic API uuid/name change support
 
