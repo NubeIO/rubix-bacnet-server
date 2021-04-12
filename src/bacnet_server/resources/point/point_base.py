@@ -10,6 +10,7 @@ class BACnetPointBase(RubixResource):
     parser = reqparse.RequestParser()
     parser.add_argument('object_type', type=str)
     parser.add_argument('object_name', type=str)
+    parser.add_argument('use_next_available_address', type=bool)
     parser.add_argument('address', type=int)
     parser.add_argument('relinquish_default', type=float)
     parser.add_argument("priority_array_write", type=dict)
@@ -43,6 +44,8 @@ class BACnetPointBase(RubixResource):
     def add_point(cls, data, uuid):
         priority_array_write = data.pop('priority_array_write')
         point = BACnetPointModel(uuid=uuid, **data)
+        if point.use_next_available_address:
+            point.address = None
         point.save_to_db(priority_array_write)
         BACServer().add_point(point)
         return point

@@ -13,7 +13,8 @@ class BACnetPointModel(db.Model):
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     object_type = db.Column(db.Enum(PointType), nullable=False)
     object_name = db.Column(db.String(80), nullable=False, unique=True)
-    address = db.Column(db.Integer(), nullable=False, unique=True)
+    use_next_available_address = db.Column(db.Boolean(), nullable=False, default=False)
+    address = db.Column(db.Integer(), nullable=True, unique=True)
     relinquish_default = db.Column(db.Float(), nullable=False)
     priority_array_write = db.relationship('PriorityArrayModel',
                                            backref='point',
@@ -64,6 +65,12 @@ class BACnetPointModel(db.Model):
     @classmethod
     def find_by_object_name(cls, object_name):
         return cls.query.filter(BACnetPointModel.object_name == object_name).first()
+
+    @classmethod
+    def find_all_analog_output_addresses(cls):
+        addresses = cls.query.filter(BACnetPointModel.address.isnot(None), BACnetPointModel.object_type ==
+                                     PointType.analogOutput).with_entities(BACnetPointModel.address).all()
+        return [address[0] for address in addresses]
 
     @classmethod
     def delete_all_from_db(cls):
