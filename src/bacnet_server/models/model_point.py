@@ -67,10 +67,17 @@ class BACnetPointModel(db.Model):
         return cls.query.filter(BACnetPointModel.object_name == object_name).first()
 
     @classmethod
-    def find_all_analog_output_addresses(cls):
+    def get_next_available_address(cls):
         addresses = cls.query.filter(BACnetPointModel.address.isnot(None), BACnetPointModel.object_type ==
                                      PointType.analogOutput).with_entities(BACnetPointModel.address).all()
-        return [address[0] for address in addresses]
+        sorted_addresses = sorted([address[0] for address in addresses])
+        available_address = 1
+        for address in sorted_addresses:
+            if address == available_address:
+                available_address += 1
+            else:
+                break
+        return available_address
 
     @classmethod
     def delete_all_from_db(cls):

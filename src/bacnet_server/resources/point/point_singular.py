@@ -2,7 +2,7 @@ import copy
 from abc import abstractmethod
 
 from flask_restful import reqparse, marshal_with
-from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.exceptions.exception import NotFoundException, BadDataException
 
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
@@ -39,6 +39,12 @@ class BACnetPointSingular(BACnetPointBase):
     @marshal_with(point_fields)
     def patch(cls, **kwargs):
         data = cls.parser_patch.parse_args()
+        use_next_available_address: bool = data.get('use_next_available_address')
+        address: str = data.get('address')
+        if use_next_available_address and address:
+            raise BadDataException("address needs to be null when use_next_available_address is true")
+        elif not use_next_available_address and not address:
+            raise BadDataException("address cannot be null when use_next_available_address is false")
         point: BACnetPointModel = copy.deepcopy(cls.get_point(**kwargs))
         cls.abort_if_bacnet_is_not_running()
         if point is None:
