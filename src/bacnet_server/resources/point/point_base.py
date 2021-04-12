@@ -42,7 +42,7 @@ class BACnetPointBase(RubixResource):
 
     @classmethod
     def add_point(cls, data, uuid):
-        priority_array_write = data.pop('priority_array_write')
+        priority_array_write: dict = data.pop('priority_array_write') or {}
         point = BACnetPointModel(uuid=uuid, **data)
         if point.use_next_available_address and point.address:
             raise BadDataException("address needs to be null when use_next_available_address is true")

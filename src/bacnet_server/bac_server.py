@@ -91,7 +91,7 @@ class BACServer(metaclass=Singleton):
         [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
         # TODO: Switch cases for different type of points
         if point.use_next_available_address:
-            point.address = BACnetPointModel.get_next_available_address()
+            point.address = BACnetPointModel.get_next_available_address(point.address)
         object_identifier = create_object_identifier(point.object_type.name, point.address)
         ao = AnalogOutputFeedbackObject(
             profileName=point.uuid,
