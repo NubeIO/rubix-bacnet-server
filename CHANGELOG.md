@@ -1,4 +1,9 @@
 # CHANGELOG
+
+## [v1.5.0](https://github.com/NubeIO/lora-raw/tree/v1.5.0) (2020-04-12)
+### Added
+- On create point next available addres
+-
 ## [v1.4.9](https://github.com/NubeIO/lora-raw/tree/v1.4.9) (2020-03-23)
 ### Added
 - Modbus <> BACnet point two way binding
