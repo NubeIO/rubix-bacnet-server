@@ -29,7 +29,6 @@ class BACServer(metaclass=Singleton):
         self.__registry: Dict[str, Commandable] = {}
         self.__sync_status: bool = False
         self.__running: bool = False
-        self.__dynamic_addresses: list = []
 
     @property
     def config(self) -> Union[BACnetSetting, None]:
@@ -87,16 +86,13 @@ class BACServer(metaclass=Singleton):
         self.__bacnet = None
         self.__running = False
         self.__registry = {}
-        self.__dynamic_addresses = []
 
     def add_point(self, point):
         [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
         # TODO: Switch cases for different type of points
-        address = point.address
         if point.use_next_available_address:
-            address = self.__get_next_available_address()
-            self.__dynamic_addresses.append(address)
-        object_identifier = create_object_identifier(point.object_type.name, address)
+            point.address = BACnetPointModel.get_next_available_address(point.address)
+        object_identifier = create_object_identifier(point.object_type.name, point.address)
         ao = AnalogOutputFeedbackObject(
             profileName=point.uuid,
             objectIdentifier=(point.object_type.name, point.address),
@@ -119,21 +115,9 @@ class BACServer(metaclass=Singleton):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
         self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
         del self.__registry[object_identifier]
-        self.__dynamic_addresses.remove(point.address)
 
     def remove_all_points(self):
         object_identifiers = copy.deepcopy(list(self.__registry.keys()))
         for object_identifier in object_identifiers:
             self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
             del self.__registry[object_identifier]
-        self.__dynamic_addresses = []
-
-    def __get_next_available_address(self):
-        addresses = sorted(BACnetPointModel.find_all_analog_output_addresses() + self.__dynamic_addresses)
-        available_address = 1
-        for address in addresses:
-            if address == available_address:
-                available_address += 1
-            else:
-                break
-        return available_address

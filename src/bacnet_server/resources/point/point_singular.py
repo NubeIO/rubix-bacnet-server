@@ -2,7 +2,7 @@ import copy
 from abc import abstractmethod
 
 from flask_restful import reqparse, marshal_with
-from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.exceptions.exception import NotFoundException, BadDataException
 
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
@@ -43,6 +43,16 @@ class BACnetPointSingular(BACnetPointBase):
         cls.abort_if_bacnet_is_not_running()
         if point is None:
             raise NotFoundException(f"Does not exist with {kwargs}")
+        use_next_available_address: bool = data.get('use_next_available_address')
+        address: str = data.get('address')
+        if use_next_available_address is not None or address is not None:
+            if use_next_available_address is None:
+                use_next_available_address = point.use_next_available_address
+            if use_next_available_address and address:
+                raise BadDataException("address needs to be null when use_next_available_address is true")
+            elif not use_next_available_address and not address:
+                raise BadDataException("address cannot be null when use_next_available_address is false")
+
         priority_array_write = data.pop('priority_array_write')
         non_none_data = {}
         for key in data.keys():
