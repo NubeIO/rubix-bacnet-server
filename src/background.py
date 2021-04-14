@@ -28,7 +28,10 @@ class Background:
     @staticmethod
     def run():
         from src.bacnet_server import BACServer
+        from src.bacnet_master.services.network import Network
         from src.mqtt import MqttClient
+
+        Network.get_instance().start()
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         logger.info("Running Background Task...")
         if setting.mqtt.enabled:

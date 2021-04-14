@@ -1,6 +1,9 @@
 from flask import Blueprint
 from flask_restful import Api
 
+from src.bacnet_master.resources.device import Device, DeviceList, DevicePoints, DevicePoint
+from src.bacnet_master.resources.network import Network, NetworkList, NetworksIds
+
 from src.bacnet_server.resources.mapping.mapping import BPGPMappingResourceList, GBPMappingResourceByGenericPointUUID, \
     GBPMappingResourceByBACnetPointUUID, BPGPMappingResourceByUUID
 from src.bacnet_server.resources.point.point_plural import BACnetPointPlural
@@ -26,6 +29,23 @@ api_mapping_bp_gp.add_resource(BPGPMappingResourceList, '')
 api_mapping_bp_gp.add_resource(BPGPMappingResourceByUUID, '/uuid/<string:uuid>')
 api_mapping_bp_gp.add_resource(GBPMappingResourceByBACnetPointUUID, '/bacnet/<string:uuid>')
 api_mapping_bp_gp.add_resource(GBPMappingResourceByGenericPointUUID, '/generic/<string:uuid>')
+
+
+bp_bacnet_master = Blueprint('bacnet_master', __name__, url_prefix='/api/bac/master')
+api_bacnet_master = Api(bp_bacnet_master)
+api_bacnet_master.add_resource(Device, '/dev/<string:uuid>')
+api_bacnet_master.add_resource(Network, '/network/<string:uuid>')
+api_bacnet_master.add_resource(DeviceList, '/devices')
+api_bacnet_master.add_resource(DevicePoints, '/points/objects/<string:dev_uuid>')
+# get a point /dev_uuid/analogInput/1/85
+api_bacnet_master.add_resource(DevicePoint,
+                               '/point/read/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:prop>')
+api_bacnet_master.add_resource(NetworkList, '/networks')
+api_bacnet_master.add_resource(NetworksIds, '/networks/ids')
+# api_bacnet_master.add_resource(PointWritePresentValue,
+#                                '/point/write/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:value>')
+
+
 
 bp_sync = Blueprint('sync_bp_gp', __name__, url_prefix='/api/sync')
 api_sync = Api(bp_sync)
