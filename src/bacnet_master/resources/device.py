@@ -92,6 +92,22 @@ class DeviceList(Resource):
         return BacnetDeviceModel.query.all()
 
 
+class DeviceObjectList(Resource):
+    def get(self, dev_uuid):
+        response = {}
+        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
+        if not device:
+            abort(404, message='Device Not found')
+        response['network_uuid'] = device.network.network_uuid
+        response['bac_device_uuid'] = device.bac_device_uuid
+        response['bac_device_mac'] = device.bac_device_mac
+        try:
+            response['points'] = DeviceService.get_instance().get_object_list(device)
+        except Exception as e:
+            abort(500, message=str(e))
+        return response
+
+
 class DevicePoints(Resource):
     def get(self, dev_uuid):
         response = {}
@@ -106,7 +122,6 @@ class DevicePoints(Resource):
         except Exception as e:
             abort(500, message=str(e))
         return response
-
 
 class DevicePoint(Resource):
     def get(self, dev_uuid, obj, obj_instance, prop):
@@ -124,4 +139,25 @@ class DevicePoint(Resource):
         except Exception as e:
             abort(500, message=str(e))
 
+        return response
+
+
+class PointWritePresentValue(Resource):
+    def get(self, dev_uuid, obj, obj_instance, value, priority):
+        response = {}
+        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
+        if not device:
+            abort(404, message='Device Not found')
+        response['network_uuid'] = device.network.network_uuid
+        response['bac_device_uuid'] = device.bac_device_uuid
+        response['bac_device_mac'] = device.bac_device_mac
+        response['pnt_type'] = obj
+        response['pnt_id'] = obj_instance
+        try:
+            print(111111)
+            print(device)
+            print(111111)
+            response['point'] = DeviceService().write_point_present_value(device, obj, obj_instance, value, priority)
+        except Exception as e:
+            abort(500, message=str(e))
         return response

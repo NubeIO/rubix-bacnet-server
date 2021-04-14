@@ -12,7 +12,8 @@ class Device:
 
     def __init__(self):
         if Device.__instance is not None:
-            raise Exception("Device class is a singleton!")
+            print("Device class is a singleton! @ Binod to check")
+            # raise Exception("Device class is a singleton!")
         else:
             Device.__instance = self
 
@@ -22,10 +23,21 @@ class Device:
     def get_network(self, device):
         return Network.get_instance().get_network(device.network)
 
+    def get_object_list(self, device):
+        dev_url = self.get_dev_url(device)
+        bac_device_id = device.bac_device_id
+        network = self.get_network(device)
+        if network:
+            return network.read(f"{dev_url} device {bac_device_id} objectList")
+        raise Exception("Network not found")
+
     def get_points(self, device):
         dev_url = self.get_dev_url(device)
         bac_device_id = device.bac_device_id
         network = self.get_network(device)
+        print(444444)
+        print(network)
+        print(444444)
         if network:
             return network.read(f"{dev_url} device {bac_device_id} objectList")
         raise Exception("Network not found")
@@ -37,4 +49,12 @@ class Device:
         if network:
             read = f"{dev_url} {obj} {obj_instance} {prop}"
             return network.read(read)
+        raise Exception("Network not found")
+
+    def write_point_present_value(self, device, obj, obj_instance, value, priority):
+        dev_url = self.get_dev_url(device)
+        network = self.get_network(device)
+        if network:
+            write = '%s %s %s presentValue %s - %s' % (dev_url, obj, obj_instance, value, priority)
+            return network.write(write)
         raise Exception("Network not found")
