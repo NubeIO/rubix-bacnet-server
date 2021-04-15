@@ -19,23 +19,33 @@ class Device(Resource):
                         )
     parser.add_argument('bac_device_ip',
                         type=str,
-                        required=True,
+                        required=False,
                         help='Every device needs a network bac_device_ip.'
                         )
     parser.add_argument('bac_device_mask',
                         type=int,
-                        required=True,
+                        required=False,
                         help='Every device needs a network bac_device_mask'
                         )
     parser.add_argument('bac_device_port',
                         type=int,
-                        required=True,
+                        required=False,
                         help='Every device needs a network bac_device_port'
                         )
     parser.add_argument('network_uuid',
                         type=str,
                         required=True,
                         help='Every device needs a network bac_device_uuid'
+                        )
+    parser.add_argument('type_mstp',
+                        type=str,
+                        required=False,
+                        help='True if device is type MSTP'
+                        )
+    parser.add_argument('network_number',
+                        type=int,
+                        required=False,
+                        help='Used for discovering networking'
                         )
 
     @marshal_with(device_fields)
@@ -123,6 +133,7 @@ class DevicePoints(Resource):
             abort(500, message=str(e))
         return response
 
+
 class DevicePoint(Resource):
     def get(self, dev_uuid, obj, obj_instance, prop):
         response = {}
@@ -161,3 +172,28 @@ class PointWritePresentValue(Resource):
         except Exception as e:
             abort(500, message=str(e))
         return response
+
+
+class Whois(Resource):
+    def get(self, uuid, whois):
+        print(999999)
+        return DeviceService().whois(uuid, whois)
+
+
+class UnknownDeviceObjects(Resource):
+    def post(self):
+        print(22222222)
+        data = Device.parser.parse_args()
+        bac_device_mac = data['bac_device_mac']
+        bac_device_id = data['bac_device_id']
+        bac_device_ip = data['bac_device_ip']
+        bac_device_mask = data['bac_device_mask']
+        bac_device_port = data['bac_device_port']
+        network_id = data['network_uuid']
+        type_mstp = data['type_mstp']
+        network_number = data['network_number']
+
+        print(444444)
+        return DeviceService().get_unknown_device_objects(bac_device_mac, bac_device_id,
+                                                          bac_device_ip,
+                                                          bac_device_mask, bac_device_port, network_id, type_mstp, network_number)

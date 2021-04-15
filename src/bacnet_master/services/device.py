@@ -1,3 +1,6 @@
+import distutils
+
+from src.bacnet_master.models.network import BacnetNetworkModel
 from src.bacnet_master.services.network import Network
 
 
@@ -35,9 +38,6 @@ class Device:
         dev_url = self.get_dev_url(device)
         bac_device_id = device.bac_device_id
         network = self.get_network(device)
-        print(444444)
-        print(network)
-        print(444444)
         if network:
             return network.read(f"{dev_url} device {bac_device_id} objectList")
         raise Exception("Network not found")
@@ -57,4 +57,49 @@ class Device:
         if network:
             write = '%s %s %s presentValue %s - %s' % (dev_url, obj, obj_instance, value, priority)
             return network.write(write)
+        raise Exception("Network not found")
+
+    def whois(self, network_uuid, whois):
+        net = BacnetNetworkModel.find_by_network_uuid(network_uuid)
+        print(net)
+        network = Network.get_instance().get_network(net)
+        print(6666666)
+        print(network)
+        print(net.network_ip)
+        print(net.network_mask)
+        print(net.network_port)
+
+        whois = bool(distutils.util.strtobool(whois))
+        if whois:
+            network.whois()
+        else:
+            network.discover()
+        if network:
+            return network.devices
+        raise Exception("Network not found")
+
+    def get_unknown_device_objects(self, bac_device_mac, bac_device_id,
+                                   bac_device_ip,
+                                   bac_device_mask, bac_device_port, network_id, type_mstp, network_number):
+        print(333333333)
+        net = BacnetNetworkModel.find_by_network_uuid(network_id)
+        print(net)
+        print(333333333)
+        network = Network.get_instance().get_network(net)
+        # print(9999)
+        # print(net.network_number)
+        print(network)
+        print(9999)
+        # network_number = net.network_number
+        type_mstp = bool(distutils.util.strtobool(type_mstp))
+        device_ip = f"{bac_device_ip}/{bac_device_mask}:{bac_device_port}"
+
+        if type_mstp:
+            req = f"{network_number}:{bac_device_mac} device {bac_device_id} objectList"
+        else:
+            req = f"{device_ip} device {bac_device_id} objectList"
+        print(232323)
+        print(req)
+        if network:
+            return network.read(req)
         raise Exception("Network not found")

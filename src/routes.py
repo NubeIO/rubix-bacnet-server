@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask_restful import Api
 
 from src.bacnet_master.resources.device import Device, DeviceList, DevicePoints, DevicePoint, PointWritePresentValue, \
-    DeviceObjectList
+    DeviceObjectList, Whois, UnknownDeviceObjects
 from src.bacnet_master.resources.network import Network, NetworkList, NetworksIds
 
 from src.bacnet_server.resources.mapping.mapping import BPGPMappingResourceList, GBPMappingResourceByGenericPointUUID, \
@@ -34,6 +34,8 @@ api_mapping_bp_gp.add_resource(GBPMappingResourceByGenericPointUUID, '/generic/<
 
 api_bacnet_server.add_resource(Device, '/master/dev/<string:uuid>')
 api_bacnet_server.add_resource(Network, '/master/network/<string:uuid>')
+api_bacnet_server.add_resource(Whois, '/master/network/whois/<string:uuid>/<string:whois>')
+api_bacnet_server.add_resource(UnknownDeviceObjects, '/master/network/poll/objects')
 api_bacnet_server.add_resource(DeviceList, '/master/devices')
 api_bacnet_server.add_resource(DeviceObjectList, '/master/points/objects/<string:dev_uuid>')
 api_bacnet_server.add_resource(DevicePoints, '/master/points/points/<string:dev_uuid>')
