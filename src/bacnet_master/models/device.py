@@ -10,6 +10,7 @@ class BacnetDeviceModel(db.Model):
     bac_device_mask = db.Column(db.Integer(), nullable=False)
     bac_device_port = db.Column(db.Integer(), nullable=False)
     network_uuid = db.Column(db.String, db.ForeignKey('bacnet_networks.network_uuid'))
+    network_number = db.Column(db.Integer())
 
     def __repr__(self):
         return f"Device(bac_device_uuid = {self.network_uuid})"

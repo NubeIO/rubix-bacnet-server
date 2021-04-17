@@ -22,11 +22,6 @@ class Network(Resource):
                         required=True,
                         help='network_port must must be an int length 4'
                         )
-    parser.add_argument('network_number',
-                        type=int,
-                        required=True,
-                        help='bacnet network number must must be an int'
-                        )
     parser.add_argument('network_device_id',
                         type=int,
                         required=True,
@@ -50,6 +45,7 @@ class Network(Resource):
         if BacnetNetworkModel.find_by_network_uuid(uuid):
             return abort(409, message=f"An Network with network_uuid '{uuid}' already exists.")
         data = Network.parser.parse_args()
+        # _uuid = str(uuid.uuid4())
         network = Network.create_network_model_obj(uuid, data)
         network.save_to_db()
         NetworkService.get_instance().add_network(network)
@@ -65,7 +61,6 @@ class Network(Resource):
             network.network_ip = data['network_ip']
             network.network_mask = data['network_mask']
             network.network_port = data['network_port']
-            network.network_number = data['network_number']
             network.network_device_id = data['network_device_id']
             network.network_device_name = data['network_device_name']
         network.save_to_db()
@@ -84,7 +79,7 @@ class Network(Resource):
     def create_network_model_obj(network_uuid, data):
         return BacnetNetworkModel(network_uuid=network_uuid, network_ip=data['network_ip'], network_mask=data['network_mask'],
                                   network_port=data['network_port'], network_device_id=data['network_device_id'],
-                                  network_device_name=data['network_device_name'], network_number=data['network_number'])
+                                  network_device_name=data['network_device_name'])
 
 
 class NetworkList(Resource):

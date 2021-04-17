@@ -2,6 +2,7 @@ import distutils
 
 from src.bacnet_master.models.network import BacnetNetworkModel
 from src.bacnet_master.services.network import Network
+from src.bacnet_server.utils.functions import to_bool
 
 
 class Device:
@@ -59,7 +60,7 @@ class Device:
             return network.write(write)
         raise Exception("Network not found")
 
-    def whois(self, network_uuid, whois):
+    def whois(self, network_uuid, whois, network_number):
         net = BacnetNetworkModel.find_by_network_uuid(network_uuid)
         print(net)
         network = Network.get_instance().get_network(net)
@@ -69,7 +70,7 @@ class Device:
         print(net.network_mask)
         print(net.network_port)
 
-        whois = bool(distutils.util.strtobool(whois))
+        whois = to_bool(whois)
         if whois:
             network.whois()
         else:
@@ -80,9 +81,9 @@ class Device:
 
     def get_unknown_device_objects(self, bac_device_mac, bac_device_id,
                                    bac_device_ip,
-                                   bac_device_mask, bac_device_port, network_id, type_mstp, network_number):
+                                   bac_device_mask, bac_device_port, network_uuid, type_mstp, network_number):
         print(333333333)
-        net = BacnetNetworkModel.find_by_network_uuid(network_id)
+        net = BacnetNetworkModel.find_by_network_uuid(network_uuid)
         print(net)
         print(333333333)
         network = Network.get_instance().get_network(net)
@@ -91,15 +92,20 @@ class Device:
         print(network)
         print(9999)
         # network_number = net.network_number
-        type_mstp = bool(distutils.util.strtobool(type_mstp))
+        type_mstp = to_bool(type_mstp)
         device_ip = f"{bac_device_ip}/{bac_device_mask}:{bac_device_port}"
-
         if type_mstp:
             req = f"{network_number}:{bac_device_mac} device {bac_device_id} objectList"
         else:
             req = f"{device_ip} device {bac_device_id} objectList"
-        print(232323)
-        print(req)
-        if network:
-            return network.read(req)
-        raise Exception("Network not found")
+        try:
+            if network:
+                return network.read(req)
+        except:
+            raise Exception("Network not found")
+
+    def network_number(self, network_number: int) -> bool:
+        if network_number == 0:
+            return False
+        else:
+            return True

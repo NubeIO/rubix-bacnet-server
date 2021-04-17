@@ -2,12 +2,12 @@ import BAC0
 
 from src.bacnet_server.helpers.helper_point_array import serialize_priority_array
 
-bacnet = BAC0.lite('192.168.15.194/24:47808')
+bacnet = BAC0.lite('192.168.15.100/24:47808')
 # print(bacnet.discover(networks=[1001]))
 # print(bacnet.discover(networks='known'))
-print(bacnet.discover())
-# print(bacnet.discover(networks='known', limits=(0,4194303), global_broadcast=False))
 # print(bacnet.discover())
+# print(bacnet.discover(networks='known', limits=(0,4194303), global_broadcast=False))
+print(bacnet.discover())
 # print(bacnet.devices)
 
 

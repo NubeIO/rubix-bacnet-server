@@ -8,6 +8,7 @@ device_fields = {
     'bac_device_mask': fields.Integer,
     'bac_device_port': fields.Integer,
     'network_uuid': fields.String,
+    'network_number': fields.Integer,
 }
 
 network_fields = {
@@ -17,6 +18,5 @@ network_fields = {
     'network_port': fields.Integer,
     'network_device_id': fields.Integer,
     'network_device_name': fields.String,
-    'network_number': fields.Integer,
     'devices': fields.List(fields.Nested(device_fields))
 }
