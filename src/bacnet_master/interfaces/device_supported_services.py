@@ -79,10 +79,6 @@ class SupportedServices(Enum):
         return d
 
     @classmethod
-    def get(self, address, object_type, object_instance):
-        return f'{address} {object_type} {object_instance} {ObjProperty.protocolServicesSupported.value}'
-
-    @classmethod
     def check(self, ss):
         ss_dict = self.obj_as_false()
         ss_num = self.obj_number()

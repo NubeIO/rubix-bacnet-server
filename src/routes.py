@@ -4,6 +4,7 @@ from flask_restful import Api
 from src.bacnet_master.resources.device import Device, DeviceList, DevicePoints, DevicePoint, PointWritePresentValue, \
     DeviceObjectList, Whois, UnknownDeviceObjects
 from src.bacnet_master.resources.network import Network, NetworkList, NetworksIds
+from src.bacnet_master.resources.point import Point
 
 from src.bacnet_server.resources.mapping.mapping import BPGPMappingResourceList, GBPMappingResourceByGenericPointUUID, \
     GBPMappingResourceByBACnetPointUUID, BPGPMappingResourceByUUID
@@ -47,6 +48,8 @@ api_bacnet_server.add_resource(NetworksIds, '/master/networks/ids')
 api_bacnet_server.add_resource(PointWritePresentValue,
                                '/master/point/write/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string'
                                ':value>/<string:priority>')
+
+api_bacnet_server.add_resource(Point, '/master/point/<string:uuid>')
 
 
 bp_sync = Blueprint('sync_bp_gp', __name__, url_prefix='/api/sync')

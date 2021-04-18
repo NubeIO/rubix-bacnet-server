@@ -7,6 +7,11 @@ from src.bacnet_master.services.network import Network as NetworkService
 
 class Network(Resource):
     parser = reqparse.RequestParser()
+    parser.add_argument('network_name',
+                        type=str,
+                        required=True,
+                        help='network_ip must be a string'
+                        )
     parser.add_argument('network_ip',
                         type=str,
                         required=True,
@@ -58,6 +63,7 @@ class Network(Resource):
         if network is None:
             network = Network.create_network_model_obj(uuid, data)
         else:
+            network.network_name = data['network_name']
             network.network_ip = data['network_ip']
             network.network_mask = data['network_mask']
             network.network_port = data['network_port']
@@ -77,7 +83,7 @@ class Network(Resource):
 
     @staticmethod
     def create_network_model_obj(network_uuid, data):
-        return BacnetNetworkModel(network_uuid=network_uuid, network_ip=data['network_ip'], network_mask=data['network_mask'],
+        return BacnetNetworkModel(network_uuid=network_uuid, network_name=data['network_name'], network_ip=data['network_ip'], network_mask=data['network_mask'],
                                   network_port=data['network_port'], network_device_id=data['network_device_id'],
                                   network_device_name=data['network_device_name'])
 

@@ -59,6 +59,3 @@ class ObjType(Enum):
             d[i.value[2]] = False
         return d
 
-
-print(ObjType.all_obj())
-print(ObjType.obj_as_false())

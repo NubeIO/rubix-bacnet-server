@@ -3,6 +3,7 @@ from src import db
 
 class BacnetNetworkModel(db.Model):
     __tablename__ = 'bacnet_networks'
+    network_name = db.Column(db.String(80), unique=False, nullable=False)
     network_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     network_ip = db.Column(db.String(20), unique=False, nullable=False)
     network_mask = db.Column(db.Integer(), nullable=False)

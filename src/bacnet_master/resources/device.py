@@ -7,35 +7,40 @@ from src.bacnet_master.services.device import Device as DeviceService
 
 class Device(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('bac_device_mac',
+    parser.add_argument('device_name',
+                        type=str,
+                        required=False,
+                        help='BACnet mstp device device_mac address'
+                        )
+    parser.add_argument('device_mac',
                         type=int,
                         required=False,
-                        help='BACnet mstp device bac_device_mac address'
+                        help='BACnet mstp device device_mac address'
                         )
-    parser.add_argument('bac_device_id',
+    parser.add_argument('device_id',
                         type=int,
                         required=True,
                         help='Every device needs a bacnet device id'
                         )
-    parser.add_argument('bac_device_ip',
+    parser.add_argument('device_ip',
                         type=str,
                         required=False,
-                        help='Every device needs a network bac_device_ip.'
+                        help='Every device needs a network device_ip.'
                         )
-    parser.add_argument('bac_device_mask',
+    parser.add_argument('device_mask',
                         type=int,
                         required=False,
-                        help='Every device needs a network bac_device_mask'
+                        help='Every device needs a network device_mask'
                         )
-    parser.add_argument('bac_device_port',
+    parser.add_argument('device_port',
                         type=int,
                         required=False,
-                        help='Every device needs a network bac_device_port'
+                        help='Every device needs a network device_port'
                         )
     parser.add_argument('network_uuid',
                         type=str,
                         required=True,
-                        help='Every device needs a network bac_device_uuid'
+                        help='Every device needs a network device_uuid'
                         )
     parser.add_argument('type_mstp',
                         type=str,
@@ -50,18 +55,18 @@ class Device(Resource):
 
     @marshal_with(device_fields)
     def get(self, uuid):
-        device = BacnetDeviceModel.find_by_bac_device_uuid(uuid)
+        device = BacnetDeviceModel.find_by_device_uuid(uuid)
         if not device:
             abort(404, message='Device not found.')
         return device
 
     @marshal_with(device_fields)
     def post(self, uuid):
-        if BacnetDeviceModel.find_by_bac_device_uuid(uuid):
-            return {'message': "An device with bac_device_uuid '{}' already exists.".format(uuid)}, 400
+        if BacnetDeviceModel.find_by_device_uuid(uuid):
+            return {'message': "An device with device_uuid '{}' already exists.".format(uuid)}, 400
         data = Device.parser.parse_args()
         device = Device.create_device_model_obj(uuid, data)
-        if device.find_by_bac_device_uuid(uuid) is not None:
+        if device.find_by_device_uuid(uuid) is not None:
             abort(409, message="Already exist this value")
         device.save_to_db()
         return device, 201
@@ -69,31 +74,32 @@ class Device(Resource):
     @marshal_with(device_fields)
     def put(self, uuid):
         data = Device.parser.parse_args()
-        device = BacnetDeviceModel.find_by_bac_device_uuid(uuid)
+        device = BacnetDeviceModel.find_by_device_uuid(uuid)
         if device is None:
             device = Device.create_device_model_obj(uuid, data)
         else:
-            device.bac_device_mac = data['bac_device_mac']
-            device.bac_device_id = data['bac_device_id']
-            device.bac_device_ip = data['bac_device_ip']
-            device.bac_device_mask = data['bac_device_mask']
-            device.bac_device_port = data['bac_device_port']
+            device.device_name = data['device_name']
+            device.device_mac = data['device_mac']
+            device.device_id = data['device_id']
+            device.device_ip = data['device_ip']
+            device.device_mask = data['device_mask']
+            device.device_port = data['device_port']
             device.network_id = data['network_uuid']
             device.network_number = data['network_number']
         device.save_to_db()
         return device
 
     def delete(self, uuid):
-        device = BacnetDeviceModel.find_by_bac_device_uuid(uuid)
+        device = BacnetDeviceModel.find_by_device_uuid(uuid)
         if device:
             device.delete_from_db()
         return '', 204
 
     @staticmethod
-    def create_device_model_obj(bac_device_uuid, data):
-        return BacnetDeviceModel(bac_device_uuid=bac_device_uuid, bac_device_mac=data['bac_device_mac'],
-                                 bac_device_id=data['bac_device_id'], bac_device_ip=data['bac_device_ip'],
-                                 bac_device_mask=data['bac_device_mask'], bac_device_port=data['bac_device_port'],
+    def create_device_model_obj(device_uuid, data):
+        return BacnetDeviceModel(device_uuid=device_uuid, device_name=data['device_name'], device_mac=data['device_mac'],
+                                 device_id=data['device_id'], device_ip=data['device_ip'],
+                                 device_mask=data['device_mask'], device_port=data['device_port'],
                                  network_uuid=data['network_uuid'], network_number=data['network_number'])
 
 
@@ -106,12 +112,12 @@ class DeviceList(Resource):
 class DeviceObjectList(Resource):
     def get(self, dev_uuid):
         response = {}
-        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
+        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
         if not device:
             abort(404, message='Device Not found')
         response['network_uuid'] = device.network.network_uuid
-        response['bac_device_uuid'] = device.bac_device_uuid
-        response['bac_device_mac'] = device.bac_device_mac
+        response['device_uuid'] = device.device_uuid
+        response['device_mac'] = device.device_mac
         try:
             response['points'] = DeviceService.get_instance().get_object_list(device)
         except Exception as e:
@@ -122,12 +128,12 @@ class DeviceObjectList(Resource):
 class DevicePoints(Resource):
     def get(self, dev_uuid):
         response = {}
-        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
+        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
         if not device:
             abort(404, message='Device Not found')
         response['network_uuid'] = device.network.network_uuid
-        response['bac_device_uuid'] = device.bac_device_uuid
-        response['bac_device_mac'] = device.bac_device_mac
+        response['device_uuid'] = device.device_uuid
+        response['device_mac'] = device.device_mac
         try:
             response['points'] = DeviceService.get_instance().get_points(device)
         except Exception as e:
@@ -138,14 +144,37 @@ class DevicePoints(Resource):
 class DevicePoint(Resource):
     def get(self, dev_uuid, obj, obj_instance, prop):
         response = {}
-        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
+        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
         if not device:
             abort(404, message='Device Not found')
         response['network_uuid'] = device.network.network_uuid
-        response['bac_device_uuid'] = device.bac_device_uuid
-        response['bac_device_mac'] = device.bac_device_mac
+        response['device_uuid'] = device.device_uuid
+        response['device_mac'] = device.device_mac
         response['pnt_type'] = obj
         response['pnt_id'] = obj_instance
+        try:
+            response['point'] = DeviceService.get_instance().get_point(device, obj, obj_instance, prop)
+        except Exception as e:
+            abort(500, message=str(e))
+
+        return response
+
+
+class PointRead(Resource):
+    def get(self, dev_uuid, obj, obj_instance, prop):
+        response = {}
+        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
+        if not device:
+            abort(404, message='Device Not found')
+        data = Device.parser.parse_args()
+        device_mac = data['device_mac']
+        device_id = data['device_id']
+        device_ip = data['device_ip']
+        device_mask = data['device_mask']
+        device_port = data['device_port']
+        network_uuid = data['network_uuid']
+        type_mstp = data['type_mstp']
+        network_number = data['network_number']
         try:
             response['point'] = DeviceService.get_instance().get_point(device, obj, obj_instance, prop)
         except Exception as e:
@@ -157,12 +186,12 @@ class DevicePoint(Resource):
 class PointWritePresentValue(Resource):
     def get(self, dev_uuid, obj, obj_instance, value, priority):
         response = {}
-        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
+        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
         if not device:
             abort(404, message='Device Not found')
         response['network_uuid'] = device.network.network_uuid
-        response['bac_device_uuid'] = device.bac_device_uuid
-        response['bac_device_mac'] = device.bac_device_mac
+        response['device_uuid'] = device.device_uuid
+        response['device_mac'] = device.device_mac
         response['pnt_type'] = obj
         response['pnt_id'] = obj_instance
         try:
@@ -186,18 +215,15 @@ class Whois(Resource):
 
 class UnknownDeviceObjects(Resource):
     def post(self):
-        print(22222222)
         data = Device.parser.parse_args()
-        bac_device_mac = data['bac_device_mac']
-        bac_device_id = data['bac_device_id']
-        bac_device_ip = data['bac_device_ip']
-        bac_device_mask = data['bac_device_mask']
-        bac_device_port = data['bac_device_port']
+        device_mac = data['device_mac']
+        device_id = data['device_id']
+        device_ip = data['device_ip']
+        device_mask = data['device_mask']
+        device_port = data['device_port']
         network_uuid = data['network_uuid']
         type_mstp = data['type_mstp']
         network_number = data['network_number']
-
-        print(444444)
-        return DeviceService().get_unknown_device_objects(bac_device_mac, bac_device_id,
-                                                          bac_device_ip,bac_device_mask, bac_device_port,
+        return DeviceService().get_unknown_device_objects(device_mac, device_id,
+                                                          device_ip, device_mask, device_port,
                                                           network_uuid, type_mstp, network_number)
