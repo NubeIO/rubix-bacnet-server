@@ -16,10 +16,7 @@ class BACnetPointModel(db.Model):
     use_next_available_address = db.Column(db.Boolean(), nullable=False, default=False)
     address = db.Column(db.Integer(), nullable=True, unique=True)
     relinquish_default = db.Column(db.Float(), nullable=False)
-    priority_array_write = db.relationship('PriorityArrayModel',
-                                           backref='point',
-                                           lazy=False,
-                                           uselist=False,
+    priority_array_write = db.relationship('PriorityArrayModel', backref='point', lazy=False, uselist=False,
                                            cascade="all,delete")
     event_state = db.Column(db.Enum(BACnetEventState), nullable=False)
     units = db.Column(db.Enum(Units), nullable=False)
@@ -28,11 +25,10 @@ class BACnetPointModel(db.Model):
     fault = db.Column(db.Boolean(), nullable=True)
     data_round = db.Column(db.Integer(), nullable=True)
     data_offset = db.Column(db.Float(), nullable=True)
-    point_store = db.relationship('BACnetPointStoreModel',
-                                  backref='point',
-                                  lazy=False,
-                                  uselist=False,
+    point_store = db.relationship('BACnetPointStoreModel', backref='point', lazy=False, uselist=False,
                                   cascade="all,delete")
+    bp_gp_mapping = db.relationship('BPGPointMapping', backref='point', lazy=True, uselist=False,
+                                    cascade="all,delete")
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
