@@ -1,10 +1,11 @@
+import json
 import logging
 from typing import List
 
 import gevent
-from mrb.brige import MqttRestBridge
-from mrb.mapper import api_to_topic_mapper
-from mrb.message import HttpMethod, Response
+from flask import Response
+from rubix_http.method import HttpMethod
+from rubix_http.request import gw_request
 from sqlalchemy import and_
 
 from src import db
@@ -37,7 +38,7 @@ class BACnetPointStoreModel(db.Model):
                                  .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                              self.__table__.c.present_value != self.present_value)))
         updated: bool = bool(res.rowcount)
-        if MqttRestBridge.status() and updated:
+        if updated:
             """BACnet > Generic point value"""
             self.__sync_point_value_bp_to_gp_process()
             """BACnet > Modbus point value"""
@@ -45,24 +46,23 @@ class BACnetPointStoreModel(db.Model):
         return updated
 
     def sync_point_value_bp_to_mp(self):
-        response: Response = api_to_topic_mapper(api=f"api/mappings/mp_gbp/bacnet/{self.point_uuid}",
-                                                 destination_identifier='ps',
-                                                 http_method=HttpMethod.GET)
-        if not response.error:
-            api_to_topic_mapper(api=f"/api/modbus/points_value/uuid/{response.content.get('modbus_point_uuid')}",
-                                destination_identifier='ps',
-                                body={"value": self.present_value},
-                                http_method=HttpMethod.PATCH)
+        response: Response = gw_request(f"/ps/api/mappings/mp_gbp/bacnet/{self.point_uuid}")
+        if response.status_code == 200:
+            gw_request(
+                api=f"/ps/api/modbus/points_value/uuid/{json.loads(response.data).get('modbus_point_uuid')}",
+                body={"value": self.present_value},
+                http_method=HttpMethod.PATCH
+            )
 
     def __sync_point_value_bp_to_mp_process(self):
         gevent.spawn(self.sync_point_value_bp_to_mp)
 
     def sync_point_value_bp_to_gp(self, generic_point_uuid: str):
-        api_to_topic_mapper(
-            api=f"/api/generic/points_value/uuid/{generic_point_uuid}",
-            destination_identifier='ps',
+        gw_request(
+            api=f"/ps/api/generic/points_value/uuid/{generic_point_uuid}",
             body={"value": self.present_value},
-            http_method=HttpMethod.PATCH)
+            http_method=HttpMethod.PATCH
+        )
 
     def __sync_point_value_bp_to_gp_process(self):
         mapping: BPGPointMapping = BPGPointMapping.find_by_bacnet_point_uuid(self.point_uuid)
@@ -70,9 +70,7 @@ class BACnetPointStoreModel(db.Model):
             gevent.spawn(self.sync_point_value_bp_to_gp, mapping.generic_point_uuid)
 
     @classmethod
-    def sync_points_values_bp_to_gp_process(cls, force_sync: bool = False):
-        if not MqttRestBridge.status() and not force_sync:
-            return
+    def sync_points_values_bp_to_gp_process(cls):
         mappings: List[BPGPointMapping] = BPGPointMapping.find_all()
         for mapping in mappings:
             point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)
