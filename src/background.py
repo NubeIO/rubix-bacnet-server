@@ -2,7 +2,6 @@ import logging
 from threading import Thread
 
 from flask import current_app
-from mrb.brige import MqttRestBridge
 
 from .setting import AppSetting
 
@@ -32,28 +31,23 @@ class Background:
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         logger.info("Running Background Task...")
         if setting.mqtt.enabled:
-            FlaskThread(target=MqttClient().start, daemon=True, kwargs={'config': setting.mqtt}).start()
+            MqttClient().start(setting.mqtt)
 
         if setting.bacnet.enabled:
             FlaskThread(target=BACServer().start_bac, daemon=True, kwargs={'config': setting.bacnet}).start()
 
-        if setting.mqtt_rest_bridge_setting.enabled:
-            FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
-                                              mqtt_setting=setting.mqtt_rest_bridge_setting,
-                                              callback=Background.sync_on_start).start, daemon=True).start()
+        Background.sync_on_start()
 
     @staticmethod
     def sync_on_start():
-        from mrb.mapper import api_to_topic_mapper
-        from mrb.message import HttpMethod
+        from rubix_http.request import gw_request
+
         """Sync mapped points values from LoRa > BACnet points values"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_to_bp", 'destination_identifier': 'lora',
-                                                        'http_method': HttpMethod.GET}).start()
+        gw_request('/lora/api/sync/lp_to_bp')
 
         """Sync mapped points values from Modbus > BACnet points values"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/mp_to_bp", 'destination_identifier': 'ps',
-                                                        'http_method': HttpMethod.GET}).start()
+        gw_request('/ps/api/sync/mp_to_bp')
 
         """Sync mapped points values from BACnet > Generic points values"""
         from .bacnet_server.models.model_point_store import BACnetPointStoreModel
-        BACnetPointStoreModel.sync_points_values_bp_to_gp_process(force_sync=True)
+        BACnetPointStoreModel.sync_points_values_bp_to_gp_process()
