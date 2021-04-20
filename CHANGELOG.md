@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v1.5.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.5.2) (2020-04-20)
+### Added
+- mqtt-rest-bridge replacement with rubix-http
+- Cascade delete points mapping
+
 ## [v1.5.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.5.1) (2020-04-12)
 ### Added
 - Fix: On create point next available address
