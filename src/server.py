@@ -14,9 +14,10 @@ from .setting import AppSetting
 def init_logconfig_option(_app_setting: AppSetting, _options=None):
     options = _options or {}
     if not (_options.get('logconfig') and os.path.isabs(_options.get('logconfig'))):
-        logconfig = os.path.join(_app_setting.config_dir, (_options.get('logconfig') or AppSetting.default_logging_conf))
+        logconfig = os.path.join(_app_setting.config_dir,
+                                 (_options.get('logconfig') or AppSetting.default_logging_conf))
         if not os.path.isfile(logconfig):
-            logconfig = AppSetting.fallback_prod_logging_conf if _app_setting.prod else AppSetting.fallback_logging_conf
+            logconfig = AppSetting.fallback_logging_prod_conf if _app_setting.prod else AppSetting.fallback_logging_conf
             logconfig = resource_path(logconfig)
         options.update({'logconfig': logconfig})
     return options
@@ -62,7 +63,7 @@ class GunicornFlaskApplication(BaseApplication, ABC):
     def run_migration(self):
         from flask_migrate import upgrade, Migrate
         Migrate(self.application, db)
-        upgrade(directory='./migrations')
+        upgrade(directory=resource_path('./migrations'))
 
     def wsgi(self):
         output = super(GunicornFlaskApplication, self).wsgi()

@@ -10,11 +10,13 @@ from sqlalchemy import pool
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
+from src.pyinstaller import resource_path
+
 config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig('./config/logging.example.conf')
+fileConfig(resource_path('./config/logging.conf'))
 logger = logging.getLogger(__name__)
 
 # add your model's MetaData object here
