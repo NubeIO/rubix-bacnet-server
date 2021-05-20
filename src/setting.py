@@ -59,8 +59,8 @@ class AppSetting:
     default_identifier: str = 'bacnet'
     default_setting_file: str = 'config.json'
     default_logging_conf: str = 'logging.conf'
-    fallback_logging_conf: str = 'config/logging.example.conf'
-    fallback_prod_logging_conf: str = 'config/logging.prod.example.conf'
+    fallback_logging_conf: str = 'config/logging.conf'
+    fallback_logging_prod_conf: str = 'config/logging.prod.conf'
 
     def __init__(self, **kwargs):
         self.__port = kwargs.get('port') or AppSetting.PORT
