@@ -21,6 +21,7 @@ class BACnetPointBase(RubixResource):
     parser.add_argument('fault', type=bool)
     parser.add_argument('data_round', type=int)
     parser.add_argument('data_offset', type=float)
+    parser.add_argument('source', type=str)
 
     nested_priority_array_write_parser = reqparse.RequestParser()
     nested_priority_array_write_parser.add_argument('_1', type=float, location=('priority_array_write',))

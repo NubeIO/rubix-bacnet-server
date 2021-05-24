@@ -1,6 +1,7 @@
 import uuid
 
 from flask_restful import marshal_with
+from flask_restful.reqparse import request
 
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
@@ -12,7 +13,7 @@ class BACnetPointPlural(BACnetPointBase):
     @classmethod
     @marshal_with(point_fields)
     def get(cls):
-        return BACnetPointModel.find_all()
+        return BACnetPointModel.find_all(**request.args)
 
     @classmethod
     @marshal_with(point_fields)
