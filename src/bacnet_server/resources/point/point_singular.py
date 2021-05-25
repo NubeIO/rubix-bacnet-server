@@ -26,6 +26,7 @@ class BACnetPointSingular(BACnetPointBase):
     parser_patch.add_argument('fault', type=bool, required=False)
     parser_patch.add_argument('data_round', type=int, required=False)
     parser_patch.add_argument('data_offset', type=float, required=False)
+    parser_patch.add_argument('source', type=str, required=False)
 
     @classmethod
     @marshal_with(point_fields)
