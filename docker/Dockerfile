@@ -12,9 +12,10 @@ RUN $HOME/.poetry/bin/poetry install
 ADD src src
 ADD config config
 ADD migrations migrations
-ADD run.py ./
+ADD run.py VERSION ./
 RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-bacnet --clean --onefile \
     --add-data pyproject.toml:. \
+    --add-data VERSION:. \
     --add-data config:config \
     --add-data migrations:migrations
 
