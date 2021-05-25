@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.5.3](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.5.3) (2020-04-25)
+### Added
+- Migration setup
+- Add field source ('OWN', 'MAPPING') for source filtration
+- Add VERSION file
 
 ## [v1.5.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.5.2) (2020-04-20)
 ### Added
