@@ -9,7 +9,8 @@ from bacpypes.local.object import Commandable
 
 from src import BACnetSetting
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
-from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
+from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier, \
+    get_highest_priority_field
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.model_point import BACnetPointModel
@@ -108,8 +109,9 @@ class BACServer(metaclass=Singleton):
         self.__bacnet.this_application.add_object(ao)
         update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
+        priority = get_highest_priority_field(point.priority_array_write)
         mqtt_client = MqttClient()
-        mqtt_client.publish_value(('ao', object_identifier), present_value)
+        mqtt_client.publish_value(('ao', object_identifier), present_value, priority)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)

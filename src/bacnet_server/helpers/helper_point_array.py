@@ -13,6 +13,14 @@ def serialize_priority_array(priority_array):
     return priority_array_dict
 
 
+def get_highest_priority_field(priority_array):
+    for i in range(17):
+        value = getattr(priority_array, f'_{i + 1}', None)
+        if value is not None:
+            return i
+    return 16
+
+
 def highest_priority(iterable, _type, default=None):
     if iterable:
         priority = 0
