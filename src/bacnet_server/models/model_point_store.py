@@ -9,6 +9,7 @@ from rubix_http.request import gw_request
 from sqlalchemy import and_
 
 from src import db
+from src.bacnet_server.interfaces.mapping.mappings import MappingState
 from src.bacnet_server.models.model_mapping import BPGPointMapping
 
 logger = logging.getLogger(__name__)
@@ -61,22 +62,23 @@ class BACnetPointStoreModel(db.Model):
     def __sync_point_value_bp_to_mp_process(self):
         gevent.spawn(self.sync_point_value_bp_to_mp)
 
-    def sync_point_value_bp_to_gp(self, generic_point_uuid: str):
+    def sync_point_value_bp_to_gp(self, mapped_point_uuid: str):
         gw_request(
-            api=f"/ps/api/generic/points_value/uuid/{generic_point_uuid}",
+            api=f"/ps/api/generic/points_value/uuid/{mapped_point_uuid}",
             body={"value": self.present_value},
             http_method=HttpMethod.PATCH
         )
 
     def __sync_point_value_bp_to_gp_process(self):
-        mapping: BPGPointMapping = BPGPointMapping.find_by_bacnet_point_uuid(self.point_uuid)
-        if mapping:
-            gevent.spawn(self.sync_point_value_bp_to_gp, mapping.generic_point_uuid)
+        mapping: BPGPointMapping = BPGPointMapping.find_by_point_uuid(self.point_uuid)
+        if mapping and mapping.mapping_state == MappingState.MAPPED:
+            gevent.spawn(self.sync_point_value_bp_to_gp, mapping.mapped_point_uuid)
 
     @classmethod
     def sync_points_values_bp_to_gp_process(cls):
         mappings: List[BPGPointMapping] = BPGPointMapping.find_all()
         for mapping in mappings:
-            point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)
-            if point_store:
-                point_store.__sync_point_value_bp_to_gp_process()
+            if mapping.mapping_state == MappingState.MAPPED:
+                point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.point_uuid)
+                if point_store:
+                    point_store.__sync_point_value_bp_to_gp_process()

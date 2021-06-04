@@ -24,7 +24,16 @@ class ModelBase(db.Model):
         db.session.commit()
 
     def save_to_db_no_commit(self):
+        self.check_self()
         db.session.add(self)
+
+    # Issue #85 filter_by(...).update(...) is not working in inheritance
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        self.check_self()
+        db.session.commit()
 
     @classmethod
     def commit(cls):
@@ -33,3 +42,6 @@ class ModelBase(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
+
+    def check_self(self) -> (bool, any):
+        return True
