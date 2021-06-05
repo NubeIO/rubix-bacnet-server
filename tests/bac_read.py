@@ -23,7 +23,12 @@ bacnet = BAC0.lite()
 # print(SupportedServices.check(ss))
 # # print(aaaa)
 
-print(bacnet.read('192.168.15.202/24:47808 device 202 objectList'))
+# <addr> <type> <inst> <prop>
+print(bacnet.read('192.168.15.202/24:47808 analogOutput 1 presentValue'))  # or 85
+print(bacnet.read('192.168.15.202/24:47808 analogOutput 1 85'))
+# print(bacnet.read('202 analogOutput 1 85'))
+print(bacnet.read('192.168.15.202/24:47808 device 202 objectList'))  # or 76
+print(bacnet.read('192.168.15.202/24:47808 device 202 76'))
 # for x in range(len(ss)):
 #     print(22222)
 #     print(x)

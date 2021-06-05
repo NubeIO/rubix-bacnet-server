@@ -31,7 +31,6 @@ class Background:
         from src.bacnet_master.services.network import Network
         from src.mqtt import MqttClient
 
-        Network.get_instance().start()
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         logger.info("Running Background Task...")
         if setting.mqtt.enabled:
@@ -39,6 +38,9 @@ class Background:
 
         if setting.bacnet.enabled:
             FlaskThread(target=BACServer().start_bac, daemon=True, kwargs={'config': setting.bacnet}).start()
+
+        if setting.bacnet.master_enabled:
+            Network.get_instance().start()
 
         if setting.mqtt_rest_bridge_setting.enabled:
             FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,

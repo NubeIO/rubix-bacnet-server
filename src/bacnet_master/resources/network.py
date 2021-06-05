@@ -1,15 +1,19 @@
+import logging
+
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
 
 from src.bacnet_master.models.network import BacnetNetworkModel
 from src.bacnet_master.resources.fields import network_fields
 from src.bacnet_master.services.network import Network as NetworkService
+from src.bacnet_master.services.device import Device as DeviceService
+logger = logging.getLogger(__name__)
 
 
 class Network(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('network_name',
                         type=str,
-                        required=True,
+                        required=False,
                         help='network_ip must be a string'
                         )
     parser.add_argument('network_ip',

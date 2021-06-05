@@ -44,8 +44,6 @@ class BACnetCommon:
         obj = kwargs.get('obj', None)  # analogInput
         obj_instance = kwargs.get('obj_instance', None)  # 1
         prop = kwargs.get('prop', None)  # 85 presentValue
-
-        #
         if type_mstp:
             return f'{network_number}:{device_mac} {obj} {obj_instance} {prop}'
         if network_number != 0:

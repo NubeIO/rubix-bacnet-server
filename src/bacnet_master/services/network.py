@@ -24,7 +24,7 @@ class Network:
             self.networks = {}
 
     def start(self):
-        logger.info("Network Start...")
+        logger.info("BACNET MASTER Network Start...")
         network_service = Network.get_instance()
         for network in BacnetNetworkModel.query.all():
             network_service.add_network(network)
@@ -33,32 +33,22 @@ class Network:
         net_url = f"{network.network_ip}/{network.network_mask}:{network.network_port}"
         network_device_id = network.network_device_id
         network_device_name = network.network_device_name
-
         if not self.networks.get(net_url):
             self.networks[net_url] = {}
-
         if not self.networks.get(net_url).get(network_device_id):
             self.networks[net_url][network_device_id] = {}
-
         logger.info('=====================================================')
-        logger.info('...........Creating BACnet network with..............')
-        logger.info(f'net_url: {net_url}')
-        logger.info(f'network_device_id: {network_device_id}')
-        logger.info(f'network_device_name: {network_device_name}')
-        logger.info('.....................................................')
-        logger.info('=====================================================')
-
+        logger.info('...........Creating BACnet MASTER network with..............')
         try:
             network = BAC0.lite(ip=net_url, deviceId=network_device_id, localObjName=network_device_name)
             self.networks[net_url][network_device_id][network_device_name] = network
         except:
-            logger.error("Initialization error!")
+            logger.error("BACnet MASTER  Initialization error!")
 
     def delete_network(self, network):
         net_url = f"{network.network_ip}/{network.network_mask}:{network.network_port}"
         network_device_id = network.network_device_id
         network_device_name = network.network_device_name
-
         network = self.networks.get(net_url, {}).get(network_device_id, {}).get(network_device_name)
         if network:
             pass
@@ -70,4 +60,6 @@ class Network:
         net_url = f'{network.network_ip}/{network.network_mask}:{network.network_port}'
         network_device_id = network.network_device_id
         network_device_name = network.network_device_name
-        return self.networks.get(net_url, {}).get(network_device_id, {}).get(network_device_name)
+        out = self.networks.get(net_url, {}).get(network_device_id, {}).get(network_device_name)
+        logger.info(f"do whois with network{out}")
+        return out

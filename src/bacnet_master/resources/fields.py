@@ -10,6 +10,7 @@ device_fields = {
     'device_port': fields.Integer,
     'network_uuid': fields.String,
     'network_number': fields.Integer,
+    'type_mstp': fields.Boolean
 }
 
 network_fields = {

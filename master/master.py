@@ -112,8 +112,6 @@ def create_server(app):
 print("Creating server_old...")
 app = create_server(app)
 
-
-
 if __name__ == '__main__':
     print("Running BAC0 API server_old")
     app.run(host=FLASK_HOST, port=FLASK_PORT)

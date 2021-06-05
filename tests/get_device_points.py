@@ -4,15 +4,15 @@ import BAC0
 
 from src.bacnet_server.helpers.helper_point_array import serialize_priority_array
 
-bacnet = BAC0.lite('192.168.15.100/24:47808')
+bacnet = BAC0.lite('192.168.15.102/24:47808')
 # device = BAC0.device('192.168.15.202', 202, bacnet, segmentation_supported=True)
 # points = device.points
 # print(points)
 #
 
-address = '192.168.15.189'
-object_type = 'device'
-object_instance = "10002:31"
+# address = '192.168.15.189'
+# object_type = 'device'
+# object_instance = "10002:31"
 
 # read_vals = f'{address} analogOutput 1 87'
 #
@@ -21,11 +21,11 @@ object_instance = "10002:31"
 #     print(i)
 # print(type(aa))
 
-
-read_vals = f' 102:31 device 1107 objectList'
-
-points = bacnet.read(read_vals)
-print(points)
+# read_vals = f' 102:31 device 1107 objectList'
+# read_vals = f' 102:31 device 202 objectList'
+#
+# points = bacnet.read(read_vals)
+# print(points)
 
 # bacnet.read('10002:31 analogInput 1 presentValue')
 
@@ -54,31 +54,92 @@ print(points)
 #                       "resolution", "covIncrement", "timeDelay", "notificationClass", "highLimit", "lowLimit",
 #                       "deadband", "limitEnable", "eventEnable"]
 
+
+address = '192.168.15.202'
+object_type = 'device'
+object_instance = "202"
+# object_instance = "10002:31"
+
+propertyListAnalog = ["objectName", "presentValue", "units"]
+objectPropertyList = {}
+analogInputs = []
+analogOutputs = []
+analogValues = []
+objectList = bacnet.read('%s device %s objectList' % (address, object_instance))
+count = 0
+for obj in objectList:
+    objectType = obj[0]
+    objectInstance = obj[1]
+    count += 1
+    if objectType == "analogInput":
+        try:
+            point_name = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, "objectName"))
+            point_value = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, "presentValue"))
+            point = f"{obj[0]}_{obj[1]}"
+            analogInputs.append({"point": point, "point_name": point_name, "point_value": point_value})
+        except BAC0.core.io.IOExceptions.UnknownPropertyError:
+            continue
+    elif objectType == "analogOutput":
+        try:
+            point_name = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, "objectName"))
+            point_value = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, "presentValue"))
+            point = f"{obj[0]}_{obj[1]}"
+            analogOutputs.append({"point": point, "point_name": point_name, "point_value": point_value})
+        except BAC0.core.io.IOExceptions.UnknownPropertyError:
+            continue
+    elif objectType == "analogValue":
+        try:
+            point_name = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, "objectName"))
+            point_value = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, "presentValue"))
+            point = f"{obj[0]}_{obj[1]}"
+            analogValues.append({"point": point, "point_name": point_name, "point_value": point_value})
+        except BAC0.core.io.IOExceptions.UnknownPropertyError:
+            continue
+
+objectPropertyList = {
+    "analogInputs": analogInputs,
+    "analogOutputs": analogOutputs,
+    "analogValues": analogValues,
+}
+
+print(objectPropertyList)
+
 # propertyListAnalog = ["objectName", "presentValue", "units"]
 # objectPropertyList = {}
+# analogInputs = {}
+# analogOutputs = {}
+# list = {}
 # objectList = bacnet.read('%s device %s objectList' % (address, object_instance))
-#
 # for obj in objectList:
 #     objectType = obj[0]
 #     objectInstance = obj[1]
 #     if objectType == "analogInput" or objectType == "analogOutput" or objectType == "analogValue":
 #         for prop in propertyListAnalog:
+#             point_name = None
+#             point_value = None
 #             try:
 #                 if prop == "objectName":
 #                     value = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, prop))
-#                     name = f'{objectType}_{objectInstance}_name'
-#                     objectPropertyList[name] = value
+#                     e = f'{objectType}_{objectInstance}_name'
+#                     if objectType == "analogInput":
+#                         analogInputs[e] = value
+#                     elif objectType == "analogOutput":
+#                         analogOutputs[e] = value
+#                     point_name = value
 #                 elif prop == "presentValue":
 #                     value = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, prop))
-#                     ps = f'{objectType}_{objectInstance}_value'
-#                     objectPropertyList[ps] = value
+#                     e = f'{objectType}_{objectInstance}_value'
+#                     if objectType == "analogInput":
+#                         analogInputs[e] = value
+#                     elif objectType == "analogOutput":
+#                         analogOutputs[e] = value
+#                     point_value = value
 #                 elif prop == "units":
 #                     value = bacnet.read('%s %s %s %s' % (address, objectType, objectInstance, prop))
-#                     units = f'{objectType}_{objectInstance}_units'
-#                     objectPropertyList[units] = value
-#
-#                 # objectPropertyList[str(objectInstance)]= value
+#                     e = f'{objectType}_{objectInstance}_units'
+#                     if objectType == "analogInput":
+#                         analogInputs[e] = value
+#                     elif objectType == "analogOutput":
+#                         analogOutputs[e] = value
 #             except BAC0.core.io.IOExceptions.UnknownPropertyError:
 #                 continue
-#
-# print(objectPropertyList)
