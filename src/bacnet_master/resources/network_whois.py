@@ -25,12 +25,12 @@ class NetworkWhois(Resource):
                         required=False,
                         help='global broadcast'
                         )
-    parser.add_argument('device_range_start',
+    parser.add_argument('range_start',
                         type=int,
                         required=False,
                         help='WhoIs looking for devices in the ID range EXAMPLE: START 10 (10 - 1000)'
                         )
-    parser.add_argument('device_range_end',
+    parser.add_argument('range_end',
                         type=int,
                         required=False,
                         help='WhoIs looking for devices in the ID range (10 - 1000) EXAMPLE: END 1000'
@@ -38,13 +38,18 @@ class NetworkWhois(Resource):
 
 
 class Whois(Resource):
-    def post(self, uuid):
+    def post(self, net_uuid):
         data = NetworkWhois.parser.parse_args()
-        network_id = uuid
-        whois = data['whois']
         network_number = data['network_number']
-        logger.info(f"WHOIS network_id:{network_id} whois:{whois} network_number:{network_number}")
-        return DeviceService().whois(network_id, whois, network_number)
+        whois = data['whois']
+        global_broadcast = data['global_broadcast']
+        range_start = data['range_start']
+        range_end = data['range_end']
+        return DeviceService().whois(net_uuid, whois=whois,
+                                     network_number=network_number,
+                                     global_broadcast=global_broadcast,
+                                     range_start=range_start,
+                                     range_end=range_end)
 
 
 class NetworkUnknownDeviceObjects(Resource):
@@ -92,7 +97,7 @@ class NetworkUnknownDeviceObjects(Resource):
 
 
 class UnknownDeviceObjects(Resource):
-    def post(self, uuid):
+    def post(self, net_uuid):
         data = NetworkUnknownDeviceObjects.parser.parse_args()
         device_id = data['device_id']
         device_ip = data['device_ip']
@@ -101,26 +106,14 @@ class UnknownDeviceObjects(Resource):
         device_port = data['device_port']
         type_mstp = data['type_mstp']
         network_number = data['network_number']
-        # object_type = data['object_type']
-        # object_instance = data['object_instance']
-        # <addr> <type> <inst> <prop>
-        # print(bacnet.read('192.168.15.202/24:47808 analogOutput 1 presentValue'))  # or 85
-        # print(bacnet.read('192.168.15.202/24:47808 analogOutput 1 85'))
-        # print(bacnet.read('192.168.15.202/24:47808 device 202 objectList'))  # or 76
-        # print(bacnet.read('192.168.15.202/24:47808 device 202 76'))
-
-        if network_number == -1:
-            network_number = None
-        # url = BACnetCommon.build_url(device_ip, mask=device_mask, port=device_port)
-        # BACnetCommon.common_point(url, network_number=network_number, type_mstp=type_mstp, device_mac=device_mac,
-        #                           obj=obj, obj_instance=obj_instance,
-        #                           prop=prop)
-        return DeviceService().get_object(uuid,
-                                          device_ip,
-                                          device_id,
-                                          device_mac=device_mac,
-                                          device_mask=device_mask,
-                                          device_port=device_port,
-                                          type_mstp=type_mstp,
-                                          network_number=network_number
-                                          )
+        device = {
+            "device_id": device_id,
+            "device_ip": device_ip,
+            "device_mac": device_mac,
+            "device_mask": device_mask,
+            "device_port": device_port,
+            "type_mstp": type_mstp,
+            "network_number": network_number
+        }
+        # url = DeviceService.build_url(device_ip=device_ip, device_mask=device_mask, device_port=device_port)
+        return DeviceService().unknown_get_object_list(net_uuid, device)

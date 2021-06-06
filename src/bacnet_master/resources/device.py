@@ -106,7 +106,8 @@ class Device(Resource):
                                  device_mac=data['device_mac'],
                                  device_id=data['device_id'], device_ip=data['device_ip'],
                                  device_mask=data['device_mask'], device_port=data['device_port'],
-                                 network_uuid=data['network_uuid'], network_number=data['network_number'], type_mstp=data['type_mstp'])
+                                 network_uuid=data['network_uuid'], network_number=data['network_number'],
+                                 type_mstp=data['type_mstp'])
 
 
 class DeviceList(Resource):
@@ -131,64 +132,6 @@ class DeviceObjectList(Resource):
         return response
 
 
-class DevicePoints(Resource):
-    def get(self, dev_uuid):
-        response = {}
-        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
-        if not device:
-            abort(404, message='Device Not found')
-        response['network_uuid'] = device.network.network_uuid
-        response['device_uuid'] = device.device_uuid
-        response['device_mac'] = device.device_mac
-        try:
-            response['points'] = DeviceService.get_instance().get_points(device)
-        except Exception as e:
-            abort(500, message=str(e))
-        return response
-
-
-class DevicePoint(Resource):
-    def get(self, dev_uuid, obj, obj_instance, prop):
-        response = {}
-        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
-        if not device:
-            abort(404, message='Device Not found')
-        response['network_uuid'] = device.network.network_uuid
-        response['device_uuid'] = device.device_uuid
-        response['device_mac'] = device.device_mac
-        response['pnt_type'] = obj
-        response['pnt_id'] = obj_instance
-        try:
-            response['point'] = DeviceService.get_instance().get_point(device, obj, obj_instance, prop)
-        except Exception as e:
-            abort(500, message=str(e))
-
-        return response
-
-
-class PointRead(Resource):
-    def get(self, dev_uuid, obj, obj_instance, prop):
-        response = {}
-        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
-        if not device:
-            abort(404, message='Device Not found')
-        data = Device.parser.parse_args()
-        device_mac = data['device_mac']
-        device_id = data['device_id']
-        device_ip = data['device_ip']
-        device_mask = data['device_mask']
-        device_port = data['device_port']
-        network_uuid = data['network_uuid']
-        type_mstp = data['type_mstp']
-        network_number = data['network_number']
-        try:
-            response['point'] = DeviceService.get_instance().get_point(device, obj, obj_instance, prop)
-        except Exception as e:
-            abort(500, message=str(e))
-
-        return response
-
-
 class PointWritePresentValue(Resource):
     def get(self, dev_uuid, obj, obj_instance, value, priority):
         response = {}
@@ -207,9 +150,9 @@ class PointWritePresentValue(Resource):
         return response
 
 
-class ReadPointObject(Resource):
-    def get(self, uuid):
-        device = BacnetDeviceModel.find_by_device_uuid(uuid)
+class BuildPointsList(Resource):
+    def get(self, dev_uuid):
+        device = BacnetDeviceModel.find_by_device_uuid(dev_uuid)
         if not device:
             abort(404, message='Points not found')
         read = DeviceService.get_instance().read_point_list(device)
@@ -218,18 +161,3 @@ class ReadPointObject(Resource):
         return {
             "points": read
         }
-
-
-# class UnknownDeviceObjects(Resource):
-#     def post(self, uuid):
-#         data = Device.parser.parse_args()
-#         device_mac = data['device_mac']
-#         device_id = data['device_id']
-#         device_ip = data['device_ip']
-#         device_mask = data['device_mask']
-#         device_port = data['device_port']
-#         type_mstp = data['type_mstp']
-#         network_number = data['network_number']
-#         return DeviceService().get_unknown_device_objects(device_mac, device_id,
-#                                                           device_ip, device_mask, device_port,
-#                                                           uuid, type_mstp, network_number)
