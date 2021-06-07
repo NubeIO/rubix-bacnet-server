@@ -53,7 +53,12 @@ class Device:
         network_number = self._network_number(network_number)
         object_instance = kwargs.get('object_instance') or point.point_obj_id
         object_type = kwargs.get('object_type') or point.point_obj_type.name
-        prop = kwargs.get('prop') or ObjProperty.presentValue.value
+        print(111111)
+        prop = kwargs.get('prop') or ObjProperty.presentValue.name
+        print(111111)
+        print(prop)
+        print(ObjProperty.presentValue.name)
+        print(111111)
         type_mstp = kwargs.get('type_mstp') or device.type_mstp
         device_mac = kwargs.get('device_mac') or device.device_mac
         if type_mstp:
@@ -65,28 +70,42 @@ class Device:
 
     def _common_object(self, device=None, **kwargs):
         """192.168.15.202/24:47808 device 202 objectList"""
-        if isinstance(device, dict):
-            dev_url = kwargs.get('dev_url') or self.build_url(device)
-            type_mstp = kwargs.get('type_mstp') or device.get("type_mstp") or False
-            device_mac = kwargs.get('device_mac') or device.get("type_mstp") or 0
-            object_instance = kwargs.get('object_instance') or device.get("device_id")
-            network_number = kwargs.get('network_number') or device.get("network_number")
-            network_number = self._network_number(network_number)
-        else:
-            dev_url = kwargs.get('dev_url') or self.build_url(device)
-            type_mstp = kwargs.get('type_mstp') or device.type_mstp or False
-            device_mac = kwargs.get('device_mac') or device.device_mac
-            object_instance = kwargs.get('object_instance') or device.device_id
-            network_number = kwargs.get('network_number') or device.network_number
-            network_number = self._network_number(network_number)
+        dev_url = kwargs.get('dev_url') or self.build_url(device)
+        type_mstp = kwargs.get('type_mstp') or device.type_mstp or False
+        device_mac = kwargs.get('device_mac') or device.device_mac
+        object_instance = kwargs.get('object_instance') or device.device_id
+        network_number = kwargs.get('network_number') or device.network_number
+        network_number = self._network_number(network_number)
         object_type = kwargs.get('object_type') or ObjType.DEVICE.name
         prop = kwargs.get('prop') or ObjProperty.objectList.name
-        print("type_mstp", type_mstp)
         if type_mstp == True:
             return f'{network_number}:{device_mac} {object_type} {object_instance} {prop}'
         if network_number != 0:
             return f'{network_number}:{dev_url} {object_type} {object_instance} {prop}'
         else:
+            return f'{dev_url} {object_type} {object_instance} {prop}'
+
+    def _get_objects_unknown(self, device):
+        """192.168.15.202/24:47808 device 202 objectList"""
+        dev_url = self.build_url(device)
+        type_mstp = device.get("type_mstp", False)
+        device_mac = device.get("device_mac", 0)
+        object_instance = device.get("device_id")
+        network_number = device.get("network_number")
+        network_number = self._network_number(network_number)
+        object_type = ObjType.DEVICE.name
+        prop = ObjProperty.objectList.name
+        logger.info(f"GET DEVICE OBJECT LIST  dev_url:{dev_url}, type_mstp:{type_mstp}, "
+                    f"device_mac:{device_mac}, device_id:{object_instance}, "
+                    f"network_number:{network_number}")
+        if type_mstp:
+            logger.info(f"GET DEVICE OBJECT LIST - TYPE MSTP")
+            return f'{network_number}:{device_mac} {object_type} {object_instance} {prop}'
+        if network_number != 0:
+            logger.info(f"GET DEVICE OBJECT LIST - TYPE IP with network number{network_number}")
+            return f'{network_number}:{dev_url} {object_type} {object_instance} {prop}'
+        else:
+            logger.info(f"GET DEVICE OBJECT LIST - TYPE IP with NO network number{network_number}")
             return f'{dev_url} {object_type} {object_instance} {prop}'
 
     def _common_whois(self, **kwargs):
@@ -132,11 +151,35 @@ class Device:
         device = BacnetDeviceModel.find_by_device_uuid(point.device_uuid)
         network_instance = self._get_network_from_device(device)
         read = self._common_point(point, device)
-        try:
-            if network_instance:
-                return network_instance.read(read)
-        except:
-            return {}
+        if network_instance:
+            try:
+                action = network_instance.read(read)
+                print(action)
+                return action
+            except:
+                logger.info(f"DO POINT WRITE ERROR:")
+                return {"error": "on point write"}
+
+    def write_point_pv(self, point, value, priority):
+        device = BacnetDeviceModel.find_by_device_uuid(point.device_uuid)
+        network_instance = self._get_network_from_device(device)
+        print(9999999)
+        print(device, network_instance)
+        print(9999999)
+        cmd = self._common_point(point, device)
+        print(cmd)
+        print(9999999)
+        # value = "active"
+        print(f"{cmd} {value} - 16")
+        write = f"{cmd} {value} - {priority}"
+        if network_instance:
+            try:
+                action = network_instance.write(write)
+                print(action)
+                return action
+            except:
+                logger.info(f"DO POINT WRITE ERROR:")
+                return {"error": "on point write"}
 
     def read_point_list(self, device):
         network_instance = self._get_network_from_device(device)
@@ -218,25 +261,30 @@ class Device:
     def whois(self, net_uuid, **kwargs):
         net = BacnetNetworkModel.find_by_network_uuid(net_uuid)
         if not net:
-            return {}
+            return {"net": "net is none"}
         network_instance = self._get_network_from_network(net)
         if not network_instance:
-            return {}
+            return {"network_instance": "network instance is none"}
         min_range = 0
         max_range = 4194302
-        range_start = kwargs.get('range_start') or min_range
-        if range_start < min_range:
+        full_range = kwargs.get('full_range', False)
+        if full_range:
             range_start = min_range
-        range_end = kwargs.get('range_end') or max_range
-        if range_end > max_range:
             range_end = max_range
-        network_number = kwargs.get('network_number') or 0
+        else:
+            range_start = kwargs.get('range_start', min_range)
+            if range_start < min_range:
+                range_start = min_range
+            range_end = kwargs.get('range_end', max_range)
+            if range_end > max_range:
+                range_end = max_range
+        network_number = kwargs.get('network_number', 0)
         network_number = self._network_number(network_number)
-        whois = kwargs.get('whois')
-        global_broadcast = kwargs.get('global_broadcast')
+        whois = kwargs.get('whois', True)
+        global_broadcast = kwargs.get('global_broadcast', False)
         who = self._common_whois(range_start=range_start, range_end=range_end, network_number=network_number)
         logger.info(f"WHOIS network_id:{net_uuid} whois -> {whois} who {who}, global_broadcast:{global_broadcast} "
-                    f", network_number:{network_number}")
+                    f", network_number:{network_number}, range_start:{range_start}, range_end:{range_end}")
         try:
             if whois:
                 return network_instance.whois(who, global_broadcast)
@@ -259,8 +307,10 @@ class Device:
     def unknown_get_object_list(self, net_uuid, device):
         net = BacnetNetworkModel.find_by_network_uuid(net_uuid)
         network_instance = self._get_network_from_network(net)
-        read = self._common_object(device)
-        logger.info(f"GET DEVICE OBJECT LIST  bac command {read}")
+        read = self._get_objects_unknown(device)
+        print(net, network_instance)
+        print(1111)
+        print(read)
         try:
             if network_instance:
                 return network_instance.read(read)

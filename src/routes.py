@@ -5,7 +5,7 @@ from src.bacnet_master.resources.device import Device, DeviceList, PointWritePre
     DeviceObjectList, BuildPointsList
 from src.bacnet_master.resources.network import Network, NetworkList, NetworksIds
 from src.bacnet_master.resources.network_whois import Whois, UnknownDeviceObjects
-from src.bacnet_master.resources.point import Point, PointList, PointBACnetRead
+from src.bacnet_master.resources.point import Point, PointList, PointBACnetRead, PointBACnetWrite
 
 from src.bacnet_server.resources.mapping.mapping import BPGPMappingResourceList, GBPMappingResourceByGenericPointUUID, \
     GBPMappingResourceByBACnetPointUUID, BPGPMappingResourceByUUID
@@ -46,9 +46,9 @@ api_bacnet_server.add_resource(PointList, '/master/points')
 # bacnet bac0 api calls
 api_bacnet_server.add_resource(Whois, '/master/b/network/whois/<string:net_uuid>')
 api_bacnet_server.add_resource(PointBACnetRead, '/master/b/points/read/pv/<string:pnt_uuid>')  # read point pv
+api_bacnet_server.add_resource(PointBACnetWrite, '/master/b/points/write/pv/<string:pnt_uuid>/<string:value>/<string:priority>')  # write point pv
 api_bacnet_server.add_resource(BuildPointsList, '/master/b/points/point_list/<string:dev_uuid>')  # build points list
 api_bacnet_server.add_resource(DeviceObjectList, '/master/b/device/objects/<string:dev_uuid>')
-
 api_bacnet_server.add_resource(UnknownDeviceObjects, '/master/b/device/unknown/objects/<string:net_uuid>')
 
 

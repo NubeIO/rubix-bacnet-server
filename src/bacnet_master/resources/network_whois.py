@@ -25,6 +25,11 @@ class NetworkWhois(Resource):
                         required=False,
                         help='global broadcast'
                         )
+    parser.add_argument('full_range',
+                        type=bool,
+                        required=False,
+                        help='WhoIs full range'
+                        )
     parser.add_argument('range_start',
                         type=int,
                         required=False,
@@ -43,11 +48,13 @@ class Whois(Resource):
         network_number = data['network_number']
         whois = data['whois']
         global_broadcast = data['global_broadcast']
+        full_range = data['full_range']
         range_start = data['range_start']
         range_end = data['range_end']
         return DeviceService().whois(net_uuid, whois=whois,
                                      network_number=network_number,
                                      global_broadcast=global_broadcast,
+                                     full_range=full_range,
                                      range_start=range_start,
                                      range_end=range_end)
 
@@ -85,7 +92,7 @@ class NetworkUnknownDeviceObjects(Resource):
                         help='Every device needs a network device_port'
                         )
     parser.add_argument('type_mstp',
-                        type=str,
+                        type=bool,
                         required=False,
                         help='True if device is type MSTP'
                         )
