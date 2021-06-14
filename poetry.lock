@@ -466,6 +466,14 @@ reference = "v1.0.0"
 resolved_reference = "cbd039aac2eafc3bdeb10aead8a3180f86335a1b"
 
 [[package]]
+name = "shortuuid"
+version = "1.0.1"
+description = "A generator library for concise, unambiguous and URL-safe UUIDs."
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "six"
 version = "1.15.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -554,7 +562,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "25e86a0146a4a92d14e41cefc9e7a588928e1eba39ef56eee54fdb0138d777de"
+content-hash = "a09ca779a1310ac63f618a17973346ddc58623bbd30521c74d7b5fee250b4b69"
 
 [metadata.files]
 alembic = [
@@ -852,6 +860,10 @@ requests = [
 rubix-http = []
 rubix-mqtt = []
 rubix-registry = []
+shortuuid = [
+    {file = "shortuuid-1.0.1-py3-none-any.whl", hash = "sha256:492c7402ff91beb1342a5898bd61ea953985bf24a41cd9f247409aa2e03c8f77"},
+    {file = "shortuuid-1.0.1.tar.gz", hash = "sha256:3c11d2007b915c43bee3e10625f068d8a349e04f0d81f08f5fa08507427ebf1f"},
+]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},

@@ -1,4 +1,4 @@
-import uuid
+import shortuuid
 
 from flask_restful import marshal_with
 from flask_restful.reqparse import request
@@ -19,7 +19,7 @@ class BACnetPointPlural(BACnetPointBase):
     @marshal_with(point_fields)
     def post(cls):
         cls.abort_if_bacnet_is_not_running()
-        _uuid = str(uuid.uuid4())
+        _uuid = str(shortuuid.uuid())
         data = BACnetPointPlural.parser.parse_args()
         return cls.add_point(data, _uuid)
 
