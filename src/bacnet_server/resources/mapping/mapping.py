@@ -1,4 +1,4 @@
-import uuid as uuid_
+import shortuuid
 from abc import abstractmethod
 
 from flask_restful import marshal_with, reqparse
@@ -32,7 +32,7 @@ class BPGPMappingResourceList(RubixResource):
         parser.add_argument('generic_point_name', type=str, required=True)
 
         data = parser.parse_args()
-        data.uuid = str(uuid_.uuid4())
+        data.uuid = str(shortuuid.uuid())
         mapping: BPGPointMapping = BPGPointMapping(**data)
         mapping.save_to_db()
         sync_point_value(mapping)
