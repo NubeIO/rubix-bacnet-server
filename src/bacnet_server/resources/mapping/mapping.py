@@ -14,7 +14,7 @@ from src.bacnet_server.resources.model_fields import mapping_bp_gp_fields
 def sync_point_value(mapping: BPGPointMapping):
     if mapping.mapping_state in (MappingState.MAPPED.name, MappingState.MAPPED):
         point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.point_uuid)
-        point_store.sync_point_value_bp_to_gp(mapping.mapped_point_uuid)
+        point_store.sync_point_value_bp_to_gp(mapping.mapped_point_uuid, point_store.get_priority_array_write())
     return mapping
 
 

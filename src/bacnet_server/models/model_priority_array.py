@@ -1,3 +1,5 @@
+from sqlalchemy import inspect
+
 from src import db
 from src.bacnet_server.helpers.helper_point_array import dict_priority
 
@@ -24,6 +26,10 @@ class PriorityArrayModel(db.Model):
 
     def __repr__(self):
         return f"PriorityArray(point_uuid = {self.point_uuid})"
+
+    def to_dict(self) -> dict:
+        return {c.key: getattr(self, c.key)
+                for c in inspect(self).mapper.column_attrs}
 
     @classmethod
     def create_new_point_store_model(cls, point_uuid):
