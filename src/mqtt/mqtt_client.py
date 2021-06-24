@@ -1,6 +1,8 @@
 import logging
+from typing import Union
 
-from registry.registry import RubixRegistry
+from registry.models.model_device_info import DeviceInfoModel
+from registry.resources.resource_device_info import get_device_info
 from rubix_mqtt.mqtt import MqttClientBase
 
 from src import MqttSetting
@@ -45,13 +47,13 @@ class MqttClient(MqttClientBase, metaclass=Singleton):
 
     @classmethod
     def prefix_topic(cls) -> str:
-        wires_plat: dict = RubixRegistry().read_wires_plat()
-        if not wires_plat:
-            logger.error('Please add wires-plat on Rubix Service')
+        device_info: Union[DeviceInfoModel, None] = get_device_info()
+        if not device_info:
+            logger.error('Please add device-info on Rubix Service')
             return ''
-        return MqttClient.SEPARATOR.join((wires_plat.get('client_id'), wires_plat.get('client_name'),
-                                          wires_plat.get('site_id'), wires_plat.get('site_name'),
-                                          wires_plat.get('device_id'), wires_plat.get('device_name')))
+        return MqttClient.SEPARATOR.join((device_info.client_id, device_info.client_name,
+                                          device_info.site_id, device_info.site_name,
+                                          device_info.device_id, device_info.device_name))
 
     def make_topic(self, parts: tuple) -> str:
         return MqttClient.SEPARATOR.join((self.prefix_topic(),) + parts)
