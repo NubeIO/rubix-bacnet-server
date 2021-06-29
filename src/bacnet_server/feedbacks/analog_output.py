@@ -30,4 +30,4 @@ class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
                 present_value = float(present_value)
             priority = get_highest_priority_field(priority_array_updated)
             mqtt_client = MqttClient()
-            mqtt_client.publish_value(('ao', object_identifier), present_value, priority)
+            mqtt_client.publish_value(('ao', object_identifier, self.objectName), present_value, priority)
