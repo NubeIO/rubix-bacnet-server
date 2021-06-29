@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Union
 
@@ -29,8 +30,13 @@ class MqttClient(MqttClientBase, metaclass=Singleton):
         return super().config if isinstance(super().config, MqttSetting) else MqttSetting()
 
     @allow_only_on_prefix
-    def publish_value(self, topic_suffix: tuple, payload: str):
+    def publish_value(self, topic_suffix: tuple, value: str, priority: int):
         if self.config.publish_value:
+            output = {
+                'value': value,
+                'priority': priority
+            }
+            payload = json.dumps(output)
             self.__publish_mqtt_value(self.make_topic((self.config.topic,) + topic_suffix), payload)
 
     @allow_only_on_prefix
