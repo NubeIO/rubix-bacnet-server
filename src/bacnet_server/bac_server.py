@@ -88,7 +88,7 @@ class BACServer(metaclass=Singleton):
         self.__running = False
         self.__registry = {}
 
-    def add_point(self, point):
+    def add_point(self, point: BACnetPointModel):
         [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
         # TODO: Switch cases for different type of points
         if point.use_next_available_address:
@@ -111,7 +111,7 @@ class BACServer(metaclass=Singleton):
         self.__registry[object_identifier] = ao
         priority = get_highest_priority_field(point.priority_array_write)
         mqtt_client = MqttClient()
-        mqtt_client.publish_value(('ao', object_identifier), present_value, priority)
+        mqtt_client.publish_value(('ao', object_identifier, point.object_name), present_value, priority)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)

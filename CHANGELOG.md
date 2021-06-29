@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.6.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.1) (2020-06-29)
+- MQTT topic structure and payload schema change
+
 ## [v1.6.0](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.0) (2020-06-24)
 - Upgrade rubix-registry to v1.1.1 (breaking change, use `rubix-service >= v1.7.7`)
 
