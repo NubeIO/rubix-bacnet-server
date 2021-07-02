@@ -22,7 +22,7 @@ class PriorityArrayModel(db.Model):
     _16 = db.Column(db.Float(), nullable=True)
 
     def __repr__(self):
-        return f"PointStore(point_uuid = {self.point_uuid})"
+        return f"PriorityArray(point_uuid = {self.point_uuid})"
 
     @classmethod
     def create_new_point_store_model(cls, point_uuid):
@@ -31,3 +31,7 @@ class PriorityArrayModel(db.Model):
     @classmethod
     def filter_by_point_uuid(cls, point_uuid):
         return cls.query.filter_by(point_uuid=point_uuid)
+
+    @classmethod
+    def get_priority_by_point_uuid(cls, point_uuid):
+        return cls.query.filter_by(point_uuid=point_uuid).first()

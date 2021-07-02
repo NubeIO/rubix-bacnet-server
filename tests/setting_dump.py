@@ -5,7 +5,7 @@ if __name__ == '__main__':
     {
       "bacnet": {
         "enabled": false,
-        "ip": "192.168.0.100",
+        "ip": "192.168.15.10/24",
         "port": 47808,
         "device_id": 123,
         "local_obj_name": "Nube-IO",

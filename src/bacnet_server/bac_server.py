@@ -6,8 +6,9 @@ from typing import Union, Dict
 import BAC0
 from bacpypes.basetypes import EngineeringUnits
 from bacpypes.local.object import Commandable
+from flask import current_app
 
-from src import BACnetSetting
+from src import BACnetSetting, AppSetting
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier, \
     get_highest_priority_field
@@ -48,13 +49,17 @@ class BACServer(metaclass=Singleton):
             try:
                 if not self.__running:
                     self.connect(self.__bacnet_server)
-                    mqtt_client = MqttClient()
-                    if mqtt_client.config.enabled and mqtt_client.config.publish_value:
+                    setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
+                    if setting.mqtt.enabled:
+                        mqtt_client = MqttClient()
                         while not mqtt_client.status():
                             logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
                             time.sleep(self.config.attempt_reconnect_secs)
-                    self.sync_stack()
-                    self.__running = True
+                        self.sync_stack()
+                        self.__running = True
+                    else:
+                        self.sync_stack()
+                        self.__running = True
                 time.sleep(2)
             except Exception as e:
                 logger.error(e)
@@ -71,7 +76,7 @@ class BACServer(metaclass=Singleton):
 
     def sync_stack(self):
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
-            self.add_point(point)
+            self.add_point(point, False)
         self.__sync_status = True
 
     def connect(self, bacnet_server):
@@ -88,7 +93,7 @@ class BACServer(metaclass=Singleton):
         self.__running = False
         self.__registry = {}
 
-    def add_point(self, point: BACnetPointModel):
+    def add_point(self, point: BACnetPointModel, _update_point_store=True):
         [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
         # TODO: Switch cases for different type of points
         if point.use_next_available_address:
@@ -107,11 +112,14 @@ class BACServer(metaclass=Singleton):
             description=point.description,
         )
         self.__bacnet.this_application.add_object(ao)
-        update_point_store(point.uuid, present_value)
+        if _update_point_store:  # make it so on start of app not to update the point store
+            update_point_store(point.uuid, present_value)
         self.__registry[object_identifier] = ao
-        priority = get_highest_priority_field(point.priority_array_write)
-        mqtt_client = MqttClient()
-        mqtt_client.publish_value(('ao', object_identifier, point.object_name), present_value, priority)
+        setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
+        if setting.mqtt.enabled:
+            priority = get_highest_priority_field(point.priority_array_write)
+            mqtt_client = MqttClient()
+            mqtt_client.publish_value(('ao', object_identifier, point.object_name), present_value, priority)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)

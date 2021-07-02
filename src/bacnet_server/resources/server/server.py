@@ -16,6 +16,7 @@ class BACnetServer(RubixResource):
     parser.add_argument('model_name', type=str)
     parser.add_argument('vendor_id', type=str)
     parser.add_argument('vendor_name', type=str)
+    parser.add_argument('restart_server', type=bool)
 
     @classmethod
     @marshal_with(server_field)
@@ -26,12 +27,15 @@ class BACnetServer(RubixResource):
     @marshal_with(server_field)
     def patch(cls):
         data = BACnetServer.parser.parse_args()
+        restart_server = data.get("restart_server") or True
         data_to_update = {}
         for key in data.keys():
             if data[key] is not None:
                 data_to_update[key] = data[key]
         BACnetServerModel.find_one().update(**data_to_update)
         new_bacnet_server = BACnetServerModel.find_one()
-        BACServer().restart_bac(new_bacnet_server)
+        if restart_server:
+            BACServer().restart_bac(new_bacnet_server)
         db.session.commit()
         return new_bacnet_server
+
