@@ -27,7 +27,7 @@ class BACnetServerModel(ModelBase):
         if not bacnet_server:
             uuid_ = str(shortuuid.uuid())
             bacnet_server = BACnetServerModel(uuid=uuid_,
-                                              ip=config.ip if config.ip != "0.0.0.0" else "192.168.0.100",
+                                              ip=config.ip if config.ip != "0.0.0.0" else "192.168.15.10/24",
                                               port=config.port,
                                               device_id=config.device_id,
                                               local_obj_name=config.local_obj_name,
