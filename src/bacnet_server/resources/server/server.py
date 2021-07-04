@@ -35,7 +35,7 @@ class BACnetServer(RubixResource):
         BACnetServerModel.find_one().update(**data_to_update)
         new_bacnet_server = BACnetServerModel.find_one()
         if restart_server:
-            BACServer().restart_bac(new_bacnet_server)
+            BACServer().restart_bacnet(new_bacnet_server)
         db.session.commit()
         return new_bacnet_server
 

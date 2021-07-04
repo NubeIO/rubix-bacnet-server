@@ -28,6 +28,7 @@ class BACnetPointSingular(BACnetPointBase):
     parser_patch.add_argument('fault', type=bool, required=False)
     parser_patch.add_argument('data_round', type=int, required=False)
     parser_patch.add_argument('data_offset', type=float, required=False)
+    parser_patch.add_argument('cov', type=float, required=False)
     parser_patch.add_argument('source', type=str, required=False)
 
     @classmethod
@@ -43,7 +44,6 @@ class BACnetPointSingular(BACnetPointBase):
     def patch(cls, **kwargs):
         data = cls.parser_patch.parse_args()
         point: BACnetPointModel = copy.deepcopy(cls.get_point(**kwargs))
-        # cls.abort_if_bacnet_is_not_running()
         if point is None:
             raise NotFoundException(f"Does not exist with {kwargs}")
         use_next_available_address: bool = data.get('use_next_available_address')
@@ -70,53 +70,66 @@ class BACnetPointSingular(BACnetPointBase):
         return point_return
 
     @staticmethod
-    def out_of_range(f1, f2, cov):
-        if abs(f1 - f2) < cov:
-            return [False, f2]
+    def out_of_range(_new, _existing_data, cov):
+        if _new is None and _existing_data is None:
+            return [False, None]
+        if _new is None and _existing_data:
+            return [True, _existing_data]
+        if _new and _existing_data is None:
+            return [True, _new]
+        if abs(_new - _existing_data) < cov:
+            return [False, _existing_data]
         else:
-            return [True, f1]
+            return [True, _new]
 
     @staticmethod
-    def check_priority_cov(_data, _point, cov):
-        new_16 = _data.get("_16")
-        existing_16 = _point._16
-        update = BACnetPointSingular.out_of_range(new_16, existing_16, cov)
-        if update[0]:
-            return {
-                "_16": update[1]
-            }
-        else:
-            return False
+    def check_priority_cov(new_data, existing_data, cov):
+        """
+        if existing and new data is none: return False
+        if existing is not none and new data is none return existing data: return False
+        if existing is not none and new data is not none compare data and if there is a COV: return new value and True
+        """
+        cov_event = False
+        for i in range(16):
+            pri = f"_{i + 1}"
+            _new = new_data.get(pri)
+            _existing_data = existing_data.get(pri)
+            check = BACnetPointSingular.out_of_range(_new, _existing_data, cov)
+            if check[0]:
+                cov_event = True
+        return cov_event
 
     @classmethod
-    def put(cls, **kwargs):  # for updating point value @ 16 will add support for more later
+    @marshal_with(point_fields)
+    def put(cls, **kwargs):
+        setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         data = cls.parser_patch.parse_args()
         point: BACnetPointModel = copy.deepcopy(cls.get_point(**kwargs))
         cls.abort_if_bacnet_is_not_running()
         if point is None:
             raise NotFoundException(f"Does not exist with {kwargs}")
         new_data = data.get('priority_array_write')
-        old_data = PriorityArrayModel.get_priority_by_point_uuid(point.uuid)
-        setting: BACnetSetting = current_app.config[AppSetting.FLASK_KEY]
-        cov = setting.bacnet.point_value_cov
+        existing_data = PriorityArrayModel.get_priority_by_point_uuid(point.uuid)
+        cov = point.cov or setting.bacnet.default_point_cov
         if not cov == 0:
-            priority_array_write = BACnetPointSingular.check_priority_cov(new_data, old_data, cov)
-            if not priority_array_write:
-                return {"update": False}
-            data.pop('priority_array_write')
+            check_for_cov = BACnetPointSingular.check_priority_cov(new_data, existing_data, cov)
+            if not check_for_cov:
+                return point  # return existing point values from db
 
         PriorityArrayModel.filter_by_point_uuid(point.uuid).update(new_data)
         BACServer().remove_point(point)
         point_return = BACnetPointModel.find_by_uuid(point.uuid)
         BACServer().add_point(point_return)
-        return {"update": True}
+        return point_return
 
     @classmethod
     def delete(cls, **kwargs):
         point: BACnetPointModel = cls.get_point(**kwargs)
         if not point:
             raise NotFoundException(f'Not found {kwargs}')
-        BACServer().remove_point(point)
+
+        if BACServer().status():
+            BACServer().remove_point(point)
         point.delete_from_db()
         return '', 204
 

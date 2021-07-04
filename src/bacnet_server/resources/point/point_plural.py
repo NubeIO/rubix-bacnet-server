@@ -18,7 +18,6 @@ class BACnetPointPlural(BACnetPointBase):
     @classmethod
     @marshal_with(point_fields)
     def post(cls):
-        cls.abort_if_bacnet_is_not_running()
         _uuid = str(shortuuid.uuid())
         data = BACnetPointPlural.parser.parse_args()
         return cls.add_point(data, _uuid)
@@ -26,5 +25,6 @@ class BACnetPointPlural(BACnetPointBase):
     @classmethod
     def delete(cls):
         BACnetPointModel.delete_all_from_db()
-        BACServer().remove_all_points()
+        if BACServer().status():
+            BACServer().remove_all_points()
         return '', 204

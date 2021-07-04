@@ -29,7 +29,11 @@ class BACnetPointStoreModel(db.Model):
 
     @classmethod
     def create_new_point_store_model(cls, point_uuid):
-        return BACnetPointStoreModel(point_uuid=point_uuid, present_value=0)
+        point = cls.find_by_point_uuid(point_uuid)
+        pv = 0.0
+        if point is not None:
+            pv = point.relinquish_default
+        return BACnetPointStoreModel(point_uuid=point_uuid, present_value=pv)
 
     def update(self) -> bool:
         res = db.session.execute(self.__table__

@@ -21,6 +21,7 @@ class BACnetPointBase(RubixResource):
     parser.add_argument('fault', type=bool)
     parser.add_argument('data_round', type=int)
     parser.add_argument('data_offset', type=float)
+    parser.add_argument('cov', type=float)
     parser.add_argument('source', type=str)
 
     nested_priority_array_write_parser = reqparse.RequestParser()
@@ -50,7 +51,8 @@ class BACnetPointBase(RubixResource):
         elif not point.use_next_available_address and not point.address:
             raise BadDataException("address cannot be null when use_next_available_address is false")
         point.save_to_db(priority_array_write)
-        BACServer().add_point(point)
+        if BACServer().status():
+            BACServer().add_point(point)
         return point
 
     @classmethod

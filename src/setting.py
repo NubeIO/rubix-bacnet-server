@@ -1,7 +1,6 @@
 import json
 import os
 from abc import ABC
-
 from flask import Flask
 from rubix_mqtt.setting import MqttSettingBase
 
@@ -26,6 +25,8 @@ class BACnetSetting(BaseSetting):
     def __init__(self):
         self.enabled: bool = True
         self.ip = '192.168.15.10/24'
+        self.enable_ip_by_nic_name: bool = False
+        self.ip_by_nic_name = 'eth0'
         self.port = 47808
         self.device_id = 123
         self.local_obj_name = 'Nube-IO'
@@ -33,7 +34,7 @@ class BACnetSetting(BaseSetting):
         self.vendor_id = 1173
         self.vendor_name = 'Nube iO Operations Pty Ltd'
         self.attempt_reconnect_secs = 5
-        self.point_value_cov = 0.5
+        self.default_point_cov = 0.1
 
 
 class MqttSetting(MqttSettingBase):
