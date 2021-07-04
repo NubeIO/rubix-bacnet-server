@@ -1,6 +1,6 @@
 # CHANGELOG
 ## [v1.6.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.2) (2020-07-02)
-- optimise to reduce start up time on PI #137
+- Optimize to reduce start up time on PI #137
 
 ## [v1.6.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.1) (2020-06-29)
 - MQTT topic structure and payload schema change

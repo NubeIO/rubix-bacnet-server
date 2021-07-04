@@ -6,13 +6,8 @@ authors = ["NubeIO"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
-BAC0 = "^20.11.21"
 bacpypes = "^0.18.3"
 gunicorn = "^20.0.4"
-gevent = [
-    { version = "20.12.1", markers = "platform_machine == 'x86_64'" },
-    { git = "https://github.com/gevent/gevent.git", tag = "20.12.1", markers = "platform_machine != 'x86_64'" }
-]
 toml = "^0.10.2"
 rubix-http = { git = "https://github.com/NubeIO/rubix-http", rev = "v1.1.1" }
 rubix-registry = {git = "https://github.com/NubeIO/rubix-registry", rev = "v1.1.1"}
@@ -20,6 +15,7 @@ rubix-mqtt = { git = "https://github.com/NubeIO/rubix-mqtt", rev = "v1.2.0" }
 Flask-Migrate = "^2.6.0"
 Flask-Script = "^2.0.6"
 shortuuid = "^1.0.1"
+gevent = "^21.1.2"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^4.1"
