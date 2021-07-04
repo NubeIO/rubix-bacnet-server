@@ -23,8 +23,7 @@ from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_server import BACnetServerModel
 from src.mqtt import MqttClient
 from src.utils import Singleton
-from src.utils.get_package_details import PackageDetails
-
+from src.utils.project import get_version
 logger = logging.getLogger(__name__)
 
 
@@ -106,10 +105,8 @@ class BACServer(metaclass=Singleton):
 
     def connect(self, bacnet_server):
         address = self._ip_address(bacnet_server)
-        p = PackageDetails.load()
-        version = p.get("version")
-        description = p.get("description")
-
+        version = get_version()
+        description = "nube-io bacnet server"
         self.ldo = LocalDeviceObject(objectName=bacnet_server.local_obj_name,
                                      objectIdentifier=int(bacnet_server.device_id),
                                      maxApduLengthAccepted=1024,
