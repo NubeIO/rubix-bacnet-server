@@ -25,7 +25,8 @@ class BPGPMappingResourceList(RubixResource):
         per_page = request.args.get('per_page', default=None, type=int)
         sort = request.args.get('sort', default=None, type=str)
         sort_by = request.args.get('sort_by', default=None, type=str)
-        return BPGPointMapping.find_by_pagination(page, per_page, sort, sort_by)
+        search = request.args.get('search', default=None, type=str)
+        return BPGPointMapping.find_by_pagination(page, per_page, sort, sort_by, search)
 
     @classmethod
     @marshal_with(mapping_bp_gp_fields)

@@ -50,10 +50,12 @@ class BACnetPointModel(db.Model):
         return cls.query.all()
 
     @classmethod
-    def find_by_pagination(cls, source: str, page: int, per_page: int, sort: str, sort_by: str):
+    def find_by_pagination(cls, source: str, page: int, per_page: int, sort: str, sort_by: str, search: str):
         query = cls.query
         if source:
             query = query.filter_by(source=source)
+        if search:
+            query = query.filter(cls.object_name.ilike(f'%{search}%'))
         if sort or sort_by:
             if not sort_by:
                 sort_by = cls.__table__.primary_key.columns.keys()[0]
@@ -62,7 +64,7 @@ class BACnetPointModel(db.Model):
                     raise ValueError(f"Does not exist sort_by {sort_by}")
             sort = desc(sort_by) if sort == "desc" else asc(sort_by)
             query = query.order_by(sort)
-        return query.paginate(page=page, per_page=per_page, error_out=False)
+        return query.paginate(page=page, per_page=per_page or 50, error_out=False)
 
     @classmethod
     def find_by_uuid(cls, uuid):

@@ -17,8 +17,9 @@ class BACnetPointPlural(BACnetPointBase):
         per_page = request.args.get('per_page', default=None, type=int)
         sort = request.args.get('sort', default=None, type=str)
         sort_by = request.args.get('sort_by', default=None, type=str)
+        search = request.args.get('search', default=None, type=str)
         source = request.args.get('source', default=None, type=str)
-        return BACnetPointModel.find_by_pagination(source, page, per_page, sort, sort_by)
+        return BACnetPointModel.find_by_pagination(source, page, per_page, sort, sort_by, search)
 
     @classmethod
     @marshal_with(point_fields)
