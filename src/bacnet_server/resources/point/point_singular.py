@@ -1,9 +1,11 @@
 import copy
 from abc import abstractmethod
 
+from flask import current_app
 from flask_restful import reqparse, marshal_with
 from rubix_http.exceptions.exception import NotFoundException, BadDataException
 
+from src import AppSetting, BACnetSetting
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
@@ -41,7 +43,7 @@ class BACnetPointSingular(BACnetPointBase):
     def patch(cls, **kwargs):
         data = cls.parser_patch.parse_args()
         point: BACnetPointModel = copy.deepcopy(cls.get_point(**kwargs))
-        cls.abort_if_bacnet_is_not_running()
+        # cls.abort_if_bacnet_is_not_running()
         if point is None:
             raise NotFoundException(f"Does not exist with {kwargs}")
         use_next_available_address: bool = data.get('use_next_available_address')
@@ -66,6 +68,48 @@ class BACnetPointSingular(BACnetPointBase):
         point_return = BACnetPointModel.find_by_uuid(point.uuid)
         BACServer().add_point(point_return)
         return point_return
+
+    @staticmethod
+    def out_of_range(f1, f2, cov):
+        if abs(f1 - f2) < cov:
+            return [False, f2]
+        else:
+            return [True, f1]
+
+    @staticmethod
+    def check_priority_cov(_data, _point, cov):
+        new_16 = _data.get("_16")
+        existing_16 = _point._16
+        update = BACnetPointSingular.out_of_range(new_16, existing_16, cov)
+        if update[0]:
+            return {
+                "_16": update[1]
+            }
+        else:
+            return False
+
+    @classmethod
+    def put(cls, **kwargs):  # for updating point value @ 16 will add support for more later
+        data = cls.parser_patch.parse_args()
+        point: BACnetPointModel = copy.deepcopy(cls.get_point(**kwargs))
+        cls.abort_if_bacnet_is_not_running()
+        if point is None:
+            raise NotFoundException(f"Does not exist with {kwargs}")
+        new_data = data.get('priority_array_write')
+        old_data = PriorityArrayModel.get_priority_by_point_uuid(point.uuid)
+        setting: BACnetSetting = current_app.config[AppSetting.FLASK_KEY]
+        cov = setting.bacnet.point_value_cov
+        if not cov == 0:
+            priority_array_write = BACnetPointSingular.check_priority_cov(new_data, old_data, cov)
+            if not priority_array_write:
+                return {"update": False}
+            data.pop('priority_array_write')
+
+        PriorityArrayModel.filter_by_point_uuid(point.uuid).update(new_data)
+        BACServer().remove_point(point)
+        point_return = BACnetPointModel.find_by_uuid(point.uuid)
+        BACServer().add_point(point_return)
+        return {"update": True}
 
     @classmethod
     def delete(cls, **kwargs):
