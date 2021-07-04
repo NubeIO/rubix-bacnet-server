@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.6.3](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.3) (2020-07-04)
+- Remove BAC0
+- Upgrade gevent
+
 ## [v1.6.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.2) (2020-07-02)
 - Optimize to reduce start up time on PI #137
 
