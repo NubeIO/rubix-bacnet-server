@@ -1,4 +1,5 @@
 from src import db
+from src.bacnet_server.helpers.helper_point_array import dict_priority
 
 
 class PriorityArrayModel(db.Model):
@@ -34,4 +35,5 @@ class PriorityArrayModel(db.Model):
 
     @classmethod
     def get_priority_by_point_uuid(cls, point_uuid):
-        return cls.query.filter_by(point_uuid=point_uuid).first()
+        x = cls.query.filter_by(point_uuid=point_uuid).first()
+        return dict_priority(x)

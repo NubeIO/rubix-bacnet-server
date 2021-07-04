@@ -2,6 +2,8 @@
   "bacnet": {
     "enabled": true,
     "ip": "192.168.15.10/24",
+    "enable_ip_by_nic_name":true,
+    "ip_by_nic_name": "eth0",
     "port": 47808,
     "device_id": 2508,
     "local_obj_name": "Nube-IO",
@@ -9,7 +11,7 @@
     "vendor_id": 1173,
     "vendor_name": "Nube iO Operations Pty Ltd",
     "attempt_reconnect_secs": 5,
-    "point_value_cov": 0.1
+    "default_point_cov": 5
   },
   "mqtt": {
     "enabled": true,

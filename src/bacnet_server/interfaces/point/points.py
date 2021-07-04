@@ -37,7 +37,7 @@ class PriorityOperationBool(enum.Enum):
 class PointType(enum.Enum):
     # analogInput= 0
     analogOutput = 1
-    # analogValue= 2
+    analogValue = 2
     # binaryInput= 3
     # binaryOutput = 2
     # binaryValue= 5

@@ -2,22 +2,28 @@ import copy
 import logging
 import time
 from typing import Union, Dict
-
-import BAC0
-from bacpypes.basetypes import EngineeringUnits
-from bacpypes.local.object import Commandable
+from bacpypes.core import run as bacnet_run
+from bacpypes.app import BIPSimpleApplication
+from bacpypes.basetypes import EngineeringUnits, StatusFlags, DeviceStatus
+from bacpypes.local.device import LocalDeviceObject
+from bacpypes.local.object import Commandable, AnalogValueCmdObject, AnalogOutputCmdObject
+from bacpypes.object import register_object_type
+from bacpypes.primitivedata import CharacterString
+from bacpypes.service.object import ReadWritePropertyMultipleServices
 from flask import current_app
-
-from src import BACnetSetting, AppSetting
-from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject
+from bacpypes.core import stop as bacnet_stop
+from src import BACnetSetting, AppSetting, FlaskThread
+from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject, AnalogValueFeedbackObject
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier, \
     get_highest_priority_field
 from src.bacnet_server.helpers.helper_point_store import update_point_store
+from src.bacnet_server.helpers.ip import IP
 from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_server import BACnetServerModel
 from src.mqtt import MqttClient
 from src.utils import Singleton
+from src.utils.get_package_details import PackageDetails
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +32,13 @@ class BACServer(metaclass=Singleton):
 
     def __init__(self):
         self.__config: Union[BACnetSetting, None] = None
-        self.__bacnet: Union[BAC0, None] = None
         self.__bacnet_server: Union[BACnetServerModel, None] = None
         self.__registry: Dict[str, Commandable] = {}
         self.__sync_status: bool = False
         self.__running: bool = False
+        self.ldo = None
+        self.__bacnet = None
+        self._thread = None
 
     @property
     def config(self) -> Union[BACnetSetting, None]:
@@ -66,55 +74,101 @@ class BACServer(metaclass=Singleton):
                 logger.warning("BACnet is not connected, waiting for BACnet server connection...")
                 time.sleep(self.config.attempt_reconnect_secs)
 
-    def restart_bac(self, bacnet_server):
+    def stop_bacnet(self):
         if self.__bacnet:
-            self.__bacnet.disconnect()  # on macOS it's not working
-            time.sleep(1)  # as per their testing we need to sleep to make sure all sockets got closed
+            self.__bacnet.close_socket()
+            bacnet_stop()
 
-        self.__reset_variable()
+    def start_bacnet(self, bacnet_server):
         self.__bacnet_server = bacnet_server
+        FlaskThread(target=self.connect, args=(bacnet_server,)).start()  # create_bacnet_stack
+
+    def restart_bacnet(self, bacnet_server):
+        if self.__bacnet:
+            self.stop_bacnet()
+        self.__reset_variable()
+        self.start_bacnet(bacnet_server)
+
+    def __reset_variable(self):
+        self.ldo = None
+        self.__bacnet = None
+        self._thread = None
+        self.__running = False
+        self.__registry = {}
 
     def sync_stack(self):
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
             self.add_point(point, False)
+        for point in BACnetPointModel.query.filter_by(object_type=PointType.analogValue):
+            self.add_point(point, False)
         self.__sync_status = True
+        self.__running = True
 
     def connect(self, bacnet_server):
-        self.__bacnet = BAC0.lite(ip=bacnet_server.ip,
-                                  port=bacnet_server.port,
-                                  deviceId=bacnet_server.device_id,
-                                  localObjName=bacnet_server.local_obj_name,
-                                  modelName=bacnet_server.model_name,
-                                  vendorId=bacnet_server.vendor_id,
-                                  vendorName=bacnet_server.vendor_name)
+        address = self._ip_address(bacnet_server)
+        p = PackageDetails.load()
+        version = p.get("version")
+        description = p.get("description")
 
-    def __reset_variable(self):
-        self.__bacnet = None
-        self.__running = False
-        self.__registry = {}
+        self.ldo = LocalDeviceObject(objectName=bacnet_server.local_obj_name,
+                                     objectIdentifier=int(bacnet_server.device_id),
+                                     maxApduLengthAccepted=1024,
+                                     segmentationSupported="segmentedBoth",
+                                     vendorIdentifier=bacnet_server.vendor_id,
+                                     firmwareRevision=CharacterString(version),
+                                     modelName=CharacterString(bacnet_server.model_name),
+                                     vendorName=CharacterString(bacnet_server.vendor_name),
+                                     description=CharacterString(description),
+                                     systemStatus=DeviceStatus(1),
+                                     applicationSoftwareVersion=CharacterString(version),
+                                     databaseRevision=0)
+
+        self.__bacnet = BIPSimpleApplication(self.ldo, address)
+        self.__bacnet.add_capability(ReadWritePropertyMultipleServices)
+        self.sync_stack()
+        FlaskThread(target=bacnet_run).start()  # start bacpypes thread
 
     def add_point(self, point: BACnetPointModel, _update_point_store=True):
-        [priority_array, present_value] = default_values(point.priority_array_write, 0.0)
-        # TODO: Switch cases for different type of points
+        [priority_array, present_value] = default_values(point.priority_array_write, point.relinquish_default)
         if point.use_next_available_address:
             point.address = BACnetPointModel.get_next_available_address(point.address)
         object_identifier = create_object_identifier(point.object_type.name, point.address)
-        ao = AnalogOutputFeedbackObject(
-            profileName=point.uuid,
-            objectIdentifier=(point.object_type.name, point.address),
-            objectName=point.object_name,
-            relinquishDefault=point.relinquish_default,
-            presentValue=present_value,
-            priorityArray=priority_array,
-            eventState=point.event_state.name,
-            statusFlags=[0, 0, 0, 0],
-            units=EngineeringUnits(point.units.name),
-            description=point.description,
-        )
-        self.__bacnet.this_application.add_object(ao)
+        if point.object_type.name == "analogOutput":
+            register_object_type(AnalogOutputCmdObject)
+            p = AnalogOutputFeedbackObject(
+                profileName=point.uuid,
+                objectIdentifier=(point.object_type.name, point.address),
+                objectName=point.object_name,
+                relinquishDefault=point.relinquish_default,
+                presentValue=present_value,
+                priorityArray=priority_array,
+                eventState=point.event_state.name,
+                statusFlags=StatusFlags(),
+                units=EngineeringUnits(point.units.name),
+                description=point.description,
+                outOfService=False,
+            )
+            self.__bacnet.add_object(p)
+            self.__registry[object_identifier] = p
+        elif point.object_type.name == "analogValue":
+            register_object_type(AnalogValueCmdObject)
+            p = AnalogValueFeedbackObject(
+                profileName=point.uuid,
+                objectIdentifier=(point.object_type.name, point.address),
+                objectName=point.object_name,
+                relinquishDefault=point.relinquish_default,
+                presentValue=present_value,
+                priorityArray=priority_array,
+                eventState=point.event_state.name,
+                statusFlags=StatusFlags(),
+                units=EngineeringUnits(point.units.name),
+                description=point.description,
+                outOfService=False,
+            )
+            self.__bacnet.add_object(p)
+            self.__registry[object_identifier] = p
         if _update_point_store:  # make it so on start of app not to update the point store
             update_point_store(point.uuid, present_value)
-        self.__registry[object_identifier] = ao
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         if setting.mqtt.enabled:
             priority = get_highest_priority_field(point.priority_array_write)
@@ -123,11 +177,36 @@ class BACServer(metaclass=Singleton):
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
-        self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
+        self.__bacnet.delete_object(self.__registry[object_identifier])
         del self.__registry[object_identifier]
 
     def remove_all_points(self):
         object_identifiers = copy.deepcopy(list(self.__registry.keys()))
         for object_identifier in object_identifiers:
-            self.__bacnet.this_application.delete_object(self.__registry[object_identifier])
+            self.__bacnet.delete_object(self.__registry[object_identifier])
             del self.__registry[object_identifier]
+
+    def _ip_address(self, bacnet_server):
+        use_nic = self.config.enable_ip_by_nic_name
+        if use_nic:
+            ip_by_nic_name = self.config.ip_by_nic_name
+            address = IP.get_nic_ipv4(ip_by_nic_name)
+            return address
+        else:
+            ip = bacnet_server.ip
+            port = bacnet_server.port
+            mask = None
+            try:
+                ip, subnet_mask_and_port = ip.split("/")
+                try:
+                    mask, port = subnet_mask_and_port.split(":")
+                except ValueError:
+                    mask = subnet_mask_and_port
+            except ValueError:
+                ip = ip
+            if not mask:
+                mask = 24
+            if not port:
+                port = 47808
+            address = "{}/{}:{}".format(ip, mask, port)
+            return address

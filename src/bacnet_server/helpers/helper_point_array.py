@@ -5,6 +5,16 @@ def create_object_identifier(object_type, address):
     return f'{object_type}-{address}'
 
 
+def dict_priority(priority_array):
+    priority_array_dict = {}
+    for i in range(16):
+        pri = f"_{i + 1}"
+        _dict = priority_array.__dict__.get(pri)
+        key = {pri: _dict}
+        priority_array_dict.update(key)
+    return priority_array_dict
+
+
 def serialize_priority_array(priority_array):
     priority_array_dict = {}
     for i in range(16):

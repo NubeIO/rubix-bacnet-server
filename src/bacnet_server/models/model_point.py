@@ -14,7 +14,7 @@ class BACnetPointModel(db.Model):
     object_type = db.Column(db.Enum(PointType), nullable=False)
     object_name = db.Column(db.String(80), nullable=False, unique=True)
     use_next_available_address = db.Column(db.Boolean(), nullable=False, default=False)
-    address = db.Column(db.Integer(), nullable=True, unique=True)
+    address = db.Column(db.Integer(), nullable=True, unique=False)
     relinquish_default = db.Column(db.Float(), nullable=False)
     priority_array_write = db.relationship('PriorityArrayModel', backref='point', lazy=False, uselist=False,
                                            cascade="all,delete")
@@ -25,6 +25,7 @@ class BACnetPointModel(db.Model):
     fault = db.Column(db.Boolean(), nullable=True)
     data_round = db.Column(db.Integer(), nullable=True)
     data_offset = db.Column(db.Float(), nullable=True)
+    cov = db.Column(db.Float(), nullable=True)
     source = db.Column(db.Enum(Sources), default=Sources.OWN)
     point_store = db.relationship('BACnetPointStoreModel', backref='point', lazy=False, uselist=False,
                                   cascade="all,delete")

@@ -40,6 +40,9 @@ class Ping(RubixResource):
             'bacnet': {
                 'enabled': setting.bacnet.enabled,
                 'status': BACServer().status(),
+                'use_pre_set_ethernet_interface': setting.bacnet.enable_ip_by_nic_name,
+                'pre_set_ethernet_interface': setting.bacnet.ip_by_nic_name,
+                'default_point_cov': setting.bacnet.default_point_cov
             },
             'mqtt': {
                 'enabled': setting.mqtt.enabled,
