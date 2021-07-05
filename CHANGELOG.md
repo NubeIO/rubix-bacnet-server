@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.6.4](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.4) (2020-07-04)
+- Redo bacnet version as pyproject file is not in the build
+
 ## [v1.6.3](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.3) (2020-07-04)
 - Remove BAC0
 - Upgrade gevent
