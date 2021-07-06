@@ -41,7 +41,7 @@ class BPGPointMapping(ModelBase):
     def __set_mapped_point_name(self):
         if not self.mapped_point_uuid:
             raise ValueError(f"mapped_point_uuid should not be null or blank")
-        response: Response = gw_request(f'/ps/api/generic/points/uuid/{self.mapped_point_uuid}')
+        response: Response = gw_request(f'/ps/api/generic/points/get_name/uuid/{self.mapped_point_uuid}')
         if response.status_code != 200:
             raise ValueError(f"Does not exist mapped_point_uuid {self.mapped_point_uuid}")
         self.mapped_point_name = json.loads(response.data).get('name')
