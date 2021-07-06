@@ -1,5 +1,4 @@
 import shortuuid
-
 from flask_restful import marshal_with
 from flask_restful.reqparse import request
 
@@ -18,9 +17,8 @@ class BACnetPointPlural(BACnetPointBase):
     @classmethod
     @marshal_with(point_fields)
     def post(cls):
-        _uuid = str(shortuuid.uuid())
         data = BACnetPointPlural.parser.parse_args()
-        return cls.add_point(data, _uuid)
+        return cls.add_point(data, shortuuid.uuid())
 
     @classmethod
     def delete(cls):

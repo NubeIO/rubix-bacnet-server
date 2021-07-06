@@ -1,6 +1,6 @@
-import shortuuid
 from abc import abstractmethod
 
+import shortuuid
 from flask_restful import marshal_with, reqparse
 from rubix_http.exceptions.exception import NotFoundException
 from rubix_http.resource import RubixResource
@@ -34,7 +34,7 @@ class BPGPMappingResourceListByUUID(RubixResource):
         parser.add_argument('mapped_point_uuid', type=str, required=True)
 
         data = parser.parse_args()
-        data.uuid = str(uuid_.uuid4())
+        data.uuid = shortuuid.uuid()
         mapping: BPGPointMapping = BPGPointMapping(**data)
         mapping.save_to_db()
         sync_point_value(mapping)
@@ -50,7 +50,7 @@ class BPGPMappingResourceListByName(RubixResource):
         parser.add_argument('mapped_point_name', type=str, required=True)
 
         data = parser.parse_args()
-        data.uuid = str(shortuuid.uuid())
+        data.uuid = shortuuid.uuid()
         mapping: BPGPointMapping = BPGPointMapping(**data)
         mapping.save_to_db()
         sync_point_value(mapping)
