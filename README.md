@@ -75,7 +75,7 @@ Options:
 
 Publish value topic
 ```
-<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/bacnet_server/points/<type>/<object_identifier>/<object_name>
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/bacnet_server/points/<type>/<object_identifier>/<uuid>/<object_name>
 ```
 
 Debug topic

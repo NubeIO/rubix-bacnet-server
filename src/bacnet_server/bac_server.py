@@ -2,20 +2,21 @@ import copy
 import logging
 import time
 from typing import Union, Dict
-from bacpypes.core import run as bacnet_run
+
 from bacpypes.app import BIPSimpleApplication
 from bacpypes.basetypes import EngineeringUnits, StatusFlags, DeviceStatus
+from bacpypes.core import run as bacnet_run
+from bacpypes.core import stop as bacnet_stop
 from bacpypes.local.device import LocalDeviceObject
 from bacpypes.local.object import Commandable, AnalogValueCmdObject, AnalogOutputCmdObject
 from bacpypes.object import register_object_type
 from bacpypes.primitivedata import CharacterString
 from bacpypes.service.object import ReadWritePropertyMultipleServices
 from flask import current_app
-from bacpypes.core import stop as bacnet_stop
+
 from src import BACnetSetting, AppSetting, FlaskThread
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject, AnalogValueFeedbackObject
-from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier, \
-    get_highest_priority_field
+from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.helpers.ip import IP
 from src.bacnet_server.interfaces.point.points import PointType
@@ -24,6 +25,7 @@ from src.bacnet_server.models.model_server import BACnetServerModel
 from src.mqtt import MqttClient
 from src.utils import Singleton
 from src.utils.project import get_version
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,9 +37,8 @@ class BACServer(metaclass=Singleton):
         self.__registry: Dict[str, Commandable] = {}
         self.__sync_status: bool = False
         self.__running: bool = False
-        self.ldo = None
+        self.__ldo = None
         self.__bacnet = None
-        self._thread = None
 
     @property
     def config(self) -> Union[BACnetSetting, None]:
@@ -89,9 +90,8 @@ class BACServer(metaclass=Singleton):
         self.start_bacnet(bacnet_server)
 
     def __reset_variable(self):
-        self.ldo = None
+        self.__ldo = None
         self.__bacnet = None
-        self._thread = None
         self.__running = False
         self.__registry = {}
 
@@ -106,24 +106,24 @@ class BACServer(metaclass=Singleton):
     def connect(self, bacnet_server):
         address = self._ip_address(bacnet_server)
         version = get_version()
-        description = "nube-io bacnet server"
-        self.ldo = LocalDeviceObject(objectName=bacnet_server.local_obj_name,
-                                     objectIdentifier=int(bacnet_server.device_id),
-                                     maxApduLengthAccepted=1024,
-                                     segmentationSupported="segmentedBoth",
-                                     vendorIdentifier=bacnet_server.vendor_id,
-                                     firmwareRevision=CharacterString(version),
-                                     modelName=CharacterString(bacnet_server.model_name),
-                                     vendorName=CharacterString(bacnet_server.vendor_name),
-                                     description=CharacterString(description),
-                                     systemStatus=DeviceStatus(1),
-                                     applicationSoftwareVersion=CharacterString(version),
-                                     databaseRevision=0)
+        description = "NubeIO BACnet Server"
+        self.__ldo = LocalDeviceObject(objectName=bacnet_server.local_obj_name,
+                                       objectIdentifier=int(bacnet_server.device_id),
+                                       maxApduLengthAccepted=1024,
+                                       segmentationSupported="segmentedBoth",
+                                       vendorIdentifier=bacnet_server.vendor_id,
+                                       firmwareRevision=CharacterString(version),
+                                       modelName=CharacterString(bacnet_server.model_name),
+                                       vendorName=CharacterString(bacnet_server.vendor_name),
+                                       description=CharacterString(description),
+                                       systemStatus=DeviceStatus(1),
+                                       applicationSoftwareVersion=CharacterString(version),
+                                       databaseRevision=0)
 
-        self.__bacnet = BIPSimpleApplication(self.ldo, address)
+        self.__bacnet = BIPSimpleApplication(self.__ldo, address)
         self.__bacnet.add_capability(ReadWritePropertyMultipleServices)
         self.sync_stack()
-        FlaskThread(target=bacnet_run).start()  # start bacpypes thread
+        FlaskThread(target=bacnet_run).start()
 
     def add_point(self, point: BACnetPointModel, _update_point_store=True):
         [priority_array, present_value] = default_values(point.priority_array_write, point.relinquish_default)
@@ -168,9 +168,9 @@ class BACServer(metaclass=Singleton):
             update_point_store(point.uuid, present_value)
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         if setting.mqtt.enabled:
-            priority = get_highest_priority_field(point.priority_array_write)
             mqtt_client = MqttClient()
-            mqtt_client.publish_value(('ao', object_identifier, point.object_name), present_value, priority)
+            topic_suffix: tuple = (point.object_type.name, object_identifier, point.uuid, point.object_name)
+            mqtt_client.publish_value(topic_suffix, present_value, priority_array)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
