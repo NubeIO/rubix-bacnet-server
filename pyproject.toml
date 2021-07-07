@@ -16,6 +16,7 @@ Flask-Migrate = "^2.6.0"
 Flask-Script = "^2.0.6"
 shortuuid = "^1.0.1"
 gevent = "^21.1.2"
+Flask = "1.1.2"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^4.1"
