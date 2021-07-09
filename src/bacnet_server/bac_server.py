@@ -170,6 +170,9 @@ class BACServer(metaclass=Singleton):
         if setting.mqtt.enabled:
             mqtt_client = MqttClient()
             topic_suffix: tuple = (point.object_type.name, object_identifier, point.uuid, point.object_name)
+            priority_array = point.priority_array_write.to_dict() if point.priority_array_write else {}
+            if 'point_uuid' in priority_array:
+                del priority_array['point_uuid']
             mqtt_client.publish_value(topic_suffix, present_value, priority_array)
 
     def remove_point(self, point):

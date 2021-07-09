@@ -1,3 +1,5 @@
+from sqlalchemy import inspect
+
 from src import db
 from src.bacnet_server.helpers.helper_point_array import dict_priority
 
@@ -37,3 +39,7 @@ class PriorityArrayModel(db.Model):
     def get_priority_by_point_uuid(cls, point_uuid):
         x = cls.query.filter_by(point_uuid=point_uuid).first()
         return dict_priority(x)
+
+    def to_dict(self) -> dict:
+        return {c.key: getattr(self, c.key)
+                for c in inspect(self).mapper.column_attrs}
