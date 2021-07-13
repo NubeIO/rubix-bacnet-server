@@ -11,6 +11,7 @@ from sqlalchemy import and_
 from src import db
 from src.bacnet_server.interfaces.mapping.mappings import MappingState
 from src.bacnet_server.models.model_mapping import BPGPointMapping
+from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 
 logger = logging.getLogger(__name__)
 
@@ -44,47 +45,39 @@ class BACnetPointStoreModel(db.Model):
                                              self.__table__.c.present_value != self.present_value)))
         updated: bool = bool(res.rowcount)
         if updated:
+            priority_array_write: dict = PriorityArrayModel.filter_by_point_uuid(self.point_uuid).first().to_dict()
             """BACnet > Generic point value"""
-            self.__sync_point_value_bp_to_gp_process()
+            self.__sync_point_value_bp_to_gp_process(priority_array_write)
             """BACnet > Modbus point value"""
-            self.__sync_point_value_bp_to_mp_process()
+            self.__sync_point_value_bp_to_mp_process(priority_array_write)
         return updated
 
     def sync_point_value_bp_to_mp(self, priority_array_write: dict):
         response: Response = gw_request(f"/ps/api/mappings/mp_gbp/bacnet/{self.point_uuid}")
         if response.status_code == 200:
+            priority_array_write.pop('point_uuid', None)
             gw_request(
                 api=f"/ps/api/modbus/points_value/uuid/{json.loads(response.data).get('modbus_point_uuid')}",
                 body={"priority_array_write": priority_array_write},
                 http_method=HttpMethod.PATCH
             )
 
-    def __sync_point_value_bp_to_mp_process(self):
-        gevent.spawn(self.sync_point_value_bp_to_mp, self.get_priority_array_write())
+    def __sync_point_value_bp_to_mp_process(self, priority_array_write: dict):
+        gevent.spawn(self.sync_point_value_bp_to_mp, priority_array_write)
 
     @staticmethod
     def sync_point_value_bp_to_gp(mapped_point_uuid: str, priority_array_write: dict):
+        priority_array_write.pop('point_uuid', None)
         gw_request(
             api=f"/ps/api/generic/points_value/uuid/{mapped_point_uuid}",
             body={"priority_array_write": priority_array_write},
             http_method=HttpMethod.PATCH
         )
 
-    def __sync_point_value_bp_to_gp_process(self):
+    def __sync_point_value_bp_to_gp_process(self, priority_array_write: dict):
         mapping: BPGPointMapping = BPGPointMapping.find_by_point_uuid(self.point_uuid)
         if mapping and mapping.mapping_state == MappingState.MAPPED:
-            gevent.spawn(self.sync_point_value_bp_to_gp, mapping.mapped_point_uuid, self.get_priority_array_write())
-
-    def get_priority_array_write(self):
-        from src.bacnet_server.models.model_priority_array import PriorityArrayModel
-        priority_array_write = self.point.priority_array_write
-        if priority_array_write:
-            priority_array_write = priority_array_write.to_dict()
-        else:
-            priority_array_write = PriorityArrayModel(point_uuid=None, **{"_16": self.present_value}).to_dict()
-        if 'point_uuid' in priority_array_write:
-            del priority_array_write['point_uuid']
-        return priority_array_write
+            gevent.spawn(self.sync_point_value_bp_to_gp, mapping.mapped_point_uuid, priority_array_write)
 
     @classmethod
     def sync_points_values_bp_to_gp_process(cls):
@@ -93,4 +86,4 @@ class BACnetPointStoreModel(db.Model):
             if mapping.mapping_state == MappingState.MAPPED:
                 point_store: BACnetPointStoreModel = BACnetPointStoreModel.find_by_point_uuid(mapping.point_uuid)
                 if point_store:
-                    point_store.__sync_point_value_bp_to_gp_process()
+                    point_store.__sync_point_value_bp_to_gp_process(point_store.point.priority_array_write.to_dict())
