@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.7.0](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.0) (2020-07-16)
+- Refactor point mappings
+
 ## [v1.6.4](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.6.4) (2020-07-04)
 - Redo bacnet version as pyproject file is not in the build
 
