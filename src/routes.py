@@ -2,11 +2,12 @@ from flask import Blueprint
 from flask_restful import Api
 
 from src.bacnet_server.resources.mapping.mapping import BPGPMappingResourceList, GBPMappingResourceByGenericPointUUID, \
-    GBPMappingResourceByBACnetPointUUID, BPGPMappingResourceByUUID
+    GBPMappingResourceByBACnetPointUUID, BPGPMappingResourceByUUID, BPGPMappingResourceListByUUID, \
+    BPGPMappingResourceListByName, BPGPMappingResourceUpdateMappingState
 from src.bacnet_server.resources.point.point_plural import BACnetPointPlural
 from src.bacnet_server.resources.point.point_singular import BACnetPointSingularByUUID, \
     BACnetPointSingularByName, BACnetPointSingularByObject
-from src.bacnet_server.resources.point.point_sync import BPToGPSync
+from src.bacnet_server.resources.point.point_sync import BPToGPSync, MPSync
 from src.bacnet_server.resources.server.server import BACnetServer
 from src.system.resources.ping import Ping
 
@@ -23,13 +24,17 @@ api_bacnet_server.add_resource(BACnetPointSingularByName, '/points/name/<string:
 bp_mapping_bp_gp = Blueprint('mappings_bp_gp', __name__, url_prefix='/api/mappings/bp_gp')
 api_mapping_bp_gp = Api(bp_mapping_bp_gp)
 api_mapping_bp_gp.add_resource(BPGPMappingResourceList, '')
+api_mapping_bp_gp.add_resource(BPGPMappingResourceListByUUID, '/uuid')
+api_mapping_bp_gp.add_resource(BPGPMappingResourceListByName, '/name')
 api_mapping_bp_gp.add_resource(BPGPMappingResourceByUUID, '/uuid/<string:uuid>')
 api_mapping_bp_gp.add_resource(GBPMappingResourceByBACnetPointUUID, '/bacnet/<string:uuid>')
 api_mapping_bp_gp.add_resource(GBPMappingResourceByGenericPointUUID, '/generic/<string:uuid>')
+api_mapping_bp_gp.add_resource(BPGPMappingResourceUpdateMappingState, '/update_mapping_state')
 
 bp_sync = Blueprint('sync_bp_gp', __name__, url_prefix='/api/sync')
 api_sync = Api(bp_sync)
 api_sync.add_resource(BPToGPSync, '/bp_to_gp')
+api_sync.add_resource(MPSync, '/mp')
 
 bp_system = Blueprint('system', __name__, url_prefix='/api/system')
 api_system = Api(bp_system)

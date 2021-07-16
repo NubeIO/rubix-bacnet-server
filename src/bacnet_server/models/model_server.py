@@ -1,5 +1,4 @@
 import shortuuid
-
 from sqlalchemy.orm import validates
 
 from src import db, BACnetSetting
@@ -25,8 +24,7 @@ class BACnetServerModel(ModelBase):
     def create_default_server_if_does_not_exist(cls, config: BACnetSetting):
         bacnet_server = BACnetServerModel.find_one()
         if not bacnet_server:
-            uuid_ = str(shortuuid.uuid())
-            bacnet_server = BACnetServerModel(uuid=uuid_,
+            bacnet_server = BACnetServerModel(uuid=shortuuid.uuid(),
                                               ip=config.ip if config.ip != "0.0.0.0" else "192.168.15.10/24",
                                               port=config.port,
                                               device_id=config.device_id,

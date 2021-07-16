@@ -60,8 +60,9 @@ server_field = {
 
 mapping_bp_gp_fields = {
     'uuid': fields.String,
-    'bacnet_point_uuid': fields.String,
-    'generic_point_uuid': fields.String,
-    'bacnet_point_name': fields.String,
-    'generic_point_name': fields.String,
+    'point_uuid': fields.String,
+    'mapped_point_uuid': fields.String,
+    'point_name': fields.String,
+    'mapped_point_name': fields.String,
+    'mapping_state': fields.String(attribute='mapping_state.name'),
 }

@@ -47,7 +47,7 @@ def default_values(priority_array, default_pv):
     present_value = default_pv
     for i in range(16, 0, -1):
         value = getattr(priority_array, f'_{i}')
-        if not value:
+        if value is None:
             write = {'null': ()}
         else:
             present_value = value
