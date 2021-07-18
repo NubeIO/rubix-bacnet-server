@@ -5,7 +5,7 @@ from flask import current_app
 from flask_restful import reqparse, marshal_with
 from rubix_http.exceptions.exception import NotFoundException, BadDataException
 
-from src import AppSetting, BACnetSetting
+from src import AppSetting
 from src.bacnet_server import BACServer
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
@@ -29,7 +29,6 @@ class BACnetPointSingular(BACnetPointBase):
     parser_patch.add_argument('data_round', type=int, required=False)
     parser_patch.add_argument('data_offset', type=float, required=False)
     parser_patch.add_argument('cov', type=float, required=False)
-    parser_patch.add_argument('source', type=str, required=False)
 
     @classmethod
     @marshal_with(point_fields)

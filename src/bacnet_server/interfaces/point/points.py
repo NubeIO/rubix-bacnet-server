@@ -43,11 +43,6 @@ class PointType(enum.Enum):
     # binaryValue= 5
 
 
-class Sources(enum.Enum):
-    OWN = 0,
-    MAPPING = 1
-
-
 class BACnetEventState(enum.Enum):
     normal = 0,
     fault = 1,
