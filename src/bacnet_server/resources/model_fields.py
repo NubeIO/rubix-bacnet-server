@@ -42,7 +42,6 @@ point_fields = {
     'data_round': fields.Integer,
     'data_offset': fields.Float,
     'cov': fields.Float,
-    'source': fields.String(attribute="source.name"),
     'created_on': fields.String,
     'updated_on': fields.String,
     'point_store': fields.Nested(point_store_fields)

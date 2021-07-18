@@ -3,7 +3,7 @@ import re
 from sqlalchemy.orm import validates
 
 from src import db
-from src.bacnet_server.interfaces.point.points import PointType, Units, BACnetEventState, Sources
+from src.bacnet_server.interfaces.point.points import PointType, Units, BACnetEventState
 from src.bacnet_server.models.model_point_store import BACnetPointStoreModel
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 
@@ -26,7 +26,6 @@ class BACnetPointModel(db.Model):
     data_round = db.Column(db.Integer(), nullable=True)
     data_offset = db.Column(db.Float(), nullable=True)
     cov = db.Column(db.Float(), nullable=True)
-    source = db.Column(db.Enum(Sources), default=Sources.OWN)
     point_store = db.relationship('BACnetPointStoreModel', backref='point', lazy=False, uselist=False,
                                   cascade="all,delete")
     bp_gp_mapping = db.relationship('BPGPointMapping', backref='point', lazy=True, uselist=False,
@@ -44,9 +43,7 @@ class BACnetPointModel(db.Model):
         return value
 
     @classmethod
-    def find_all(cls, *args, **kwargs):
-        if 'source' in kwargs:
-            return cls.query.filter_by(source=kwargs['source']).all()
+    def find_all(cls):
         return cls.query.all()
 
     @classmethod

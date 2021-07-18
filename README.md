@@ -107,8 +107,6 @@ Get bacnet server points
 
 ```bash
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/points
-
-curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/points?source=<source>
 ```
 
 HTTP PATCH new bacnet server `device_id`
@@ -127,8 +125,6 @@ curl --data '{"ip": "192.168.0.123"}' -i -H "Accept: application/json" -H "Conte
 
 
 > GET: `/api/bacnet/points`
-
-> GET: `/api/bacnet/points?source=<source>` 
 
 > GET: `/api/bacnet/points/uuid/<uuid>`
 
@@ -166,8 +162,7 @@ curl --data '{"ip": "192.168.0.123"}' -i -H "Accept: application/json" -H "Conte
   "enable": true,
   "fault": false,
   "data_round": 2,
-  "data_offset": 16,
-  "source": "MAPPING"  
+  "data_offset": 16
 }
 ```
 
@@ -189,8 +184,7 @@ Update an existing point
   "enable": true,
   "fault": false,
   "data_round": 2,
-  "data_offset": 16,
-  "source": "OWN"  
+  "data_offset": 16
 }
 ```
 
