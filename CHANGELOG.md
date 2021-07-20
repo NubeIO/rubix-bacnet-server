@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.7.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.1) (2020-07-20)
+- Fix: timeout issue
+
 ## [v1.7.0](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.0) (2020-07-16)
 - Refactor point mappings
 
