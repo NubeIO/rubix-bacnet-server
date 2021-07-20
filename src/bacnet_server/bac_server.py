@@ -2,16 +2,19 @@ import copy
 import logging
 import time
 from typing import Union, Dict
-from bacpypes.core import run as bacnet_run
+
 from bacpypes.app import BIPSimpleApplication
 from bacpypes.basetypes import EngineeringUnits, StatusFlags, DeviceStatus
+from bacpypes.core import run as bacnet_run
+from bacpypes.core import stop as bacnet_stop
 from bacpypes.local.device import LocalDeviceObject
 from bacpypes.local.object import Commandable, AnalogValueCmdObject, AnalogOutputCmdObject
 from bacpypes.object import register_object_type
 from bacpypes.primitivedata import CharacterString
 from bacpypes.service.object import ReadWritePropertyMultipleServices
 from flask import current_app
-from bacpypes.core import stop as bacnet_stop
+from gevent import sleep
+
 from src import BACnetSetting, AppSetting, FlaskThread
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject, AnalogValueFeedbackObject
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier, \
@@ -24,6 +27,7 @@ from src.bacnet_server.models.model_server import BACnetServerModel
 from src.mqtt import MqttClient
 from src.utils import Singleton
 from src.utils.project import get_version
+
 logger = logging.getLogger(__name__)
 
 
@@ -98,8 +102,10 @@ class BACServer(metaclass=Singleton):
     def sync_stack(self):
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
             self.add_point(point, False)
+            sleep(0.001)
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogValue):
             self.add_point(point, False)
+            sleep(0.001)
         self.__sync_status = True
         self.__running = True
 

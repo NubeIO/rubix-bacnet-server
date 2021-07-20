@@ -30,6 +30,7 @@ def init_gunicorn_option(_options=None):
     options.update({'worker_class': GeventWorker.__module__ + '.' + GeventWorker.__qualname__,
                     'logger_class': Logger.__module__ + '.' + Logger.__name__,
                     'when_ready': when_ready,
+                    'timeout': 120,
                     'on_exit': on_exit})
     return options
 
