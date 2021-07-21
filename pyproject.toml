@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rubix-bacnet"
-version = "1.7.1"
+version = "1.7.2"
 description = "Rubix BACnet"
 authors = ["NubeIO"]
 
