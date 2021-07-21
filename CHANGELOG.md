@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.7.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.2) (2020-07-21)
+- Fix: DB lock issue
+
 ## [v1.7.1](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.1) (2020-07-20)
 - Fix: timeout issue
 
