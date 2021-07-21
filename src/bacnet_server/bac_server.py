@@ -15,7 +15,7 @@ from bacpypes.service.object import ReadWritePropertyMultipleServices
 from flask import current_app
 from gevent import sleep
 
-from src import BACnetSetting, AppSetting, FlaskThread
+from src import BACnetSetting, AppSetting, FlaskThread, db
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject, AnalogValueFeedbackObject
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier, \
     get_highest_priority_field
@@ -172,6 +172,8 @@ class BACServer(metaclass=Singleton):
             self.__registry[object_identifier] = p
         if _update_point_store:  # make it so on start of app not to update the point store
             update_point_store(point.uuid, present_value)
+        else:
+            db.session.commit()
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         if setting.mqtt.enabled:
             priority = get_highest_priority_field(point.priority_array_write)
