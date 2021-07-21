@@ -29,6 +29,10 @@ class BPGPointMapping(ModelBase):
         if not self.mapped_point_uuid:
             self.__set_mapped_point_uuid()
 
+    def set_uuid_with_name(self):
+        self.__set_point_uuid()
+        self.__set_mapped_point_uuid()
+
     def __set_point_name(self):
         from src.bacnet_server.models.model_point import BACnetPointModel
         if not self.point_uuid:

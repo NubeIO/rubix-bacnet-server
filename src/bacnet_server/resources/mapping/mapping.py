@@ -67,7 +67,10 @@ class BPGPMappingResourceUpdateMappingState(RubixResource):
                 mapping.mapping_state = MappingState.MAPPED
                 mapping.check_self()
             except ValueError:
-                mapping.mapping_state = MappingState.BROKEN
+                try:
+                    mapping.set_uuid_with_name()
+                except ValueError:
+                    mapping.mapping_state = MappingState.BROKEN
             mapping.commit()
             sync_point_value(mapping)
         return {"message": "Mapping state has been updated successfully"}
