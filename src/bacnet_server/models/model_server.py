@@ -15,6 +15,8 @@ class BACnetServerModel(ModelBase):
     model_name = db.Column(db.String(80), nullable=False)
     vendor_id = db.Column(db.String(80), nullable=False)
     vendor_name = db.Column(db.String(80), nullable=False)
+    enable_ip_by_nic_name = db.Column(db.Boolean(), nullable=False)
+    ip_by_nic_name = db.Column(db.String(80), nullable=False)
 
     @classmethod
     def find_one(cls):
@@ -31,7 +33,10 @@ class BACnetServerModel(ModelBase):
                                               local_obj_name=config.local_obj_name,
                                               model_name=config.model_name,
                                               vendor_id=config.vendor_id,
-                                              vendor_name=config.vendor_name)
+                                              vendor_name=config.vendor_name,
+                                              enable_ip_by_nic_name=config.enable_ip_by_nic_name,
+                                              ip_by_nic_name=config.ip_by_nic_name)
+
             bacnet_server.save_to_db()
         return bacnet_server
 

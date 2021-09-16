@@ -17,6 +17,9 @@ class BACnetServer(RubixResource):
     parser.add_argument('vendor_id', type=str)
     parser.add_argument('vendor_name', type=str)
     parser.add_argument('restart_server', type=bool)
+    parser.add_argument('enable_ip_by_nic_name', type=bool)
+    parser.add_argument('ip_by_nic_name', type=str)
+
 
     @classmethod
     @marshal_with(server_field)
