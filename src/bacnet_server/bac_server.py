@@ -193,6 +193,7 @@ class BACServer(metaclass=Singleton):
 
     def _ip_address(self, bacnet_server):
         use_nic = self.config.enable_ip_by_nic_name
+        #TODO @binod call the db and use the  enable_ip_by_nic_name, and ip_by_nic_name as this means we dont need the config file
         if use_nic:
             ip_by_nic_name = self.config.ip_by_nic_name
             address = IP.get_nic_ipv4(ip_by_nic_name)
