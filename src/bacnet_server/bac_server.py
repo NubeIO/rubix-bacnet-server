@@ -109,7 +109,7 @@ class BACServer(metaclass=Singleton):
         self.__sync_status = True
         self.__running = True
 
-    def connect(self, bacnet_server):
+    def connect(self, bacnet_server: BACnetServerModel):
         address = self._ip_address(bacnet_server)
         version = get_version()
         description = "nube-io bacnet server"
@@ -191,11 +191,10 @@ class BACServer(metaclass=Singleton):
             self.__bacnet.delete_object(self.__registry[object_identifier])
             del self.__registry[object_identifier]
 
-    def _ip_address(self, bacnet_server):
-        use_nic = self.config.enable_ip_by_nic_name
-        #TODO @binod call the db and use the  enable_ip_by_nic_name, and ip_by_nic_name as this means we dont need the config file
-        if use_nic:
-            ip_by_nic_name = self.config.ip_by_nic_name
+    @classmethod
+    def _ip_address(cls, bacnet_server: BACnetServerModel):
+        if bacnet_server.enable_ip_by_nic_name:
+            ip_by_nic_name = bacnet_server.ip_by_nic_name
             address = IP.get_nic_ipv4(ip_by_nic_name)
             return address
         else:
