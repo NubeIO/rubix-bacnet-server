@@ -46,6 +46,3 @@ class IP:
         result = result.decode().splitlines()
         n = [l.split()[1].strip(':') for l in result if l[0].isdigit()]
         return n
-
-
-

@@ -55,6 +55,8 @@ server_field = {
     'model_name': fields.String,
     'vendor_id': fields.String,
     'vendor_name': fields.String,
+    'enable_ip_by_nic_name': fields.Boolean,
+    'ip_by_nic_name': fields.String,
 }
 
 mapping_bp_gp_fields = {
