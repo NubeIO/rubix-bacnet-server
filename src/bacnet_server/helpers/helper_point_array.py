@@ -46,7 +46,10 @@ def default_values(priority_array, default_pv):
     priority_array_return = PriorityArray()
     present_value = default_pv
     for i in range(16, 0, -1):
+        print(55555)
         value = getattr(priority_array, f'_{i}')
+        print(55555)
+        print(f'_{i}')
         if value is None:
             write = {'null': ()}
         else:

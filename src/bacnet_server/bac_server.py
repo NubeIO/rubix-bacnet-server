@@ -100,6 +100,9 @@ class BACServer(metaclass=Singleton):
         self.__registry = {}
 
     def sync_stack(self):
+        # change this to a rest call
+        # have end point to add/edit/remove point
+        # still use MQTT to getting bacnet updates
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
             self.add_point(point, False)
             sleep(0.001)
@@ -132,32 +135,38 @@ class BACServer(metaclass=Singleton):
         FlaskThread(target=bacnet_run).start()  # start bacpypes thread
 
     def add_point(self, point: BACnetPointModel, _update_point_store=True):
+        print(666666)
+        print(point.priority_array_write)
         [priority_array, present_value] = default_values(point.priority_array_write, point.relinquish_default)
-        if point.use_next_available_address:
-            point.address = BACnetPointModel.get_next_available_address(point.address)
-        object_identifier = create_object_identifier(point.object_type.name, point.address)
-        if point.object_type.name == "analogOutput":
+        print(666666)
+        # if point.use_next_available_address:
+        #     point.address = BACnetPointModel.get_next_available_address(point.address)
+        print(666666)
+        object_identifier = create_object_identifier(point.object_type, point.address)
+        print(666666, object_identifier)
+        print(point)
+        if point.object_type == "analogOutput":
             register_object_type(AnalogOutputCmdObject)
             p = AnalogOutputFeedbackObject(
-                profileName=point.uuid,
-                objectIdentifier=(point.object_type.name, point.address),
+                profileName=object_identifier,
+                objectIdentifier=(point.object_type, point.address),
                 objectName=point.object_name,
                 relinquishDefault=point.relinquish_default,
                 presentValue=present_value,
                 priorityArray=priority_array,
-                eventState=point.event_state.name,
+                eventState=point.event_state,
                 statusFlags=StatusFlags(),
-                units=EngineeringUnits(point.units.name),
+                units=EngineeringUnits(point.units),
                 description=point.description,
                 outOfService=False,
             )
             self.__bacnet.add_object(p)
             self.__registry[object_identifier] = p
-        elif point.object_type.name == "analogValue":
+        elif point.object_type == "analogValue":
             register_object_type(AnalogValueCmdObject)
             p = AnalogValueFeedbackObject(
                 profileName=point.uuid,
-                objectIdentifier=(point.object_type.name, point.address),
+                objectIdentifier=(point.object_type, point.address),
                 objectName=point.object_name,
                 relinquishDefault=point.relinquish_default,
                 presentValue=present_value,
@@ -181,9 +190,14 @@ class BACServer(metaclass=Singleton):
             mqtt_client.publish_value(('ao', object_identifier, point.object_name), present_value, priority)
 
     def remove_point(self, point):
-        object_identifier = create_object_identifier(point.object_type.name, point.address)
+        print(22222, point)
+        print("remove_point", point.object_type, point.object_type, point.address)
+        object_identifier = create_object_identifier(point.object_type, point.address)
+        print(22222, object_identifier)
         self.__bacnet.delete_object(self.__registry[object_identifier])
+        print(" self.__bacnet.delete_object")
         del self.__registry[object_identifier]
+        print("del self.__bacnet.delete_object")
 
     def remove_all_points(self):
         object_identifiers = copy.deepcopy(list(self.__registry.keys()))
