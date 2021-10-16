@@ -8,6 +8,19 @@ from src.bacnet_server.models.model_point_store import BACnetPointStoreModel
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 
 
+class ModelBACnetPoint:
+    def __init__(self, object_type=None, object_name=None, address=None, description=None, event_state=None,
+                 relinquish_default=None, priority_array_write=None, units=None):
+        self.object_type = object_type
+        self.object_name = object_name
+        self.address = address
+        self.description = description
+        self.event_state = event_state
+        self.relinquish_default = relinquish_default
+        self.priority_array_write = priority_array_write
+        self.units = units
+
+
 class BACnetPointModel(db.Model):
     __tablename__ = 'bac_points'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)

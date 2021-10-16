@@ -1,8 +1,12 @@
 import copy
+import dataclasses
+import json
 import logging
 import time
 from typing import Union, Dict
+from types import SimpleNamespace
 
+import requests
 from bacpypes.app import BIPSimpleApplication
 from bacpypes.basetypes import EngineeringUnits, StatusFlags, DeviceStatus
 from bacpypes.core import run as bacnet_run
@@ -13,22 +17,46 @@ from bacpypes.object import register_object_type
 from bacpypes.primitivedata import CharacterString
 from bacpypes.service.object import ReadWritePropertyMultipleServices
 from flask import current_app
-from gevent import sleep
-
-from src import BACnetSetting, AppSetting, FlaskThread, db
+from src import BACnetSetting, AppSetting, FlaskThread
 from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject, AnalogValueFeedbackObject
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier, \
     get_highest_priority_field
-from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.helpers.ip import IP
-from src.bacnet_server.interfaces.point.points import PointType
-from src.bacnet_server.models.model_point import BACnetPointModel
+from src.bacnet_server.models.model_point import BACnetPointModel, ModelBACnetPoint
 from src.bacnet_server.models.model_server import BACnetServerModel
 from src.mqtt import MqttClient
 from src.utils import Singleton
 from src.utils.project import get_version
 
 logger = logging.getLogger(__name__)
+
+
+class FlowNetworkPointPriority:
+    _1: float
+    _2: float
+
+
+class FlowNetworkPoint:
+    uuid: str
+    name: str
+    description: str
+    enable: bool
+    present_value: float
+    fallback: int
+    cov: float
+    object_type: str
+    address_id: int
+    priority: FlowNetworkPointPriority
+
+
+
+def get_points():
+    host = '0.0.0.0'
+    port = '1660'
+    url = f'http://{host}:{port}/api/points/network/name/bacnetserver'
+    result = requests.get(url,
+                          headers={'Content-Type': 'application/json'})
+    return result
 
 
 class BACServer(metaclass=Singleton):
@@ -100,17 +128,23 @@ class BACServer(metaclass=Singleton):
         self.__registry = {}
 
     def sync_stack(self):
-        # change this to a rest call
-        # have end point to add/edit/remove point
-        # still use MQTT to getting bacnet updates
-        for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
-            self.add_point(point, False)
-            sleep(0.001)
-        for point in BACnetPointModel.query.filter_by(object_type=PointType.analogValue):
-            self.add_point(point, False)
-            sleep(0.001)
-        self.__sync_status = True
-        self.__running = True
+        # disabled not using db: Aidan Oct 16 2021
+        # for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
+        #     self.add_point(point, False)
+        #     sleep(0.001)
+        # for point in BACnetPointModel.query.filter_by(object_type=PointType.analogValue):
+        #     self.add_point(point, False)
+        #     sleep(0.001)
+        p = ModelBACnetPoint()
+        points = get_points()
+        if points:
+            for pnt in points.json():
+                p.object_name = pnt.get("name")
+                p.object_type = pnt.get("object_type")
+                print(p.object_name)
+                self.add_point(p, False)
+            self.__sync_status = True
+            self.__running = True
 
     def connect(self, bacnet_server: BACnetServerModel):
         address = self._ip_address(bacnet_server)
@@ -134,17 +168,9 @@ class BACServer(metaclass=Singleton):
         self.sync_stack()
         FlaskThread(target=bacnet_run).start()  # start bacpypes thread
 
-    def add_point(self, point: BACnetPointModel, _update_point_store=True):
-        print(666666)
-        print(point.priority_array_write)
+    def add_point(self, point: ModelBACnetPoint, _update_point_store=True):
         [priority_array, present_value] = default_values(point.priority_array_write, point.relinquish_default)
-        print(666666)
-        # if point.use_next_available_address:
-        #     point.address = BACnetPointModel.get_next_available_address(point.address)
-        print(666666)
         object_identifier = create_object_identifier(point.object_type, point.address)
-        print(666666, object_identifier)
-        print(point)
         if point.object_type == "analogOutput":
             register_object_type(AnalogOutputCmdObject)
             p = AnalogOutputFeedbackObject(
@@ -179,25 +205,21 @@ class BACServer(metaclass=Singleton):
             )
             self.__bacnet.add_object(p)
             self.__registry[object_identifier] = p
-        if _update_point_store:  # make it so on start of app not to update the point store
-            update_point_store(point.uuid, present_value)
-        else:
-            db.session.commit()
+        # if _update_point_store:  # disabled not using db: Aidan Oct 16 2021
+        #     update_point_store(point.uuid, present_value)
+        # else:
+        #     db.session.commit()
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         if setting.mqtt.enabled:
             priority = get_highest_priority_field(point.priority_array_write)
             mqtt_client = MqttClient()
-            mqtt_client.publish_value(('ao', object_identifier, point.object_name), present_value, priority)
+            mqtt_client.publish_value(('type', object_identifier, point.object_name), present_value, priority)
 
     def remove_point(self, point):
-        print(22222, point)
-        print("remove_point", point.object_type, point.object_type, point.address)
-        object_identifier = create_object_identifier(point.object_type, point.address)
-        print(22222, object_identifier)
-        self.__bacnet.delete_object(self.__registry[object_identifier])
-        print(" self.__bacnet.delete_object")
-        del self.__registry[object_identifier]
-        print("del self.__bacnet.delete_object")
+        # object_identifier = create_object_identifier(point.object_type, point.address)
+        if self.__bacnet.get_object_name(point.object_name):
+            self.__bacnet.delete_object(self.__bacnet.get_object_name(point.object_name))
+            # del self.__registry[object_identifier] TODD throw error after change from not using db: Aidan Oct 16 2021
 
     def remove_all_points(self):
         object_identifiers = copy.deepcopy(list(self.__registry.keys()))
