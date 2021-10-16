@@ -141,7 +141,6 @@ class BACServer(metaclass=Singleton):
             for pnt in points.json():
                 p.object_name = pnt.get("name")
                 p.object_type = pnt.get("object_type")
-                print(p.object_name)
                 self.add_point(p, False)
             self.__sync_status = True
             self.__running = True

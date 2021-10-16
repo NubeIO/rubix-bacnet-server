@@ -41,15 +41,8 @@ class BACnetPointSingular(BACnetPointBase):
     @classmethod
     @marshal_with(point_fields)
     def patch(cls, **kwargs):
-        print(11111)
         data = cls.parser_patch.parse_args()
-        print(11111)
         point = data
-        # print(11111)
-        # print(data)
-        # point: BACnetPointModel = copy.deepcopy(cls.get_point(**kwargs))
-        # if point is None:
-        #     raise NotFoundException(f"Does not exist with {kwargs}")
         use_next_available_address: bool = data.get('use_next_available_address')
         address: str = data.get('address')
         if use_next_available_address is not None or address is not None:
@@ -59,21 +52,8 @@ class BACnetPointSingular(BACnetPointBase):
                 raise BadDataException("address needs to be null when use_next_available_address is true")
             elif not use_next_available_address and not address:
                 raise BadDataException("address cannot be null when use_next_available_address is false")
-
-        # priority_array_write = data.pop('priority_array_write')
-        non_none_data = {}
-        for key in data.keys():
-            if data[key] is not None:
-                non_none_data[key] = data[key]
-        # if priority_array_write:
-        #     PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
-        # BACnetPointModel.filter_by_uuid(point.uuid).update(non_none_data)
-        print(3333)
         BACServer().remove_point(point)
-        print(3333)
-        # point_return = BACnetPointModel.find_by_uuid(point.uuid)
         BACServer().add_point(point)
-        print(4444)
         return point
 
     @staticmethod
