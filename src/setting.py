@@ -25,10 +25,10 @@ class BACnetSetting(BaseSetting):
     def __init__(self):
         self.enabled: bool = True
         self.ip = '192.168.15.10/24'
-        self.enable_ip_by_nic_name: bool = False
+        self.enable_ip_by_nic_name: bool = True
         self.ip_by_nic_name = 'eth0'
         self.port = 47808
-        self.device_id = 123
+        self.device_id = 2508
         self.local_obj_name = 'Nube-IO'
         self.model_name = 'rubix-bac-stack-RC4'
         self.vendor_id = 1173
@@ -43,7 +43,7 @@ class MqttSetting(MqttSettingBase):
     def __init__(self):
         super().__init__()
         self.name = 'bacnet-server-mqtt'
-        self.publish_value: bool = False
+        self.publish_value: bool = True
         self.topic = 'rubix/bacnet_server/points'
         self.publish_debug: bool = False
         self.debug_topic = 'rubix/bacnet_server/debug'
