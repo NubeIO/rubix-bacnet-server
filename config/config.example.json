@@ -11,7 +11,7 @@
     "vendor_id": 1173,
     "vendor_name": "Nube iO Operations Pty Ltd",
     "attempt_reconnect_secs": 5,
-    "default_point_cov": 5
+    "default_point_cov": 0.5
   },
   "mqtt": {
     "enabled": true,
