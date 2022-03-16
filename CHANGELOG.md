@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.7.3](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.3) (2022-03-16)
+- added bo's and bv's #153
+- Use nic #150
+- Update config.example.json #152
+
 ## [v1.7.2](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.2) (2020-07-21)
 - Fix: DB lock issue
 
