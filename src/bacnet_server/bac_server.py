@@ -1,6 +1,7 @@
 import copy
 import logging
 import time
+from random import randint
 from typing import Union, Dict
 
 from bacpypes.app import BIPSimpleApplication
@@ -9,18 +10,20 @@ from bacpypes.core import run as bacnet_run
 from bacpypes.core import stop as bacnet_stop
 from bacpypes.local.device import LocalDeviceObject
 from bacpypes.local.object import Commandable, AnalogValueCmdObject, AnalogOutputCmdObject
-from bacpypes.object import register_object_type
+from bacpypes.object import register_object_type, BinaryValueObject, BinaryOutputObject
 from bacpypes.primitivedata import CharacterString
 from bacpypes.service.object import ReadWritePropertyMultipleServices
 from flask import current_app
 from gevent import sleep
 
 from src import BACnetSetting, AppSetting, FlaskThread, db
-from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject, AnalogValueFeedbackObject
+from src.bacnet_server.feedbacks.analog_output import AnalogOutputFeedbackObject, AnalogValueFeedbackObject, \
+    BinaryOutputFeedbackObject, BinaryValueFeedbackObject
 from src.bacnet_server.helpers.helper_point_array import default_values, create_object_identifier, \
-    get_highest_priority_field
+    get_highest_priority_field, default_values_binary
 from src.bacnet_server.helpers.helper_point_store import update_point_store
 from src.bacnet_server.helpers.ip import IP
+from src.bacnet_server.helpers.points import type_to_mqtt_topic
 from src.bacnet_server.interfaces.point.points import PointType
 from src.bacnet_server.models.model_point import BACnetPointModel
 from src.bacnet_server.models.model_server import BACnetServerModel
@@ -106,6 +109,12 @@ class BACServer(metaclass=Singleton):
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogValue):
             self.add_point(point, False)
             sleep(0.001)
+        for point in BACnetPointModel.query.filter_by(object_type=PointType.binaryValue):
+            self.add_point(point, False)
+            sleep(0.001)
+        for point in BACnetPointModel.query.filter_by(object_type=PointType.binaryOutput):
+            self.add_point(point, False)
+            sleep(0.001)
         self.__sync_status = True
         self.__running = True
 
@@ -132,7 +141,7 @@ class BACServer(metaclass=Singleton):
         FlaskThread(target=bacnet_run).start()  # start bacpypes thread
 
     def add_point(self, point: BACnetPointModel, _update_point_store=True):
-        [priority_array, present_value] = default_values(point.priority_array_write, point.relinquish_default)
+        [priority_array, present_value] = default_values_binary(point.priority_array_write, point.relinquish_default)
         if point.use_next_available_address:
             point.address = BACnetPointModel.get_next_available_address(point.address)
         object_identifier = create_object_identifier(point.object_type.name, point.address)
@@ -170,15 +179,60 @@ class BACServer(metaclass=Singleton):
             )
             self.__bacnet.add_object(p)
             self.__registry[object_identifier] = p
+        elif point.object_type.name == "binaryOutput":
+            pv = "inactive"
+            rd = "inactive"
+            if present_value > 0:
+                pv = "active"
+            if point.relinquish_default > 0:
+                rd = "active"
+            register_object_type(BinaryOutputObject)
+            p = BinaryOutputFeedbackObject(
+                profileName=point.uuid,
+                objectIdentifier=(point.object_type.name, point.address),
+                objectName=point.object_name,
+                relinquishDefault=rd,
+                presentValue=pv,
+                priorityArray=priority_array,
+                eventState=point.event_state.name,
+                statusFlags=StatusFlags(),
+                description=point.description,
+                outOfService=False,
+            )
+            self.__bacnet.add_object(p)
+            self.__registry[object_identifier] = p
+        elif point.object_type.name == "binaryValue":
+            pv = "inactive"
+            rd = "inactive"
+            if present_value > 0:
+                pv = "active"
+            if point.relinquish_default > 0:
+                rd = "active"
+            register_object_type(BinaryValueObject)
+            p = BinaryValueFeedbackObject(
+                profileName=point.uuid,
+                objectIdentifier=(point.object_type.name, point.address),
+                objectName=point.object_name,
+                relinquishDefault=rd,
+                presentValue=pv,
+                priorityArray=priority_array,
+                eventState=point.event_state.name,
+                statusFlags=StatusFlags(),
+                description=point.description,
+                outOfService=False,
+            )
+            self.__bacnet.add_object(p)
+            self.__registry[object_identifier] = p
         if _update_point_store:  # make it so on start of app not to update the point store
             update_point_store(point.uuid, present_value)
         else:
             db.session.commit()
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         if setting.mqtt.enabled:
+            t = type_to_mqtt_topic(point.object_type.name)
             priority = get_highest_priority_field(point.priority_array_write)
             mqtt_client = MqttClient()
-            mqtt_client.publish_value(('ao', object_identifier, point.object_name), present_value, priority)
+            mqtt_client.publish_value((t, object_identifier, point.object_name), present_value, priority)
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)

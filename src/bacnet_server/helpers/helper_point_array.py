@@ -55,3 +55,19 @@ def default_values(priority_array, default_pv):
             write = {'real': value}
         priority_array_return.__setitem__(i, PriorityValue(**write))
     return [priority_array_return, present_value]
+
+
+def default_values_binary(priority_array, default_pv):
+    priority_array_return = PriorityArray()
+    present_value = default_pv
+    for i in range(16, 0, -1):
+        value = getattr(priority_array, f'_{i}')
+        if value is None:
+            write = {'null': ()}
+        else:
+            present_value = value
+            # TODO: Switch cases for different type of points
+            write = {'enumerated': value}
+        priority_array_return.__setitem__(i, PriorityValue(**write))
+    return [priority_array_return, present_value]
+
