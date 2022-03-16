@@ -1,4 +1,5 @@
-from bacpypes.local.object import AnalogOutputCmdObject, AnalogValueCmdObject, BinaryOutputCmdObject
+from bacpypes.local.object import AnalogOutputCmdObject, AnalogValueCmdObject, BinaryOutputCmdObject, \
+    BinaryValueCmdObject
 
 from bacpypes.primitivedata import Real
 from flask import current_app
@@ -7,6 +8,7 @@ from src import AppSetting
 from src.bacnet_server.helpers.helper_point_array import create_object_identifier, serialize_priority_array, \
     get_highest_priority_field
 from src.bacnet_server.helpers.helper_point_store import update_point_store
+from src.bacnet_server.helpers.points import encode_binary_present_value, decode_binary_present_value
 from src.bacnet_server.models.model_priority_array import PriorityArrayModel
 from src.mqtt import MqttClient
 
@@ -34,7 +36,7 @@ class AnalogValueFeedbackObject(AnalogValueCmdObject):
                     present_value = float(present_value)
                 priority = get_highest_priority_field(priority_array_updated)
                 mqtt_client = MqttClient()
-                mqtt_client.publish_value(('ao', object_identifier, self.objectName), present_value, priority)
+                mqtt_client.publish_value(('av', object_identifier, self.objectName), present_value, priority)
 
 
 class BinaryOutputFeedbackObject(BinaryOutputCmdObject):
@@ -44,12 +46,51 @@ class BinaryOutputFeedbackObject(BinaryOutputCmdObject):
         self._property_monitors["presentValue"].append(self.bo_check_feedback)
 
     def bo_check_feedback(self, old_value, new_value):
-        if new_value == self.feedbackValue:
-            self.eventState = "normal"
-            self.statusFlags["inAlarm"] = False
-        else:
-            self.eventState = "offnormal"
-            self.statusFlags["inAlarm"] = True
+        pv = decode_binary_present_value(new_value)
+        priority_array = self._dict_contents().get('priorityArray')
+        serialized_priority_array = serialize_priority_array(priority_array)
+        with self.__app_context():
+            priority_array_updated = PriorityArrayModel.filter_by_point_uuid(self.profileName).update(
+                serialized_priority_array)
+            update_point_store(self.profileName, pv)
+            setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
+            if setting.mqtt.publish_value:
+                object_identifier = create_object_identifier(self.objectIdentifier[0], self.objectIdentifier[1])
+                present_value = pv
+                if isinstance(present_value, Real):
+                    present_value = float(present_value.value)
+                elif type(present_value) is float:
+                    present_value = float(present_value)
+                priority = get_highest_priority_field(priority_array_updated)
+                mqtt_client = MqttClient()
+                mqtt_client.publish_value(('bo', object_identifier, self.objectName), present_value, priority)
+
+
+class BinaryValueFeedbackObject(BinaryValueCmdObject):
+    def __init__(self, **kwargs):
+        self.__app_context = current_app.app_context
+        super().__init__(**kwargs)
+        self._property_monitors["presentValue"].append(self.bo_check_feedback)
+
+    def bo_check_feedback(self, old_value, new_value):
+        pv = decode_binary_present_value(new_value)
+        priority_array = self._dict_contents().get('priorityArray')
+        serialized_priority_array = serialize_priority_array(priority_array)
+        with self.__app_context():
+            priority_array_updated = PriorityArrayModel.filter_by_point_uuid(self.profileName).update(
+                serialized_priority_array)
+            update_point_store(self.profileName, pv)
+            setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
+            if setting.mqtt.publish_value:
+                object_identifier = create_object_identifier(self.objectIdentifier[0], self.objectIdentifier[1])
+                present_value = pv
+                if isinstance(present_value, Real):
+                    present_value = float(present_value.value)
+                elif type(present_value) is float:
+                    present_value = float(present_value)
+                priority = get_highest_priority_field(priority_array_updated)
+                mqtt_client = MqttClient()
+                mqtt_client.publish_value(('bv', object_identifier, self.objectName), present_value, priority)
 
 
 class AnalogOutputFeedbackObject(AnalogOutputCmdObject):
