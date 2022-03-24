@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.7.4](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.4) (2022-03-24)
+- Removed address unique constraint
+
 ## [v1.7.3](https://github.com/NubeIO/rubix-bacnet-server/tree/v1.7.3) (2022-03-16)
 - added bo's and bv's #153
 - Use nic #150
