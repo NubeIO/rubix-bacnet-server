@@ -1,7 +1,6 @@
 import copy
 import logging
 import time
-from random import randint
 from typing import Union, Dict
 
 from bacpypes.app import BIPSimpleApplication
@@ -141,11 +140,11 @@ class BACServer(metaclass=Singleton):
         FlaskThread(target=bacnet_run).start()  # start bacpypes thread
 
     def add_point(self, point: BACnetPointModel, _update_point_store=True):
-        [priority_array, present_value] = default_values_binary(point.priority_array_write, point.relinquish_default)
         if point.use_next_available_address:
             point.address = BACnetPointModel.get_next_available_address(point.address)
         object_identifier = create_object_identifier(point.object_type.name, point.address)
         if point.object_type.name == "analogOutput":
+            [priority_array, present_value] = default_values(point.priority_array_write, point.relinquish_default)
             register_object_type(AnalogOutputCmdObject)
             p = AnalogOutputFeedbackObject(
                 profileName=point.uuid,
@@ -163,6 +162,7 @@ class BACServer(metaclass=Singleton):
             self.__bacnet.add_object(p)
             self.__registry[object_identifier] = p
         elif point.object_type.name == "analogValue":
+            [priority_array, present_value] = default_values(point.priority_array_write, point.relinquish_default)
             register_object_type(AnalogValueCmdObject)
             p = AnalogValueFeedbackObject(
                 profileName=point.uuid,
@@ -180,6 +180,8 @@ class BACServer(metaclass=Singleton):
             self.__bacnet.add_object(p)
             self.__registry[object_identifier] = p
         elif point.object_type.name == "binaryOutput":
+            [priority_array, present_value] = default_values_binary(point.priority_array_write,
+                                                                    point.relinquish_default)
             pv = "inactive"
             rd = "inactive"
             if present_value > 0:
@@ -201,7 +203,9 @@ class BACServer(metaclass=Singleton):
             )
             self.__bacnet.add_object(p)
             self.__registry[object_identifier] = p
-        elif point.object_type.name == "binaryValue":
+        else:
+            [priority_array, present_value] = default_values_binary(point.priority_array_write,
+                                                                    point.relinquish_default)
             pv = "inactive"
             rd = "inactive"
             if present_value > 0:

@@ -89,183 +89,91 @@ Example debug topic
 +/+/+/+/+/+/rubix/bacnet_server/debug
 ```
 
-## CURL
+## How to test using [bacnet-stack](https://github.com/bacnet-stack/bacnet-stack) (here, 2508 as device_id)
 
-Get flask server details
+### Pre-requisite
+- Run this app on our local PC
+- Configure IP to your local PC IP or can configure by enabling enable_ip_by_nic_name & ip_by_nic_name
+- Run this app
+- Install bacnet-stack v1.0.0 on BBB or other device on the same network
+- Now, it will make below commands available
 
-```bash
-curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/system/ping
+
+### To get available device
+```
+> ./bacwi
+;Device   MAC (hex)            SNET  SADR (hex)           APDU
+;-------- -------------------- ----- -------------------- ----
+  2508    0A:00:00:06:BA:C0    0     00                   1024
+;
+; Total Devices: 1
 ```
 
-Get bacnet server details
-
-```bash
-curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/server
-```
-
-Get bacnet server points
-
-```bash
-curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://0.0.0.0:1717/api/bacnet/points
-```
-
-HTTP PATCH new bacnet server `device_id`
-
-```bash
-curl --data '{"device_id": "1233"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
-```
-
-HTTP PATCH new bacnet server `ip`
-
-```bash
-curl --data '{"ip": "192.168.0.123"}' -i -H "Accept: application/json" -H "Content-Type: application/json" -X PATCH http://0.0.0.0:1717/api/bacnet/server
-```
-
-## Get details
-
-
-> GET: `/api/bacnet/points`
-
-> GET: `/api/bacnet/points/uuid/<uuid>`
-
-## Add a new point
-
-> POST: /api/bacnet/points
-
-> Body
-```json
-{
-  "object_type": "analogOutput",
-  "object_name": "object_name",
-  "address": 1,
-  "relinquish_default": 1,
-  "priority_array_write": {
-    "_1": null,
-    "_2": null,
-    "_3": null,
-    "_4": null,
-    "_5": null,
-    "_6": null,
-    "_7": null,
-    "_8": 99.9,
-    "_9": 892.02,
-    "_10": null,
-    "_11": null,
-    "_12": null,
-    "_13": null,
-    "_14": null,
-    "_15": null,
-    "_16": 16.9089
-  },
-  "units": "volts",
-  "description": "description",
-  "enable": true,
-  "fault": false,
-  "data_round": 2,
-  "data_offset": 16
-}
-```
-
-## HTTP PATCH:
-
-Update an existing point
-
-> PATCH: `/api/bacnet/points/uuid/<uuid>`
-
-> Body
-```json
-{
-  "object_type": "analogOutput",
-  "object_name": "object_name",
-  "address": 1,
-  "relinquish_default": 1,
-  "units": "volts",
-  "description": "description",
-  "enable": true,
-  "fault": false,
-  "data_round": 2,
-  "data_offset": 16
-}
-```
-
-## BACnet server
-
-> GET: `/api/bacnet/server`
-
-```json
-{
-    "ip": "192.168.0.101",
-    "port": 47808,
-    "device_id": "2508",
-    "local_obj_name": "Nube-IO",
-    "model_name": "rubix-bac-stack-RC4",
-    "vendor_id": "1173",
-    "vendor_name": "Nube iO Operations Pty Ltd"
-}
-```
-
-> PATCH: `/api/bacnet/server`
-
-```json
-{
-    "device_id": "2508"
-}
-```
-
-## Using a bacnet master to test
-
-### Using bacstack to test for a BO
+### To test for a BO
 
 ```
-read presentValue
-./bacrp 2508 4 1 85
-read array
-./bacrp 2508 4 1 87
-Write a value to @16 of 1
-./bacwp 2508 4 1 85 16 -1 9 1
-Write a value to @16 of null
-./bacwp 2508 4 1 85 16 -1 0 0
+- Read present value
+> ./bacrp 2508 4 1 85
+
+- Read priority array
+> ./bacrp 2508 4 1 87
+
+- Write a value to @16 of 1
+> ./bacwp 2508 4 1 85 16 -1 9 1
+
+- Write a value to @16 of null
+> ./bacwp 2508 4 1 85 16 -1 0 0
 ```
 
-### Using bacstack to test for a AO
+### To test for an AO
 
 ```
-read presentValue
-./bacrp 2508 1 1 85
-read array
-./bacrp 2508 1 1 87
-Write a value to @16 of 1
-./bacwp 2508 1 1 85 16 -1 4 1
-Write a value to @16 of null
-./bacwp 2508 1 1 85 16 -1 0 0
+- Read present value
+> ./bacrp 2508 1 1 85
+
+- Read priority array
+> ./bacrp 2508 1 1 87
+
+- Write a value to @16 of 1
+> ./bacwp 2508 1 1 85 16 -1 4 1
+
+- Write a value to @16 of null
+> ./bacwp 2508 1 1 85 16 -1 0 0
 ```
 
-### Using bacstack to read device/point info
+### To read device/point info
 
-Point info
-
-```
-pointName
-./bacrp 2508 1 1 77
-pointDisc
-./bacrp 2508 1 1 28
-pointUnits
-./bacrp 2508 1 1 117
-pointEventState
-./bacrp 123 1 1 36
-```
-
-Device info, if the deviceId is 123
+#### Point info
 
 ```
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 77
+- Point Name
+> ./bacrp 2508 1 1 77
+
+- Point Discription
+> ./bacrp 2508 1 1 28
+
+- Point Units
+> ./bacrp 2508 1 1 117
+
+- Point Event State
+> ./bacrp 2508 1 1 36
+```
+
+#### Device info
+
+```
+> ./bacrp 2508 8 2508 77
 "nube-io"
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 75
-(device, 123)
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 112
+
+> ./bacrp 2508 8 2508 75
+(device, 2508)
+
+> ./bacrp 2508 8 2508 112
 operational-read-only
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 121
+
+> ./bacrp 2508 8 2508 121
 "NUBE-IO-IO vendor_name"
-debian@beaglebone:~/bacnet-stack-0.8.6/bin$ ./bacrp 2508 8 123 120
+
+> ./bacrp 2508 8 2508 120
 1173
 ```

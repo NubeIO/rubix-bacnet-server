@@ -67,7 +67,6 @@ def default_values_binary(priority_array, default_pv):
         else:
             present_value = value
             # TODO: Switch cases for different type of points
-            write = {'enumerated': value}
+            write = {'enumerated': value != 0}
         priority_array_return.__setitem__(i, PriorityValue(**write))
     return [priority_array_return, present_value]
-
