@@ -177,3 +177,20 @@ operational-read-only
 > ./bacrp 2508 8 2508 120
 1173
 ```
+
+## Writing string
+Write device name
+```
+./bacwp 202 8 202 77 0 -1 7 test2
+
+./bacrp 2508 8 2508 77
+```
+
+
+Write point name
+```
+./bacwp 202 8 202 77 0 -1 7 test2
+
+./bacrp 2508 8 2508 77
+```
+
