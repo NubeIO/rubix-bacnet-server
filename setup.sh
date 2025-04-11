@@ -4,4 +4,4 @@ curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poet
 mkdir -p "$HOME"/.bash_completion.d
 poetry completions bash > "$HOME"/.bash_completion.d/poetry.bash-completion
 echo 'source $HOME/.bash_completion.d/poetry.bash-completion' >> ~/.profile
-poetry install
+poetry install --no-root
