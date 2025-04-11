@@ -33,7 +33,7 @@ jobs:
       fqn: ${{ env.APP_NAME }}-${{ steps.context.outputs.version }}-${{ steps.context.outputs.shortCommitId }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.NUBEIO_CI_GITHUBPROJECT_TOKEN }}
 
@@ -68,13 +68,13 @@ jobs:
           -v /home/runner:/var/lib/registry
           --name registry
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Fallback version to deal with GitHub Cache
         run: sed -i "0,/${{ needs.context.outputs.version }}/s//0.0.0/" pyproject.toml
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /home/runner/docker
           key: ${{ runner.os }}-docker-${{ github.sha }}
