@@ -5,7 +5,7 @@ description = "Rubix BACnet"
 authors = ["NubeIO"]
 
 [tool.poetry.dependencies]
-python = ">=3.6,<3.11"
+python = ">=3.8,<3.11"
 bacpypes = "^0.18.3"
 gunicorn = "^20.0.4"
 toml = "^0.10.2"
@@ -19,7 +19,7 @@ gevent = "21.12.0"
 Flask = "1.1.2"
 
 [tool.poetry.dev-dependencies]
-pyinstaller = "4.10"
+pyinstaller = "6.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

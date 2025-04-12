@@ -22,7 +22,8 @@ RUN poetry run pyinstaller run.py -n rubix-bacnet --clean --onefile \
     --add-data pyproject.toml:. \
     --add-data VERSION:. \
     --add-data config:config \
-    --add-data migrations:migrations
+    --add-data migrations:migrations \
+    --log-level=DEBUG
 
 FROM python:$BASE_IMAGE_VERSION-slim
 
