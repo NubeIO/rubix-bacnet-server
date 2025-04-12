@@ -4,18 +4,21 @@ FROM python:$BASE_IMAGE_VERSION-slim-buster as build
 RUN apt update -qq \
     && apt install git curl gcc g++ make file musl-dev libffi6 libffi-dev zlib1g zlib1g-dev -y
 
-COPY docker/get-poetry.py get-poetry.py
-RUN POETRY_VERSION=1.1.13 python3 get-poetry.py
+# Install Poetry
+ENV POETRY_VERSION=1.7.1
+RUN curl -sSL https://install.python-poetry.org | python3 -
+# Add Poetry to PATH
+ENV PATH="/root/.local/bin:$PATH"
 
 WORKDIR /usr/src/app/
-ADD poetry.lock pyproject.toml ./
-RUN $HOME/.poetry/bin/poetry install
+ADD pyproject.toml ./
+RUN poetry install
 
 ADD src src
 ADD config config
 ADD migrations migrations
 ADD run.py VERSION ./
-RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-bacnet --clean --onefile \
+RUN poetry run pyinstaller run.py -n rubix-bacnet --clean --onefile \
     --add-data pyproject.toml:. \
     --add-data VERSION:. \
     --add-data config:config \
