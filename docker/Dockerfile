@@ -40,7 +40,8 @@ ENV RUBIX_BACNET_DATA=/data/rubix-bacnet
 RUN groupadd -g $NUBEIO_GID nubeio \
     && useradd -u $RUBIX_UID -G nubeio rubix \
     && mkdir -p $RUBIX_BACNET_DATA \
-    && chown -R rubix:nubeio $RUBIX_BACNET_DATA
+    && mkdir -p /usr/src/app/out \
+    && chown -R rubix:nubeio $RUBIX_BACNET_DATA /usr/src/app/out
 
 WORKDIR /usr/src/app/
 COPY --chown=rubix:nubeio --from=build /usr/src/app/dist/rubix-bacnet ./
