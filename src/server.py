@@ -1,5 +1,6 @@
 import os
 from abc import ABC
+from logging.config import fileConfig
 
 from gunicorn.app.base import BaseApplication
 from gunicorn.arbiter import Arbiter
@@ -62,6 +63,7 @@ class GunicornFlaskApplication(BaseApplication, ABC):
         return self.application
 
     def run_migration(self):
+        fileConfig(resource_path(self._options.get("logconfig")))
         from flask_migrate import upgrade, Migrate
         Migrate(self.application, db)
         upgrade(directory=resource_path('./migrations'))
