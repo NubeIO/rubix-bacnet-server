@@ -68,6 +68,7 @@ class BACServer(metaclass=Singleton):
                         while not mqtt_client.status():
                             logger.warning("MQTT is not connected, waiting for MQTT connection successful...")
                             time.sleep(self.config.attempt_reconnect_secs)
+                        logger.info("MQTT is connected")
                         self.sync_stack()
                         self.__running = True
                     else:
@@ -102,40 +103,71 @@ class BACServer(metaclass=Singleton):
         self.__registry = {}
 
     def sync_stack(self):
+        logger.info("Syncing BACnet points...")
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogOutput):
-            self.add_point(point, False)
+            logger.info(f"Adding BACnet point AO ObjectName: {point.object_name}")
+            try:
+                self.add_point(point, False)
+            except Exception as e:
+                logger.error(e)
             sleep(0.001)
         for point in BACnetPointModel.query.filter_by(object_type=PointType.analogValue):
-            self.add_point(point, False)
+            logger.info(f"Adding BACnet point AV ObjectName: {point.object_name}")
+            try:
+                self.add_point(point, False)
+            except Exception as e:
+                logger.error(e)
             sleep(0.001)
         for point in BACnetPointModel.query.filter_by(object_type=PointType.binaryValue):
-            self.add_point(point, False)
+            logger.info(f"Adding BACnet point BV ObjectName: {point.object_name}")
+            try:
+                self.add_point(point, False)
+            except Exception as e:
+                logger.error(e)
             sleep(0.001)
         for point in BACnetPointModel.query.filter_by(object_type=PointType.binaryOutput):
-            self.add_point(point, False)
+            logger.info(f"Adding BACnet point BO ObjectName: {point.object_name}")
+            try:
+                self.add_point(point, False)
+            except Exception as e:
+                logger.error(e)
             sleep(0.001)
         self.__sync_status = True
         self.__running = True
+        logger.info("Synced BACnet points")
 
     def connect(self, bacnet_server: BACnetServerModel):
         address = self._ip_address(bacnet_server)
+        logger.info(f"Creating BACnet LocalDeviceObject address: {address}...")
         version = get_version()
         description = "nube-io bacnet server"
-        self.ldo = LocalDeviceObject(objectName=bacnet_server.local_obj_name,
-                                     objectIdentifier=int(bacnet_server.device_id),
-                                     maxApduLengthAccepted=1024,
-                                     segmentationSupported="segmentedBoth",
-                                     vendorIdentifier=bacnet_server.vendor_id,
-                                     firmwareRevision=CharacterString(version),
-                                     modelName=CharacterString(bacnet_server.model_name),
-                                     vendorName=CharacterString(bacnet_server.vendor_name),
-                                     description=CharacterString(description),
-                                     systemStatus=DeviceStatus(1),
-                                     applicationSoftwareVersion=CharacterString(version),
-                                     databaseRevision=0)
+        try:
+            self.ldo = LocalDeviceObject(objectName=bacnet_server.local_obj_name,
+                                         objectIdentifier=int(bacnet_server.device_id),
+                                         maxApduLengthAccepted=1024,
+                                         segmentationSupported="segmentedBoth",
+                                         vendorIdentifier=bacnet_server.vendor_id,
+                                         firmwareRevision=CharacterString(version),
+                                         modelName=CharacterString(bacnet_server.model_name),
+                                         vendorName=CharacterString(bacnet_server.vendor_name),
+                                         description=CharacterString(description),
+                                         systemStatus=DeviceStatus(1),
+                                         applicationSoftwareVersion=CharacterString(version),
+                                         databaseRevision=0)
+        except Exception as e:
+            logger.error(e)
 
-        self.__bacnet = BIPSimpleApplication(self.ldo, address)
-        self.__bacnet.add_capability(ReadWritePropertyMultipleServices)
+        logger.info(f"Creating BACnet server object...")
+        try:
+            self.__bacnet = BIPSimpleApplication(self.ldo, address)
+        except Exception as e:
+            logger.error(e)
+        logger.info(f"Adding BACnet capabilities...")
+        try:
+            self.__bacnet.add_capability(ReadWritePropertyMultipleServices)
+        except Exception as e:
+            logger.error(e)
+        logger.info(f"Created BACnet server object: {self.__bacnet}")
         self.sync_stack()
         FlaskThread(target=bacnet_run).start()  # start bacpypes thread
 
@@ -159,7 +191,9 @@ class BACServer(metaclass=Singleton):
                 description=point.description,
                 outOfService=False,
             )
+            logger.info(f"Adding BACnet point AO {point.object_type.name}, {point.address}")
             self.__bacnet.add_object(p)
+            logger.info(f"Added BACnet point AO {point.object_type.name}, {point.address}")
             self.__registry[object_identifier] = p
         elif point.object_type.name == "analogValue":
             [priority_array, present_value] = default_values(point.priority_array_write, point.relinquish_default)
@@ -177,7 +211,9 @@ class BACServer(metaclass=Singleton):
                 description=point.description,
                 outOfService=False,
             )
+            logger.info(f"Adding BACnet point AV {point.object_type.name}, {point.address}")
             self.__bacnet.add_object(p)
+            logger.info(f"Added BACnet point AV {point.object_type.name}, {point.address}")
             self.__registry[object_identifier] = p
         elif point.object_type.name == "binaryOutput":
             [priority_array, present_value] = default_values_binary(point.priority_array_write,
@@ -201,7 +237,9 @@ class BACServer(metaclass=Singleton):
                 description=point.description,
                 outOfService=False,
             )
+            logger.info(f"Adding BACnet point BO {point.object_type.name}, {point.address}")
             self.__bacnet.add_object(p)
+            logger.info(f"Added BACnet point BO {point.object_type.name}, {point.address}")
             self.__registry[object_identifier] = p
         else:
             [priority_array, present_value] = default_values_binary(point.priority_array_write,
@@ -225,18 +263,26 @@ class BACServer(metaclass=Singleton):
                 description=point.description,
                 outOfService=False,
             )
+            logger.info(f"Adding BACnet point BV {point.object_type.name}, {point.address}")
             self.__bacnet.add_object(p)
+            logger.info(f"Added BACnet point BV {point.object_type.name}, {point.address}")
             self.__registry[object_identifier] = p
         if _update_point_store:  # make it so on start of app not to update the point store
+            logger.info("Updating point store...")
             update_point_store(point.uuid, present_value)
+            logger.info("Updated point store")
         else:
+            logger.info("Commiting...")
             db.session.commit()
+            logger.info("Commited")
         setting: AppSetting = current_app.config[AppSetting.FLASK_KEY]
         if setting.mqtt.enabled:
+            logger.info("Publishing MQTT value...")
             t = type_to_mqtt_topic(point.object_type.name)
             priority = get_highest_priority_field(point.priority_array_write)
             mqtt_client = MqttClient()
             mqtt_client.publish_value((t, object_identifier, point.object_name), present_value, priority)
+            logger.info("Published MQTT value")
 
     def remove_point(self, point):
         object_identifier = create_object_identifier(point.object_type.name, point.address)
